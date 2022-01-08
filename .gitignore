@@ -4,11 +4,7 @@
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
 # Custom
-*.suo
-*.user
-_ReSharper.*
-bin
-obj
+obj/Debug
 
 # User-specific files
 *.rsuser
