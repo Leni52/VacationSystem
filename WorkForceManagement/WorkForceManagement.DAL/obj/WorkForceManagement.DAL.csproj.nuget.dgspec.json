@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\CC-Student\\source\\repos\\The%20Workforce%20Management\\WorkForceManagement\\WorkForceManagement.DAL\\WorkForceManagement.DAL.csproj": {}
+    "C:\\Users\\Vladimirz\\source\\repos\\TheWorkforceManagement\\WorkForceManagement\\WorkForceManagement.DAL\\WorkForceManagement.DAL.csproj": {}
   },
   "projects": {
-    "C:\\Users\\CC-Student\\source\\repos\\The%20Workforce%20Management\\WorkForceManagement\\WorkForceManagement.DAL\\WorkForceManagement.DAL.csproj": {
+    "C:\\Users\\Vladimirz\\source\\repos\\TheWorkforceManagement\\WorkForceManagement\\WorkForceManagement.DAL\\WorkForceManagement.DAL.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\CC-Student\\source\\repos\\The%20Workforce%20Management\\WorkForceManagement\\WorkForceManagement.DAL\\WorkForceManagement.DAL.csproj",
+        "projectUniqueName": "C:\\Users\\Vladimirz\\source\\repos\\TheWorkforceManagement\\WorkForceManagement\\WorkForceManagement.DAL\\WorkForceManagement.DAL.csproj",
         "projectName": "WorkForceManagement.DAL",
-        "projectPath": "C:\\Users\\CC-Student\\source\\repos\\The%20Workforce%20Management\\WorkForceManagement\\WorkForceManagement.DAL\\WorkForceManagement.DAL.csproj",
-        "packagesPath": "C:\\Users\\CC-Student\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\CC-Student\\source\\repos\\The%20Workforce%20Management\\WorkForceManagement\\WorkForceManagement.DAL\\obj\\",
+        "projectPath": "C:\\Users\\Vladimirz\\source\\repos\\TheWorkforceManagement\\WorkForceManagement\\WorkForceManagement.DAL\\WorkForceManagement.DAL.csproj",
+        "packagesPath": "C:\\Users\\Vladimirz\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Vladimirz\\source\\repos\\TheWorkforceManagement\\WorkForceManagement\\WorkForceManagement.DAL\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\CC-Student\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Vladimirz\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -39,6 +39,26 @@
       "frameworks": {
         "net5.0": {
           "targetAlias": "net5.0",
+          "dependencies": {
+            "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[5.0.13, )"
+            },
+            "Microsoft.EntityFrameworkCore.Proxies": {
+              "target": "Package",
+              "version": "[5.0.13, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[5.0.13, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[5.0.13, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
@@ -54,7 +74,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.404\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.402\\RuntimeIdentifierGraph.json"
         }
       }
     }

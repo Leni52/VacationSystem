@@ -8,19 +8,19 @@
     "net5.0": []
   },
   "packageFolders": {
-    "C:\\Users\\CC-Student\\.nuget\\packages\\": {}
+    "C:\\Users\\Vladimirz\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\CC-Student\\source\\repos\\The%20Workforce%20Management\\WorkForceManagement\\WorkForceManagement.BLL\\WorkForceManagement.BLL.csproj",
+      "projectUniqueName": "C:\\Users\\Vladimirz\\source\\repos\\TheWorkforceManagement\\WorkForceManagement\\WorkForceManagement.BLL\\WorkForceManagement.BLL.csproj",
       "projectName": "WorkForceManagement.BLL",
-      "projectPath": "C:\\Users\\CC-Student\\source\\repos\\The%20Workforce%20Management\\WorkForceManagement\\WorkForceManagement.BLL\\WorkForceManagement.BLL.csproj",
-      "packagesPath": "C:\\Users\\CC-Student\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\CC-Student\\source\\repos\\The%20Workforce%20Management\\WorkForceManagement\\WorkForceManagement.BLL\\obj\\",
+      "projectPath": "C:\\Users\\Vladimirz\\source\\repos\\TheWorkforceManagement\\WorkForceManagement\\WorkForceManagement.BLL\\WorkForceManagement.BLL.csproj",
+      "packagesPath": "C:\\Users\\Vladimirz\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Vladimirz\\source\\repos\\TheWorkforceManagement\\WorkForceManagement\\WorkForceManagement.BLL\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\CC-Student\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Vladimirz\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -60,7 +60,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.404\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.402\\RuntimeIdentifierGraph.json"
       }
     }
   }
