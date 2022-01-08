@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Vladimirz\\source\\repos\\TheWorkforceManagement\\WorkForceManagement\\WorkForceManagement.DTO\\WorkForceManagement.DTO.csproj": {}
+    "C:\\Users\\CC-Student\\source\\repos\\TheWorkforceManagement\\WorkForceManagement\\WorkForceManagement.DTO\\WorkForceManagement.DTO.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Vladimirz\\source\\repos\\TheWorkforceManagement\\WorkForceManagement\\WorkForceManagement.DTO\\WorkForceManagement.DTO.csproj": {
+    "C:\\Users\\CC-Student\\source\\repos\\TheWorkforceManagement\\WorkForceManagement\\WorkForceManagement.DTO\\WorkForceManagement.DTO.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Vladimirz\\source\\repos\\TheWorkforceManagement\\WorkForceManagement\\WorkForceManagement.DTO\\WorkForceManagement.DTO.csproj",
+        "projectUniqueName": "C:\\Users\\CC-Student\\source\\repos\\TheWorkforceManagement\\WorkForceManagement\\WorkForceManagement.DTO\\WorkForceManagement.DTO.csproj",
         "projectName": "WorkForceManagement.DTO",
-        "projectPath": "C:\\Users\\Vladimirz\\source\\repos\\TheWorkforceManagement\\WorkForceManagement\\WorkForceManagement.DTO\\WorkForceManagement.DTO.csproj",
-        "packagesPath": "C:\\Users\\Vladimirz\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Vladimirz\\source\\repos\\TheWorkforceManagement\\WorkForceManagement\\WorkForceManagement.DTO\\obj\\",
+        "projectPath": "C:\\Users\\CC-Student\\source\\repos\\TheWorkforceManagement\\WorkForceManagement\\WorkForceManagement.DTO\\WorkForceManagement.DTO.csproj",
+        "packagesPath": "C:\\Users\\CC-Student\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\CC-Student\\source\\repos\\TheWorkforceManagement\\WorkForceManagement\\WorkForceManagement.DTO\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Vladimirz\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\CC-Student\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -54,7 +54,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.402\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.404\\RuntimeIdentifierGraph.json"
         }
       }
     }

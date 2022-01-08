@@ -7598,19 +7598,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Vladimirz\\.nuget\\packages\\": {}
+    "C:\\Users\\CC-Student\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Vladimirz\\source\\repos\\TheWorkforceManagement\\WorkForceManagement\\WorkForceManagement.DAL\\WorkForceManagement.DAL.csproj",
+      "projectUniqueName": "C:\\Users\\CC-Student\\source\\repos\\TheWorkforceManagement\\WorkForceManagement\\WorkForceManagement.DAL\\WorkForceManagement.DAL.csproj",
       "projectName": "WorkForceManagement.DAL",
-      "projectPath": "C:\\Users\\Vladimirz\\source\\repos\\TheWorkforceManagement\\WorkForceManagement\\WorkForceManagement.DAL\\WorkForceManagement.DAL.csproj",
-      "packagesPath": "C:\\Users\\Vladimirz\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Vladimirz\\source\\repos\\TheWorkforceManagement\\WorkForceManagement\\WorkForceManagement.DAL\\obj\\",
+      "projectPath": "C:\\Users\\CC-Student\\source\\repos\\TheWorkforceManagement\\WorkForceManagement\\WorkForceManagement.DAL\\WorkForceManagement.DAL.csproj",
+      "packagesPath": "C:\\Users\\CC-Student\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\CC-Student\\source\\repos\\TheWorkforceManagement\\WorkForceManagement\\WorkForceManagement.DAL\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\Vladimirz\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\CC-Student\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -7670,7 +7670,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.402\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.404\\RuntimeIdentifierGraph.json"
       }
     }
   }
