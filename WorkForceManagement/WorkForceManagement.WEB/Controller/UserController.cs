@@ -72,5 +72,13 @@ namespace WorkForceManagement.WEB.Controller
             return Ok(models);
         }
 
+        [HttpGet("GetUserById/{id}")]
+        public async Task<ActionResult<UserResponseModel>> GetUserByIdAsync(string id)
+        {
+            var user = await _userService.GetUserWithIdAsync(id);
+            var model = _mapper.Map<UserResponseModel>(user);
+
+            return Ok(model);
+        }
     }
 }

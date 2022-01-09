@@ -85,14 +85,17 @@ namespace WorkForceManagement.BLL.Services
             throw new NotImplementedException();
         }
 
-        public Task<User> GetUserWithIdAsync(string id)
+        public async Task<User> GetUserWithIdAsync(string id)
         {
-            throw new NotImplementedException();
+            User user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+                throw new KeyNotFoundException($"User with id: {id} does not exist!");
+            return user;
         }
 
         public bool IsUserAdmin(User currentUser)
         {
-            throw new NotImplementedException();
+            return _userManager.IsUserInRole(currentUser, "Admin");
         }
     }
 }
