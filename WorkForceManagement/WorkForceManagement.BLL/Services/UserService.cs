@@ -93,9 +93,9 @@ namespace WorkForceManagement.BLL.Services
             return user;
         }
 
-        public bool IsUserAdmin(User currentUser)
+        public async Task<bool> IsUserAdmin(User currentUser)
         {
-            return _userManager.IsUserInRole(currentUser, "Admin");
+            return await _userManager.IsUserInRole(currentUser.Id , "Admin");
         }
     }
 }

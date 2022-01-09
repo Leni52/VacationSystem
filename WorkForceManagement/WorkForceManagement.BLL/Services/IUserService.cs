@@ -14,7 +14,6 @@ namespace WorkForceManagement.BLL.Services
         List<Team> GetUserTeams(User currentUser);
         Task<User> GetUserWithIdAsync(string id);
         Task<User> GetCurrentUser(ClaimsPrincipal principal);
-        bool IsUserAdmin(User currentUser);
-
+        Task<bool> IsUserAdmin(User currentUser);
     }
 }
