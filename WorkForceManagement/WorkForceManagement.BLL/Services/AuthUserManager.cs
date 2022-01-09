@@ -18,16 +18,18 @@ namespace WorkForceManagement.BLL.Services
             : base(store, optionsAccessor, passwordHasher,
             userValidators, passwordValidators, keyNormalizer,
             errors, services, logger)
-        {}
+        { }
 
         public async Task<List<User>> GetAllAsync()
         {
             return await Users.ToListAsync();
         }
+
         public async Task<List<string>> GetUserRolesAsync(User user)
         {
             return (await GetRolesAsync(user)).ToList();
         }
+
         public async Task CreateUserAsync(User user, string password)
         {
             await CreateAsync(user, password);
@@ -38,10 +40,12 @@ namespace WorkForceManagement.BLL.Services
             User user = await FindByIdAsync(userId);
             return await IsInRoleAsync(user, roleName);
         }
+
         public async Task AddRoleToUser(User user, string role)
         {
             await AddToRoleAsync(user, role);
         }
+
         public async Task RemoveRoleFromUser(User user, string role)
         {
             await RemoveFromRoleAsync(user, role);
@@ -57,11 +61,12 @@ namespace WorkForceManagement.BLL.Services
             }
             return false;
         }
+
         public async Task DeleteUserAsync(User user)
         {
             await DeleteAsync(user);
-
         }
+
         public async Task<User> FindDifferentUserWithSameUsername(string userId, string username)
         {
             List<User> users = await GetAllAsync();
@@ -70,6 +75,7 @@ namespace WorkForceManagement.BLL.Services
                 user.UserName == username &&
                 user.Id != userId);
         }
+
         public async Task EditUserAsync(User user)
         {
             await UpdateAsync(user);
