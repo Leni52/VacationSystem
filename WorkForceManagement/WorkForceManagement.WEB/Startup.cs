@@ -16,6 +16,7 @@ using Microsoft.OpenApi.Models;
 using WorkForceManagement.BLL.Services;
 using WorkForceManagement.DAL.Data;
 using WorkForceManagement.DAL.Entities;
+using WorkForceManagement.DAL.Repositories;
 
 namespace WorkForceManagement.WEB
 {
@@ -55,8 +56,11 @@ namespace WorkForceManagement.WEB
             services.AddAutoMapper(typeof(Startup));
 
             // Custom services
+            services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
+
             services.AddTransient<IAuthUserManager, AuthUserManager>();
             services.AddTransient<IUserService, UserService>();
+            services.AddTransient<ITeamService, TeamService>();
         }
 
 
