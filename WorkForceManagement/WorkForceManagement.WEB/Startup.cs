@@ -16,6 +16,7 @@ using Microsoft.OpenApi.Models;
 using WorkForceManagement.BLL.Services;
 using WorkForceManagement.DAL.Data;
 using WorkForceManagement.DAL.Entities;
+using WorkForceManagement.WEB.Middleware;
 
 namespace WorkForceManagement.WEB
 {
@@ -70,6 +71,7 @@ namespace WorkForceManagement.WEB
             app.UseHttpsRedirection();
 
             app.UseRouting();
+            app.UseMiddleware<ExceptionHandlerMiddleware>();
 
             app.UseAuthorization();
 

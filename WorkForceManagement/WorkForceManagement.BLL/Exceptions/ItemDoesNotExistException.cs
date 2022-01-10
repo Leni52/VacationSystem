@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace WorkForceManagement.BLL
+namespace WorkForceManagement.BLL.Exceptions
 {
     [Serializable]
-    internal class ItemDoesNotExistException : Exception
+    public class ItemDoesNotExistException : Exception
     {
         public ItemDoesNotExistException()
         {
