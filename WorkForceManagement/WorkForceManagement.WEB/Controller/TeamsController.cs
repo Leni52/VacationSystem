@@ -91,6 +91,36 @@ namespace WorkForceManagement.WEB.Controller
             return Ok();
         }
 
+        [HttpPost("AddUserToTeam/{teamId}&{userId}")]
+        public async Task<IActionResult> AddUserToTeam(string teamId, string userId)
+        {
+            User userToAdd = await _userService.GetUserWithIdAsync(userId);
+
+            await _teamService.AddUserToTeamAsync(teamId, userToAdd);
+
+            return Ok();
+        }
+
+        [HttpGet("GetTeamMembers/{teamId}")]
+        public async Task<ActionResult<List<UserResponseModel>>> GetTeamMembers(string teamId)
+        {
+            List<User> teamMembers = await _teamService.GetAllTeamMembers(teamId);
+
+            var models = _mapper.Map<List<UserResponseModel>>(teamMembers);
+
+            return models;
+        }
+
+        [HttpDelete("RemoveUserFromTeam/{teamId}&{userId}")]
+        public  async Task<IActionResult> RemoveUserFromTeam(string teamId, string userId)
+        {
+            User userToDelete = await _userService.GetUserWithIdAsync(userId);
+
+            await _teamService.RemoveUserFromTeam(teamId, userToDelete);
+
+            return Ok();
+        }
+
 
 
     }

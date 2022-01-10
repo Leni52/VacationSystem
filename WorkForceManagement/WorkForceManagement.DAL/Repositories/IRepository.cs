@@ -18,5 +18,7 @@ namespace WorkForceManagement.DAL.Repositories
 
         public T Remove(T entity);
 
+        void SaveChanges();
+
     }
 }

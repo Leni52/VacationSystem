@@ -55,5 +55,10 @@ namespace WorkForceManagement.DAL.Repositories
             return removed;
         }
 
+        public void SaveChanges()
+        {
+            _databaseContext.SaveChanges();
+        }
+
     }
 }
