@@ -33,12 +33,10 @@ namespace WorkForceManagement.WEB
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WorkForceManagement.WEB", Version = "v1" });
-
                 // Adds the authorize button in swagger UI 
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
@@ -85,6 +83,9 @@ namespace WorkForceManagement.WEB
             // DAL
             services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
 
+            // Injecting automapper
+            services.AddAutoMapper(typeof(Startup));
+
             // Custom services
             services.AddTransient<IAuthUserManager, AuthUserManager>();
             services.AddTransient<IUserService, UserService>();
@@ -120,6 +121,7 @@ namespace WorkForceManagement.WEB
                 });
         }
 
+
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
@@ -136,8 +138,6 @@ namespace WorkForceManagement.WEB
             }
 
             app.UseHttpsRedirection();
-
-            app.UseStaticFiles();
 
             app.UseRouting();
 
