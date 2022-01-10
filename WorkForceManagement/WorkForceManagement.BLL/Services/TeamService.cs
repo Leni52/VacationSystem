@@ -24,11 +24,11 @@ namespace WorkForceManagement.BLL.Services
             if (teamWithSameName != null)
                 throw new TeamWithSameNameExistsException($"Team with the name:{teamToAdd.Name} already exists!");
 
-            //teamToAdd.Id = Guid.NewGuid();
+            
             teamToAdd.CreationDate = DateTime.Now;
             teamToAdd.ChangeDate = DateTime.Now;
-            teamToAdd.CreatorId = Guid.NewGuid().ToString("D");
-            teamToAdd.UpdaterId = Guid.NewGuid().ToString("D");
+            teamToAdd.CreatorId = Guid.NewGuid().ToString("D"); // TODO Change to currentUser
+            teamToAdd.UpdaterId = Guid.NewGuid().ToString("D"); // TODO Change to currentUser
 
             _teamRepository.CreateOrUpdate(teamToAdd);
         }
