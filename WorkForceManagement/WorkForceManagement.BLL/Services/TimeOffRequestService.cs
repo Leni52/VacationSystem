@@ -15,6 +15,7 @@ namespace WorkForceManagement.BLL.Services
         {
             _timeOffRequestRepository = timeOffRequestRepository;
         }
+       
         public void CreateTimeOffRequestAsync(TimeOffRequest timeOffRequest)
         {
             _timeOffRequestRepository.CreateOrUpdate(timeOffRequest);
@@ -42,8 +43,8 @@ namespace WorkForceManagement.BLL.Services
             }
             return timeOffRequest;
         }
-        public void UpdateTimeOffRequest(Guid Id, TimeOffRequestType timeOffRequestType, 
-            TimeOffRequestStatus timeOffRequestStatus, string description)
+        public void UpdateTimeOffRequest(Guid Id, TimeOffRequestType timeOffRequestType,
+               TimeOffRequestStatus timeOffRequestStatus, string description)
         {
             TimeOffRequest requestToUpdate = _timeOffRequestRepository.Get(Id);
             if (requestToUpdate == null)
@@ -54,6 +55,29 @@ namespace WorkForceManagement.BLL.Services
             requestToUpdate.Type = timeOffRequestType;
             requestToUpdate.Description = description;
             _timeOffRequestRepository.CreateOrUpdate(requestToUpdate);
-        }       
+        }
+        public string ApproveTimeOffRequest(Guid id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ChangeStatusTimeOffRequest(Guid id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string RejectTimeOffRequest(Guid id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<TimeOffRequest> AllRequestsFromUser(string userId)
+        {
+            List<TimeOffRequest> requests = new List<TimeOffRequest>();
+            requests = _timeOffRequestRepository.All().Where(u => u.CreatorId == userId).ToList();
+            return requests;
+        }
+
+        
     }
 }

@@ -12,6 +12,10 @@ namespace WorkForceManagement.BLL.Services
         void DeleteTimeOffRequest(Guid Id);
         void UpdateTimeOffRequest(Guid Id, TimeOffRequestType timeOffRequestType,
             TimeOffRequestStatus timeOffRequestStatus, string description);
+        List<TimeOffRequest> AllRequestsFromUser(string userId);
+        string ApproveTimeOffRequest(Guid id);
+        string RejectTimeOffRequest(Guid id);
+        void ChangeStatusTimeOffRequest(Guid id);
 
 
     }

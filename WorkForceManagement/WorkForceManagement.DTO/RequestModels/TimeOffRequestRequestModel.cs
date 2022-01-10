@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WorkForceManagement.DAL.Entities;
 
 namespace WorkForceManagement.DTO.Requests
 {
@@ -14,8 +15,10 @@ namespace WorkForceManagement.DTO.Requests
         [MaxLength(50)]
         public string Description { get; set; }
         [Required(ErrorMessage ="Please, add the type for your request:")]
-        public string TimeOffRequestType { get; set; }
-        [Required(ErrorMessage ="Please, add a start date: ")]
+        public TimeOffRequestType TimeOffRequestType { get; set; }
+        [Required(ErrorMessage = "Please, add the type for your request:")]
+        public TimeOffRequestStatus TimeOffRequestStatus { get; set; }
+        [Required(ErrorMessage ="Please, add a status: ")]
         public DateTime StartDate { get; set; }
         [Required(ErrorMessage = "Please, add a end date: ")]
         public DateTime EndDate { get; set; }
