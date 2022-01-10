@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace WorkForceManagement.DTO.Requests
 {
-   public class TimeOffRequestModel
+   public class TimeOffRequestRequestModel
     {
         [Required(ErrorMessage ="Please, add a description:")]
         [MinLength(10, ErrorMessage ="The description is too short.")]
