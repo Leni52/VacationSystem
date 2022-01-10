@@ -11,6 +11,7 @@ namespace WorkForceManagement.BLL.Services
         Task<List<Team>> GetAllTeamsAsync();
         Task UpdateTeamAsync(Team updatedTeam, string teamId);
         Task DeleteTeamAsync(string teamToDeleteId);
+        Task UpdateTeamLeaderAsync(string teamId, User newTeamLeader);
 
     }
 }

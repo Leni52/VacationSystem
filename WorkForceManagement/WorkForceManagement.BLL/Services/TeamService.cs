@@ -56,6 +56,8 @@ namespace WorkForceManagement.BLL.Services
             foundTeam.Name = updatedTeam.Name;
             foundTeam.Description = updatedTeam.Description;
 
+            // foundTeam.UpdaterId = currentUser; //TODO
+
             _teamRepository.CreateOrUpdate(foundTeam);
         }
         public async Task DeleteTeamAsync(string teamToDeleteId)
@@ -68,7 +70,19 @@ namespace WorkForceManagement.BLL.Services
 
             _teamRepository.Remove(teamToDelete);
         }
+        public async Task UpdateTeamLeaderAsync(string teamId, User newTeamLeader)
+        {
+            Team foundTeam = _teamRepository.Get(Guid.Parse(teamId));
+            if(foundTeam == null)
+                throw new KeyNotFoundException($"Team with id:{teamId} was not found!");
 
-        
+            //foundTeam.UpdaterId = currentUser; // TODO
+
+            foundTeam.TeamLeader = newTeamLeader;
+
+            _teamRepository.CreateOrUpdate(foundTeam);
+        }
+
+
     }
 }

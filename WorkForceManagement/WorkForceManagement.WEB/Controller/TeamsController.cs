@@ -81,6 +81,16 @@ namespace WorkForceManagement.WEB.Controller
             return Ok();
         }
 
+        [HttpPatch("UpdateTeamLeader/{teamId}&{newLeaderId}")]
+        public async Task<IActionResult> UpdateTeamLeader(string teamId, string newLeaderId)
+        {
+            User newLeader = await _userService.GetUserWithIdAsync(newLeaderId);
+
+            await _teamService.UpdateTeamLeaderAsync(teamId, newLeader);
+
+            return Ok();
+        }
+
 
 
     }
