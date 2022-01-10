@@ -2,8 +2,8 @@
 {
     public enum TimeOffRequestType
     {
-        Paid,
-        Unpaid,
-        SickLeave
+        Paid = 1,
+        Unpaid = 2,
+        SickLeave = 3
     }
 }

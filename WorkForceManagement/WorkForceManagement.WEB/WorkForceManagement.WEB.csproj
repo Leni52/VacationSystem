@@ -5,11 +5,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="11.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.13">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\WorkForceManagement.BLL\WorkForceManagement.BLL.csproj" />
     <ProjectReference Include="..\WorkForceManagement.DAL\WorkForceManagement.DAL.csproj" />
+    <ProjectReference Include="..\WorkForceManagement.DTO\WorkForceManagement.DTO.csproj" />
   </ItemGroup>
 
 </Project>

@@ -4,7 +4,7 @@ namespace WorkForceManagement.DAL.Entities
 {
     public class TimeOffRequest : Base
     {
-        public User Requester { get; set; }
+        public virtual User Requester { get; set; }
         public virtual TimeOffRequestType Type { get; set; }
         public virtual TimeOffRequestStatus Status { get; set; }
         public string Description { get; set; }

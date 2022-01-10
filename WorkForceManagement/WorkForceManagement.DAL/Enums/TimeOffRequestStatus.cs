@@ -2,9 +2,9 @@
 {
     public enum TimeOffRequestStatus
     {
-        Created,
-        Awaiting,
-        Approved,
-        Rejected
+        Created = 0,
+        Awaiting = 1,
+        Approved = 2,
+        Rejected = 3
     }
 }

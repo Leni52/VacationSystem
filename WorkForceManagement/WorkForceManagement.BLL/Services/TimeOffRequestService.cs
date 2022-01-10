@@ -15,34 +15,45 @@ namespace WorkForceManagement.BLL.Services
         {
             _timeOffRequestRepository = timeOffRequestRepository;
         }
-        public Task<bool> CreateTimeOffRequestAsync()
+        public void CreateTimeOffRequestAsync(TimeOffRequest timeOffRequest)
         {
-            throw new NotImplementedException();
-        }
+            _timeOffRequestRepository.CreateOrUpdate(timeOffRequest);
+        }    
 
-        public TimeOffRequest DeleteTimeOffRequest(Guid Id)
+        public void  DeleteTimeOffRequest(Guid Id)
         {
             var request = _timeOffRequestRepository.Get(Id);
             if (request != null)
             {
-                _timeOffRequestRepository.Remove(request);
+               _timeOffRequestRepository.Remove(request);
             }
             throw new ItemDoesNotExistException();
         }
-
         public List<TimeOffRequest> GetAllRequests()
         {
             return _timeOffRequestRepository.All();
         }
-
         public TimeOffRequest GetTimeOffRequest(Guid Id)
         {
-            return _timeOffRequestRepository.Get(Id);
+            TimeOffRequest timeOffRequest= _timeOffRequestRepository.Get(Id);
+            if (timeOffRequest == null)
+            {
+                throw new ItemDoesNotExistException();
+            }
+            return timeOffRequest;
         }
-
-        public TimeOffRequest UpdateTimeOffRequest(Guid Id, TimeOffRequest timeOffRequest)
+        public void UpdateTimeOffRequest(Guid Id, TimeOffRequestType timeOffRequestType, 
+            TimeOffRequestStatus timeOffRequestStatus, string description)
         {
-            throw new NotImplementedException();
-        }
+            TimeOffRequest requestToUpdate = _timeOffRequestRepository.Get(Id);
+            if (requestToUpdate == null)
+            {
+                throw new ItemDoesNotExistException();
+            }
+            requestToUpdate.Status = timeOffRequestStatus;
+            requestToUpdate.Type = timeOffRequestType;
+            requestToUpdate.Description = description;
+            _timeOffRequestRepository.CreateOrUpdate(requestToUpdate);
+        }       
     }
 }

@@ -18,6 +18,8 @@ namespace WorkForceManagement.DAL.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Team>().HasOne(t => t.TeamLeader).WithMany(u=>u.Teams);
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

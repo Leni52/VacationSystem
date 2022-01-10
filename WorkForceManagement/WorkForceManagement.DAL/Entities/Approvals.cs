@@ -1,9 +1,9 @@
 ﻿namespace WorkForceManagement.DAL.Entities
 {
-    public class Approvals
+    public class Approvals : Base
     {
-        public Team Team { get; set; }
-        public TimeOffRequest TimeOffRequest { get; set; }
-        public ApprovalState State { get; set; }
+        public virtual Team Team { get; set; }
+        public virtual TimeOffRequest TimeOffRequest { get; set; }
+        public virtual ApprovalState State { get; set; }
     }
 }
