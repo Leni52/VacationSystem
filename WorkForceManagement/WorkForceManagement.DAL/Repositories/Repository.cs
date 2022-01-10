@@ -1,6 +1,9 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
 using WorkForceManagement.DAL.Data;
 using WorkForceManagement.DAL.Entities;
 
@@ -15,12 +18,12 @@ namespace WorkForceManagement.DAL.Repositories
             _databaseContext = context;
         }
 
-        public List<T> All()
+        public async Task<List<T>> All()
         {
-            return _databaseContext.Set<T>().ToList();
+            return await _databaseContext.Set<T>().ToListAsync();
         }
 
-        public void CreateOrUpdate(T entity)
+        public async Task CreateOrUpdate(T entity)
         {
             if (entity.Id == Guid.Empty)
             {
@@ -29,9 +32,9 @@ namespace WorkForceManagement.DAL.Repositories
             }
             else
             {
-                _databaseContext.Add(entity);
+                await _databaseContext.AddAsync(entity);
             }
-            _databaseContext.SaveChanges();
+            await _databaseContext.SaveChangesAsync();
         }
 
         public List<T> Find(Func<T, bool> predicate)
@@ -39,19 +42,19 @@ namespace WorkForceManagement.DAL.Repositories
             return _databaseContext.Set<T>().Where(predicate).ToList();
         }
 
-        public T Get(Func<T, bool> predicate)
+        public async Task<T> Get(Expression<Func<T, bool>> predicate)
         {
-            return _databaseContext.Set<T>().FirstOrDefault(predicate);
+            return await _databaseContext.Set<T>().FirstOrDefaultAsync(predicate);
         }
 
-        public T Get(Guid id)
+        public async Task<T> Get(Guid id)
         {
-            return _databaseContext.Set<T>().FirstOrDefault(e => e.Id == id);
+            return await _databaseContext.Set<T>().FirstOrDefaultAsync(e => e.Id == id);
         }
-        public T Remove(T entity)
+        public async Task<T> Remove(T entity)
         {
             T removed = _databaseContext.Set<T>().Remove(entity).Entity;
-            _databaseContext.SaveChanges();
+            await _databaseContext.SaveChangesAsync();
             return removed;
         }
 
