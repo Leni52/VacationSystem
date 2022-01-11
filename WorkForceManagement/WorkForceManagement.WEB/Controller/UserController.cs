@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -23,6 +24,7 @@ namespace WorkForceManagement.WEB.Controller
             _mapper = mapper;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateUser(UserRequestDTO model)
         {
@@ -39,6 +41,7 @@ namespace WorkForceManagement.WEB.Controller
             return Ok(model);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{userId}")]
         public async Task<IActionResult> DeleteUser(Guid userId)
         {
@@ -47,6 +50,7 @@ namespace WorkForceManagement.WEB.Controller
             return Ok();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPatch("{userId}")]
         public async Task<IActionResult> UpdateUser(Guid userId, UserRequestDTO model)
         {
