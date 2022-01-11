@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using WorkForceManagement.DAL.Entities;
 
 namespace WorkForceManagement.DAL.Repositories
@@ -18,7 +19,7 @@ namespace WorkForceManagement.DAL.Repositories
 
         public T Remove(T entity);
 
-        void SaveChanges();
+        Task SaveChanges();
 
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using WorkForceManagement.DAL.Data;
 using WorkForceManagement.DAL.Entities;
 
@@ -55,9 +56,9 @@ namespace WorkForceManagement.DAL.Repositories
             return removed;
         }
 
-        public void SaveChanges()
+        public async Task SaveChanges()
         {
-            _databaseContext.SaveChanges();
+            await _databaseContext.SaveChangesAsync();
         }
 
     }

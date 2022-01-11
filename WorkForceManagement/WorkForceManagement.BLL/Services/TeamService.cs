@@ -67,9 +67,9 @@ namespace WorkForceManagement.BLL.Services
 
             _teamRepository.CreateOrUpdate(foundTeam);
         }
-        public async Task DeleteTeam(Guid teamToDeleteId)
+        public async Task DeleteTeam(Guid teamId)
         {
-            Team teamToDelete = await GetTeamWithId(teamToDeleteId);
+            Team teamToDelete = await GetTeamWithId(teamId);
 
             _teamRepository.Remove(teamToDelete);
         }
@@ -90,7 +90,7 @@ namespace WorkForceManagement.BLL.Services
 
             foundTeam.Members.Add(userToAdd);
 
-            _teamRepository.SaveChanges();
+            await _teamRepository.SaveChanges();
         }
         public async Task<List<User>> GetAllTeamMembers(Guid teamId)
         {
@@ -108,7 +108,7 @@ namespace WorkForceManagement.BLL.Services
 
             foundTeam.Members.Remove(userToDelete);
 
-            _teamRepository.SaveChanges();
+            await _teamRepository.SaveChanges();
         }
 
 
