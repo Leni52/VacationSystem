@@ -17,68 +17,45 @@ namespace WorkForceManagement.BLL.Services
             _timeOffRequestRepository = timeOffRequestRepository;
         }
        
-        public void CreateTimeOffRequestAsync(TimeOffRequest timeOffRequest)
+        public async Task CreateTimeOffRequest(TimeOffRequest timeOffRequest)
         {
-            _timeOffRequestRepository.CreateOrUpdate(timeOffRequest);
+            timeOffRequest.Status = 0;           
+            await _timeOffRequestRepository.CreateOrUpdate(timeOffRequest);
         }    
 
-        public void  DeleteTimeOffRequest(Guid Id)
+        public async Task  DeleteTimeOffRequest(Guid Id)
         {
-            var request = _timeOffRequestRepository.Get(Id);
+            var request =await _timeOffRequestRepository.Get(Id);
             if (request != null)
             {
-               _timeOffRequestRepository.Remove(request);
+              await _timeOffRequestRepository.Remove(request);
             }
             throw new ItemDoesNotExistException();
         }
-        public List<TimeOffRequest> GetAllRequests()
+        public async Task<List<TimeOffRequest>> GetAllRequests()
         {
-            return _timeOffRequestRepository.All();
+            return await _timeOffRequestRepository.All();
         }
-        public TimeOffRequest GetTimeOffRequest(Guid Id)
+        public async Task<TimeOffRequest> GetTimeOffRequest(Guid Id)
         {
-            TimeOffRequest timeOffRequest= _timeOffRequestRepository.Get(Id);
+            TimeOffRequest timeOffRequest=await _timeOffRequestRepository.Get(Id);
             if (timeOffRequest == null)
             {
                 throw new ItemDoesNotExistException();
             }
             return timeOffRequest;
         }
-        public void UpdateTimeOffRequest(Guid Id, TimeOffRequestType timeOffRequestType,
-               TimeOffRequestStatus timeOffRequestStatus, string description)
+        public async Task UpdateTimeOffRequest(Guid Id, TimeOffRequestType timeOffRequestType)
         {
-            TimeOffRequest requestToUpdate = _timeOffRequestRepository.Get(Id);
+            TimeOffRequest requestToUpdate =await _timeOffRequestRepository.Get(Id);
             if (requestToUpdate == null)
             {
                 throw new ItemDoesNotExistException();
             }
-            requestToUpdate.Status = timeOffRequestStatus;
             requestToUpdate.Type = timeOffRequestType;
-            requestToUpdate.Description = description;
-            _timeOffRequestRepository.CreateOrUpdate(requestToUpdate);
-        }
-        public string ApproveTimeOffRequest(Guid id)
-        {
-            throw new NotImplementedException();
-        }
 
-        public void ChangeStatusTimeOffRequest(Guid id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string RejectTimeOffRequest(Guid id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public List<TimeOffRequest> AllRequestsFromUser(string userId)
-        {
-            List<TimeOffRequest> requests = new List<TimeOffRequest>();
-            requests = _timeOffRequestRepository.All().Where(u => u.CreatorId == userId).ToList();
-            return requests;
-        }
-
-        
+           await _timeOffRequestRepository.CreateOrUpdate(requestToUpdate);
+        }     
+               
     }
 }

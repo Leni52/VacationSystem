@@ -25,7 +25,7 @@ namespace WorkForceManagement.DAL.Repositories
 
         public async Task CreateOrUpdate(T entity)
         {
-            if (entity.Id == Guid.Empty)
+            if (entity.Id != Guid.Empty)
             {
                 entity.ChangeDate = DateTime.Now;
                 _databaseContext.Set<T>().Update(entity);

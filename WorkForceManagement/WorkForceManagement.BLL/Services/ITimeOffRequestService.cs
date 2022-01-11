@@ -1,21 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using WorkForceManagement.DAL.Entities;
 
 namespace WorkForceManagement.BLL.Services
 {
     public interface ITimeOffRequestService
     {
-        void CreateTimeOffRequestAsync(TimeOffRequest timeOffRequest);
-        List<TimeOffRequest> GetAllRequests();
-        TimeOffRequest GetTimeOffRequest(Guid Id);
-        void DeleteTimeOffRequest(Guid Id);
-        void UpdateTimeOffRequest(Guid Id, TimeOffRequestType timeOffRequestType,
-            TimeOffRequestStatus timeOffRequestStatus, string description);
-        List<TimeOffRequest> AllRequestsFromUser(string userId);
-        string ApproveTimeOffRequest(Guid id);
-        string RejectTimeOffRequest(Guid id);
-        void ChangeStatusTimeOffRequest(Guid id);
+        Task CreateTimeOffRequest(TimeOffRequest timeOffRequest);
+       Task<List<TimeOffRequest>> GetAllRequests();
+       Task<TimeOffRequest> GetTimeOffRequest(Guid Id);
+        Task DeleteTimeOffRequest(Guid Id);
+        Task UpdateTimeOffRequest(Guid Id, TimeOffRequestType timeOffRequestType);          
+        
 
 
     }

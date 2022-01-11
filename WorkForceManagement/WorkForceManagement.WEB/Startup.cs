@@ -18,6 +18,7 @@ using WorkForceManagement.BLL.Services;
 using WorkForceManagement.DAL.Data;
 using WorkForceManagement.DAL.Entities;
 using WorkForceManagement.DAL.Repositories;
+using WorkForceManagement.WEB.Middleware;
 
 namespace WorkForceManagement.WEB
 {
@@ -89,6 +90,7 @@ namespace WorkForceManagement.WEB
             // Custom services
             services.AddTransient<IAuthUserManager, AuthUserManager>();
             services.AddTransient<IUserService, UserService>();
+            services.AddTransient<ITimeOffRequestService, TimeOffRequestService>();
 
             // IdentityServer
             var builder = services.AddIdentityServer((options) =>
@@ -140,7 +142,7 @@ namespace WorkForceManagement.WEB
             app.UseHttpsRedirection();
 
             app.UseRouting();
-
+            app.UseMiddleware<ExceptionHandlerMiddleware>();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

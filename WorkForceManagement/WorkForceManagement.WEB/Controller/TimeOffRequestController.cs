@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using WorkForceManagement.BLL.Services;
 using WorkForceManagement.DAL.Entities;
 using WorkForceManagement.DTO.Requests;
@@ -22,24 +23,21 @@ namespace WorkForceManagement.WEB.Controller
             _mapper = mapper;
         }
 
-        [HttpGet("GetAllTimeOffRequests")]
-        public ActionResult<List<TimeOffRequestResponseModel>> GetAllTimeOffRequests()
+        [HttpGet]
+        public async Task<ActionResult<List<TimeOffRequestResponseModel>>> GetAllTimeOffRequests()
         {
             List<TimeOffRequestResponseModel> timeOffRequestResponseModel =
                 new List<TimeOffRequestResponseModel>();
-            var requests = _timeOffRequestService.GetAllRequests();
-            if (requests.Count == 0)
-            {
-                return NotFound("No requests in the database.");
-            }
+            var requests = await _timeOffRequestService.GetAllRequests();
+
             timeOffRequestResponseModel = _mapper.Map<List<TimeOffRequestResponseModel>>(requests);
             return Ok(requests);
         }
 
         [HttpGet("{timeOffRequestId}")]
-        public ActionResult<TimeOffRequestResponseModel> GetTimeOffRequest(Guid id)
+        public async Task<ActionResult<TimeOffRequestResponseModel>> GetTimeOffRequest(Guid timeOffRequestId)
         {
-            TimeOffRequest requestFromDB = _timeOffRequestService.GetTimeOffRequest(id);
+            TimeOffRequest requestFromDB = await _timeOffRequestService.GetTimeOffRequest(timeOffRequestId);
             if (requestFromDB == null)
             {
                 return NotFound("TimeOff Request doesn't exist.");
@@ -49,7 +47,7 @@ namespace WorkForceManagement.WEB.Controller
         }
 
 
-        [HttpPost("CreateTimeOffRequest")]
+        [HttpPost]
         public ActionResult CreateTimeOffRequest(TimeOffRequestRequestModel timeOffRequestRequestModel)
         {
             if (!ModelState.IsValid)
@@ -57,46 +55,38 @@ namespace WorkForceManagement.WEB.Controller
                 return BadRequest(ModelState);
             }
             TimeOffRequest timeOffRequest = _mapper.Map<TimeOffRequest>(timeOffRequestRequestModel);
-            _timeOffRequestService.CreateTimeOffRequestAsync(timeOffRequest);
+            timeOffRequest.Type = (TimeOffRequestType)timeOffRequestRequestModel.TimeOffRequestType;
+            _timeOffRequestService.CreateTimeOffRequest(timeOffRequest);
             return Ok();
         }
 
-        [HttpPut("{id}")]
-        public ActionResult UpdateTimeOffRequest(Guid id, TimeOffRequestRequestModel timeOffRequestRequestModel)
+        [HttpPut("{timeOffRequestId}")]
+        public async Task<ActionResult> UpdateTimeOffRequest(Guid timeOffRequestId, TimeOffRequestRequestModel timeOffRequestRequestModel)
         {
-            TimeOffRequest timeOffRequest = _timeOffRequestService.GetTimeOffRequest(id);
+            TimeOffRequest timeOffRequest = await _timeOffRequestService.GetTimeOffRequest(timeOffRequestId);
             if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
+            var tor = _mapper.Map<TimeOffRequest>(timeOffRequestRequestModel);
             timeOffRequest.Description = timeOffRequestRequestModel.Description;
-            timeOffRequest.Status = timeOffRequestRequestModel.TimeOffRequestStatus;
             timeOffRequest.ChangeDate = DateTime.Now;
-            //timeOffRequest.UpdaterId = currentUser.Id;
-            timeOffRequest.Type = timeOffRequestRequestModel.TimeOffRequestType;
+            timeOffRequest.Type = (TimeOffRequestType)timeOffRequestRequestModel.TimeOffRequestType;
             timeOffRequest.StartDate = timeOffRequestRequestModel.StartDate;
             timeOffRequest.EndDate = timeOffRequestRequestModel.EndDate;
+          await _timeOffRequestService.UpdateTimeOffRequest(timeOffRequestId, timeOffRequest.Type);
             return Ok(timeOffRequest);
         }
 
-        [HttpDelete("{id}")]
-        public ActionResult DeleteTimeOffRequest(Guid id)
+        [HttpDelete("{timeOffRequestId}")]
+        public ActionResult DeleteTimeOffRequest(Guid timeOffRequestId)
         {
-            if (!(id == Guid.Empty))
+            if (!(Guid.Empty == timeOffRequestId))
             {
-                _timeOffRequestService.DeleteTimeOffRequest(id);
+                _timeOffRequestService.DeleteTimeOffRequest(timeOffRequestId);
                 return Ok();
             }
             return BadRequest();
-        }
-        [HttpGet("{userId}/requests")]
-        public ActionResult<List<TimeOffRequestResponseModel>> GetMyRequests()
-        {
-            //get currentUser
-            string currentUser = "a";
-            List<TimeOffRequest> myRequests = _timeOffRequestService.AllRequestsFromUser(currentUser);
-            var myRequestsModel = _mapper.Map<TimeOffRequestResponseModel>(myRequests);
-            return Ok(myRequestsModel);
         }
 
     }
