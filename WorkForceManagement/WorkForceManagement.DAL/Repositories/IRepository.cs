@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using WorkForceManagement.DAL.Entities;
 
@@ -7,18 +8,17 @@ namespace WorkForceManagement.DAL.Repositories
 {
     public interface IRepository<T> where T : Base
     {
-        T Get(Func<T, bool> predicate);
+        Task<T> Get(Expression<Func<T, bool>> predicate);
 
-        T Get(Guid id);
+        Task<T> Get(Guid id);
 
-        List<T> All();
+        Task<List<T>> All();
 
         List<T> Find(Func<T, bool> predicate);
 
-        void CreateOrUpdate(T entity);
+        Task CreateOrUpdate(T entity);
 
-        public T Remove(T entity);
-
+        Task<T> Remove(T entity);
         Task SaveChanges();
 
     }

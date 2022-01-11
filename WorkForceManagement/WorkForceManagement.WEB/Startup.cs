@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -36,6 +37,33 @@ namespace WorkForceManagement.WEB
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WorkForceManagement.WEB", Version = "v1" });
+                // Adds the authorize button in swagger UI 
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey
+                });
+
+                // Uses the token from the authorize input and sends it as a header
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement()
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                        Reference = new OpenApiReference
+                            {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                            },
+                            Scheme = "oauth2",
+                            Name = "Bearer",
+                            In = ParameterLocation.Header,
+                        },
+                        new List<string>()
+                    }
+                });
             });
 
             // EF
@@ -52,15 +80,46 @@ namespace WorkForceManagement.WEB
                     .AddRoles<IdentityRole>()
                     .AddEntityFrameworkStores<DatabaseContext>();
 
+            // DAL
+            services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
+
             // Injecting automapper
             services.AddAutoMapper(typeof(Startup));
 
             // Custom services
-            services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
-
             services.AddTransient<IAuthUserManager, AuthUserManager>();
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<ITeamService, TeamService>();
+
+            // IdentityServer
+            var builder = services.AddIdentityServer((options) =>
+            {
+                options.EmitStaticAudienceClaim = true;
+            })
+                                   .AddInMemoryApiScopes(IdentityConfig.ApiScopes)
+                                   .AddInMemoryClients(IdentityConfig.Clients);
+
+            builder.AddDeveloperSigningCredential();
+            builder.AddResourceOwnerValidator<PasswordValidator>();
+
+            // Authentication
+            // Adds the asp.net auth services
+            services
+                .AddAuthorization()
+                .AddAuthentication(options =>
+                {
+                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+
+                // Adds the JWT bearer token services that will authenticate each request based on the token in the Authorize header
+                // and configures them to validate the token with the options
+                .AddJwtBearer(options =>
+                {
+                    options.Authority = "https://localhost:5001";
+                    options.Audience = "https://localhost:5001/resources";
+                });
         }
 
 
@@ -68,6 +127,9 @@ namespace WorkForceManagement.WEB
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             DatabaseSeeder.Seed(app.ApplicationServices);
+
+            //Adds the Identityserver Middleware that will handle 
+            app.UseIdentityServer();
 
             if (env.IsDevelopment())
             {

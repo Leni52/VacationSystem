@@ -85,5 +85,10 @@ namespace WorkForceManagement.BLL.Services
         {
             await UpdateAsync(user);
         }
+
+        public async Task<User> FindByName(string userName)
+        {
+            return await FindByNameAsync(userName);
+        }
     }
 }

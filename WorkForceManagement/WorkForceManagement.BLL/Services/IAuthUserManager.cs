@@ -19,6 +19,7 @@ namespace WorkForceManagement.BLL.Services
         Task DeleteUser(User user);
         Task<User> FindDifferentUserWithSameUsername(Guid userId, string username);
         Task EditUser(User user);
+        Task<User> FindByName(string userName);
     }
 
 }
