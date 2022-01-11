@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -30,23 +28,17 @@ namespace WorkForceManagement.WEB.Middleware
 
                 switch (error)
                 {
-
                     case ItemDoesNotExistException e:
-                        // not found error
                         response.StatusCode = (int)HttpStatusCode.NotFound;
                         break;
-                    case ItemAlreadyExistsException e:
-                        // already exists error
+                    case ItemAlreadyExistsException e:                       
                         response.StatusCode = (int)HttpStatusCode.Conflict;
                         break;
-                    case InvalidIdException e:
-                        // invalid id
+                    case InvalidIdException e:                       
                         response.StatusCode = (int)HttpStatusCode.BadRequest;
-                        break;
+                       break;
 
-
-                    default:
-                        // unhandled error
+                    default:                       
                         response.StatusCode = (int)HttpStatusCode.InternalServerError;
                         break;
                 }
