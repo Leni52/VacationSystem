@@ -58,7 +58,6 @@ namespace WorkForceManagement.BLL.Services
 
             Team foundTeam = await GetTeamWithId(teamId);
 
-
             foundTeam.ChangeDate = DateTime.Now;
             foundTeam.Name = updatedTeam.Name;
             foundTeam.Description = updatedTeam.Description;
@@ -73,22 +72,22 @@ namespace WorkForceManagement.BLL.Services
 
             _teamRepository.Remove(teamToDelete);
         }
-        public async Task UpdateTeamLeader(Guid teamId, User newTeamLeader)
+        public async Task UpdateTeamLeader(Guid teamId, User user)
         {
             Team foundTeam = await GetTeamWithId(teamId);
 
             //foundTeam.UpdaterId = currentUser; // TODO
 
-            foundTeam.TeamLeader = newTeamLeader;
+            foundTeam.TeamLeader = user;
 
             _teamRepository.CreateOrUpdate(foundTeam);
         }
 
-        public async Task AddUserToTeam(Guid teamId, User userToAdd)
+        public async Task AddUserToTeam(Guid teamId, User user)
         {
             Team foundTeam = await GetTeamWithId(teamId);
 
-            foundTeam.Members.Add(userToAdd);
+            foundTeam.Members.Add(user);
 
             await _teamRepository.SaveChanges();
         }
@@ -99,14 +98,14 @@ namespace WorkForceManagement.BLL.Services
             return foundTeam.Members;
         }
 
-        public async Task RemoveUserFromTeam(Guid teamId, User userToDelete)
+        public async Task RemoveUserFromTeam(Guid teamId, User user)
         {
             Team foundTeam = await GetTeamWithId(teamId);
 
-            if (foundTeam.Members.Any(user => user.Id == userToDelete.Id) == false) // the user to remove isnt part of the team
-                throw new KeyNotFoundException($" User with id:{userToDelete.Id} isnt part of this team!");
+            if (foundTeam.Members.Any(tempUser => tempUser.Id == user.Id) == false) // the user to remove isnt part of the team
+                throw new KeyNotFoundException($" User with id:{user.Id} isnt part of this team!");
 
-            foundTeam.Members.Remove(userToDelete);
+            foundTeam.Members.Remove(user);
 
             await _teamRepository.SaveChanges();
         }

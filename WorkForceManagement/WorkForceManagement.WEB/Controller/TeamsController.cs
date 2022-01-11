@@ -41,7 +41,7 @@ namespace WorkForceManagement.WEB.Controller
 
             await _teamService.Create(teamToAdd);
 
-            return model;
+            return Ok(model);
         }
 
         [HttpGet("{teamId}")]
