@@ -20,89 +20,94 @@ namespace WorkForceManagement.WEB.Controller
         private readonly IMapper _mapper;
 
         public TeamsController(
-            IMapper _mapper,
-            ITeamService _teamService,
-            IUserService _userService) : base()
+            IMapper mapper,
+            ITeamService teamService,
+            IUserService userService) : base()
         {
-            this._mapper = _mapper;
-            this._teamService = _teamService;
-            this._userService = _userService;
+            _mapper = mapper;
+            _teamService = teamService;
+            _userService = userService;
         }
 
-        [HttpPost("CreateTeam")]
+        [HttpPost]
         public async Task<ActionResult<TeamRequestDTO>> Post(TeamRequestDTO model)
         {
             Team teamToAdd = new Team();
-            User teamLeader = await _userService.GetUserWithIdAsync(model.TeamLeaderId);
+            User teamLeader = await _userService.GetUserWithIdAsync(model.TeamLeaderId.ToString());
 
             _mapper.Map(model, teamToAdd);
             teamToAdd.TeamLeader = teamLeader;
 
-            await _teamService.CreateAsync(teamToAdd);
+            await _teamService.Create(teamToAdd);
 
             return model;
         }
-        [HttpGet("GetTeamById/{teamId}")]
-        public async Task<ActionResult<TeamResponseDTO>> GetTeamById(string teamId)
+        [HttpGet("{teamId}")]
+        public async Task<ActionResult<TeamResponseDTO>> GetTeamById(Guid teamId)
         {
-            Team team = await _teamService.GetTeamWithIdAsync(teamId);
+            Team team = await _teamService.GetTeamWithId(teamId);
 
             var model = _mapper.Map<TeamResponseDTO>(team);
 
             return model;
         }
 
-        [HttpGet("GetAllTeams")]
+        [HttpGet]
         public async Task<ActionResult<List<TeamResponseDTO>>> GetAllTeams()
         {
-            List<Team> teams = await _teamService.GetAllTeamsAsync();
+            List<Team> teams = await _teamService.GetAllTeams();
+            
+
             var models = _mapper.Map<List<TeamResponseDTO>>(teams);
 
 
             return models;
         }
 
-        [HttpPatch("UpdateTeam/{teamId}")]
-        public async Task<ActionResult> UpdateTeam(string teamId, TeamRequestDTO model)
+        [HttpPatch("{teamId}")]
+        public async Task<ActionResult> UpdateTeam(Guid teamId, TeamRequestDTO model)
         {
             Team updatedTeam = new Team();
-            _mapper.Map(model, updatedTeam);
+            User teamLeader = await _userService.GetUserWithIdAsync(model.TeamLeaderId.ToString());
 
-            await _teamService.UpdateTeamAsync(updatedTeam, teamId);
+            _mapper.Map(model, updatedTeam);
+            updatedTeam.TeamLeader = teamLeader;
+
+            await _teamService.UpdateTeam(updatedTeam, teamId);
 
             return Ok();
         }
 
-        [HttpDelete("DeleteTeam/{teamId}")]
-        public async Task<IActionResult> DeleteTeam(string teamId)
+        [HttpDelete("{teamId}")]
+        public async Task<IActionResult> DeleteTeam(Guid teamId)
         {
-            await _teamService.DeleteTeamAsync(teamId);
+            await _teamService.DeleteTeam(teamId);
 
             return Ok();
         }
 
         [HttpPatch("UpdateTeamLeader/{teamId}&{newLeaderId}")]
-        public async Task<IActionResult> UpdateTeamLeader(string teamId, string newLeaderId)
+        public async Task<IActionResult> UpdateTeamLeader(Guid teamId, Guid newLeaderId)
         {
-            User newLeader = await _userService.GetUserWithIdAsync(newLeaderId);
+            User newLeader = await _userService.GetUserWithIdAsync(newLeaderId.ToString()); // TODO update this when fix comes
 
-            await _teamService.UpdateTeamLeaderAsync(teamId, newLeader);
+            await _teamService.UpdateTeamLeader(teamId, newLeader);
 
             return Ok();
         }
 
         [HttpPost("AddUserToTeam/{teamId}&{userId}")]
-        public async Task<IActionResult> AddUserToTeam(string teamId, string userId)
+        public async Task<IActionResult> AddUserToTeam(Guid teamId, Guid userId)
         {
-            User userToAdd = await _userService.GetUserWithIdAsync(userId);
+            User userToAdd = await _userService.GetUserWithIdAsync(userId.ToString());
 
-            await _teamService.AddUserToTeamAsync(teamId, userToAdd);
+            await _teamService.AddUserToTeam(teamId, userToAdd);
 
             return Ok();
         }
 
         [HttpGet("GetTeamMembers/{teamId}")]
-        public async Task<ActionResult<List<UserResponseModel>>> GetTeamMembers(string teamId)
+        public async Task<ActionResult<List<UserResponseModel>>> GetTeamMembers(Guid teamId)
         {
             List<User> teamMembers = await _teamService.GetAllTeamMembers(teamId);
 
@@ -112,9 +117,9 @@ namespace WorkForceManagement.WEB.Controller
         }
 
         [HttpDelete("RemoveUserFromTeam/{teamId}&{userId}")]
-        public  async Task<IActionResult> RemoveUserFromTeam(string teamId, string userId)
+        public  async Task<IActionResult> RemoveUserFromTeam(Guid teamId, Guid userId)
         {
-            User userToDelete = await _userService.GetUserWithIdAsync(userId);
+            User userToDelete = await _userService.GetUserWithIdAsync(userId.ToString());
 
             await _teamService.RemoveUserFromTeam(teamId, userToDelete);
 

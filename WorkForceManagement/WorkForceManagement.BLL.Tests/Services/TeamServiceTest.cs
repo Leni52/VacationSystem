@@ -26,7 +26,7 @@ namespace WorkForceManagement.BLL.Tests.Services
             Team teamToAdd = new Team();
 
             //act
-            var result = await Record.ExceptionAsync(() => sut.CreateAsync(teamToAdd));
+            var result = await Record.ExceptionAsync(() => sut.Create(teamToAdd));
 
             Assert.Null(result);
             //asert

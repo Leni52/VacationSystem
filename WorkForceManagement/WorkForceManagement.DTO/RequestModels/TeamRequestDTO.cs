@@ -14,9 +14,7 @@ namespace WorkForceManagement.DTO.RequestModels
         [MaxLength(50)]
         public string Name { get; set; }
         [Required]
-        [MinLength(3)]
-        [MaxLength(100)]
-        public string TeamLeaderId { get; set; }
+        public Guid TeamLeaderId { get; set; }
         [Required]
         [MinLength(3)]
         [MaxLength(100)]

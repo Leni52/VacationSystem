@@ -15,16 +15,16 @@ namespace WorkForceManagement.BLL.Services
 
         public TeamService(IRepository<Team> teamRepository)
         {
-            this._teamRepository = teamRepository;
+            _teamRepository = teamRepository;
         }
 
-        public async Task CreateAsync(Team teamToAdd)
+        public async Task Create(Team teamToAdd)
         {
             Team teamWithSameName = _teamRepository.Get(team => team.Name == teamToAdd.Name);
             if (teamWithSameName != null)
                 throw new TeamWithSameNameExistsException($"Team with the name:{teamToAdd.Name} already exists!");
 
-            
+
             teamToAdd.CreationDate = DateTime.Now;
             teamToAdd.ChangeDate = DateTime.Now;
             teamToAdd.CreatorId = Guid.NewGuid().ToString("D"); // TODO Change to currentUser
@@ -32,23 +32,31 @@ namespace WorkForceManagement.BLL.Services
 
             _teamRepository.CreateOrUpdate(teamToAdd);
         }
-        public async Task<Team> GetTeamWithIdAsync(string teamId)
+        public async Task<Team> GetTeamWithId(Guid teamId)
         {
-            Team foundTeam = _teamRepository.Get(Guid.Parse(teamId));
+            Team foundTeam = _teamRepository.Get(teamId);
             if (foundTeam == null)
                 throw new KeyNotFoundException($"Team with id:{teamId} does not exist!");
 
             return foundTeam;
         }
 
-        public async Task<List<Team>> GetAllTeamsAsync()
+        public async Task<List<Team>> GetAllTeams()
         {
             return _teamRepository.All();
         }
 
-        public async Task UpdateTeamAsync(Team updatedTeam, string teamId)
+        public async Task UpdateTeam(Team updatedTeam, Guid teamId)
         {
-            Team foundTeam = await GetTeamWithIdAsync(teamId);
+            Team teamWithSameName = _teamRepository.Get(
+                team => 
+                team.Name == updatedTeam.Name &&
+                team.Id != teamId); // find different team with same name
+
+            if (teamWithSameName != null)
+                throw new TeamWithSameNameExistsException($"Team with the name:{updatedTeam.Name} already exists!");
+
+            Team foundTeam = await GetTeamWithId(teamId);
 
 
             foundTeam.ChangeDate = DateTime.Now;
@@ -59,15 +67,15 @@ namespace WorkForceManagement.BLL.Services
 
             _teamRepository.CreateOrUpdate(foundTeam);
         }
-        public async Task DeleteTeamAsync(string teamToDeleteId)
+        public async Task DeleteTeam(Guid teamToDeleteId)
         {
-            Team teamToDelete = await GetTeamWithIdAsync(teamToDeleteId);
+            Team teamToDelete = await GetTeamWithId(teamToDeleteId);
 
             _teamRepository.Remove(teamToDelete);
         }
-        public async Task UpdateTeamLeaderAsync(string teamId, User newTeamLeader)
+        public async Task UpdateTeamLeader(Guid teamId, User newTeamLeader)
         {
-            Team foundTeam = await GetTeamWithIdAsync(teamId);
+            Team foundTeam = await GetTeamWithId(teamId);
 
             //foundTeam.UpdaterId = currentUser; // TODO
 
@@ -76,24 +84,24 @@ namespace WorkForceManagement.BLL.Services
             _teamRepository.CreateOrUpdate(foundTeam);
         }
 
-        public async Task AddUserToTeamAsync(string teamId, User userToAdd)
+        public async Task AddUserToTeam(Guid teamId, User userToAdd)
         {
-            Team foundTeam = await GetTeamWithIdAsync(teamId);
+            Team foundTeam = await GetTeamWithId(teamId);
 
             foundTeam.Members.Add(userToAdd);
 
             _teamRepository.SaveChanges();
         }
-        public async Task<List<User>> GetAllTeamMembers(string teamId)
+        public async Task<List<User>> GetAllTeamMembers(Guid teamId)
         {
-            Team foundTeam = await GetTeamWithIdAsync(teamId);
+            Team foundTeam = await GetTeamWithId(teamId);
 
             return foundTeam.Members;
         }
 
-        public async Task RemoveUserFromTeam(string teamId, User userToDelete)
+        public async Task RemoveUserFromTeam(Guid teamId, User userToDelete)
         {
-            Team foundTeam = await GetTeamWithIdAsync(teamId);
+            Team foundTeam = await GetTeamWithId(teamId);
 
             if (foundTeam.Members.Any(user => user.Id == userToDelete.Id) == false) // the user to remove isnt part of the team
                 throw new KeyNotFoundException($" User with id:{userToDelete.Id} isnt part of this team!");
