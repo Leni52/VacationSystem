@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using WorkForceManagement.DAL.Entities;
-using WorkForceManagement.DTO.RequestModels;
+using WorkForceManagement.DTO.RequestDTO;
 
 namespace WorkForceManagement.WEB.Profiles
 {
@@ -8,7 +8,7 @@ namespace WorkForceManagement.WEB.Profiles
     {
         public UserRequestProfile()
         {
-            this.CreateMap<UserRequestModel, User>();
+            this.CreateMap<UserRequestDTO, User>();
         }
     }
 }

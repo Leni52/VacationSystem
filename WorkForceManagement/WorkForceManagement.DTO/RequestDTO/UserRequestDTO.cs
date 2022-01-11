@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace WorkForceManagement.DTO.RequestModels
+namespace WorkForceManagement.DTO.RequestDTO
 {
-    public class UserRequestModel
+    public class UserRequestDTO
     {
         [Required]
         [MinLength(3)]

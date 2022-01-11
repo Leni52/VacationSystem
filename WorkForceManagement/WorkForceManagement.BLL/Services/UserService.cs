@@ -16,7 +16,7 @@ namespace WorkForceManagement.BLL.Services
             _userManager = userManager;
         }
 
-        public async Task AddAsync(User userToAdd, string password, bool isAdmin)
+        public async Task Add(User userToAdd, string password, bool isAdmin)
         {
             User foundUser = await _userManager.FindDifferentUserWithSameUsername(userToAdd.Id, userToAdd.UserName);
             if (foundUser != null)
@@ -24,7 +24,7 @@ namespace WorkForceManagement.BLL.Services
                 return;
             }
 
-            await _userManager.CreateUserAsync(userToAdd, password);
+            await _userManager.CreateUser(userToAdd, password);
 
             if (isAdmin)
             {
@@ -32,17 +32,17 @@ namespace WorkForceManagement.BLL.Services
             }
         }
 
-        public async Task DeleteAsync(string userId)
+        public async Task Delete(Guid userId)
         {
-            User userToDelete = await _userManager.FindByIdAsync(userId);
+            User userToDelete = await _userManager.FindById(userId);
 
             if (userToDelete == null)
                 throw new KeyNotFoundException($"User with id: {userId} could not be found! ");
 
-            await _userManager.DeleteUserAsync(userToDelete);
+            await _userManager.DeleteUser(userToDelete);
         }
 
-        public async Task EditAsync(string userId, User editedUser, string editedUserPassword, bool isAdmin)
+        public async Task Edit(Guid userId, User editedUser, string editedUserPassword, bool isAdmin)
         {
             PasswordHasher<User> hasher = new PasswordHasher<User>();
 
@@ -51,7 +51,7 @@ namespace WorkForceManagement.BLL.Services
                 return;
             }
 
-            User userToEdit = await _userManager.FindByIdAsync(userId);
+            User userToEdit = await _userManager.FindById(userId);
 
             if (userToEdit == null)
                 throw new KeyNotFoundException($"User with Id:{userId} was not found");
@@ -68,12 +68,12 @@ namespace WorkForceManagement.BLL.Services
                 await _userManager.RemoveRoleFromUser(userToEdit, "Admin");
             }
 
-            await _userManager.EditUserAsync(userToEdit);
+            await _userManager.EditUser(userToEdit);
         }
 
-        public async Task<List<User>> GetAllUsersAsync()
+        public async Task<List<User>> GetAllUsers()
         {
-            return await _userManager.GetAllAsync();
+            return await _userManager.GetAll();
         }
 
         public Task<User> GetCurrentUser(ClaimsPrincipal principal)
@@ -86,9 +86,9 @@ namespace WorkForceManagement.BLL.Services
             throw new NotImplementedException();
         }
 
-        public async Task<User> GetUserWithIdAsync(string id)
+        public async Task<User> GetUserById(Guid id)
         {
-            User user = await _userManager.FindByIdAsync(id);
+            User user = await _userManager.FindById(id);
             if (user == null)
                 throw new KeyNotFoundException($"User with id: {id} does not exist!");
             return user;
@@ -96,7 +96,7 @@ namespace WorkForceManagement.BLL.Services
 
         public async Task<bool> IsUserAdmin(User currentUser)
         {
-            return await _userManager.IsUserInRole(currentUser.Id , "Admin");
+            return await _userManager.IsUserInRole(Guid.Parse(currentUser.Id) , "Admin");
         }
     }
 }
