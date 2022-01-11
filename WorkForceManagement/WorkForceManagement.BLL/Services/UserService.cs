@@ -85,7 +85,7 @@ namespace WorkForceManagement.BLL.Services
             throw new NotImplementedException();
         }
 
-        public async Task<User> GetUserWithId(Guid id)
+        public async Task<User> GetUserById(Guid id)
         {
             User user = await _userManager.FindById(id);
             if (user == null)

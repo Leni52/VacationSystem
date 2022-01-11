@@ -24,7 +24,7 @@ namespace WorkForceManagement.WEB.Controller
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateUserAsync(UserRequestDTO model)
+        public async Task<IActionResult> CreateUser(UserRequestDTO model)
         {
             if (!ModelState.IsValid)
             {
@@ -40,7 +40,7 @@ namespace WorkForceManagement.WEB.Controller
         }
 
         [HttpDelete("{userId}")]
-        public async Task<IActionResult> DeleteUserAsync(Guid userId)
+        public async Task<IActionResult> DeleteUser(Guid userId)
         {
             await _userService.Delete(userId);
 
@@ -48,7 +48,7 @@ namespace WorkForceManagement.WEB.Controller
         }
 
         [HttpPatch("{userId}")]
-        public async Task<IActionResult> UpdateUserAsync(Guid userId, UserRequestDTO model)
+        public async Task<IActionResult> UpdateUser(Guid userId, UserRequestDTO model)
         {
             if (!ModelState.IsValid)
             {
@@ -64,22 +64,22 @@ namespace WorkForceManagement.WEB.Controller
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<UserResponseDTO>>> GetAllUsersAsync()
+        public async Task<ActionResult<List<UserResponseDTO>>> GetAllUsers()
         {
             var users = await _userService.GetAllUsers();
 
-            var models = _mapper.Map<List<UserResponseDTO>>(users);
+            var results = _mapper.Map<List<UserResponseDTO>>(users);
 
-            return Ok(models);
+            return Ok(results);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<UserResponseDTO>> GetUserByIdAsync(Guid id)
+        public async Task<ActionResult<UserResponseDTO>> GetUserById(Guid id)
         {
-            var user = await _userService.GetUserWithId(id);
-            var model = _mapper.Map<UserResponseDTO>(user);
+            var user = await _userService.GetUserById(id);
+            var result = _mapper.Map<UserResponseDTO>(user);
 
-            return Ok(model);
+            return Ok(result);
         }
     }
 }

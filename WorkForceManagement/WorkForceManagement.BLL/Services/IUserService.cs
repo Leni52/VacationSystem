@@ -13,7 +13,7 @@ namespace WorkForceManagement.BLL.Services
         Task Edit(Guid userId, User editedUser, string editedUserPassword, bool isAdmin);
         Task<List<User>> GetAllUsers();
         List<Team> GetUserTeams(User currentUser);
-        Task<User> GetUserWithId(Guid id);
+        Task<User> GetUserById(Guid id);
         Task<User> GetCurrentUser(ClaimsPrincipal principal);
         Task<bool> IsUserAdmin(User currentUser);
     }
