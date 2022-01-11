@@ -8,19 +8,17 @@ namespace WorkForceManagement.BLL.Services
 {
     public interface IAuthUserManager
     {
-        Task<User> GetUserAsync(ClaimsPrincipal claimsPrincipal);
         Task<bool> IsUserInRole(Guid userId, string roleId);
         Task AddRoleToUser(User user, string role);
         Task RemoveRoleFromUser(User user, string role);
-        Task<User> FindByNameAsync(string name);
-        Task<User> FindByIdAsync(Guid id);
-        Task<List<User>> GetAllAsync();
-        Task CreateUserAsync(User user, string password);
-        Task<List<string>> GetUserRolesAsync(User user);
+        Task<User> FindById(Guid id);
+        Task<List<User>> GetAll();
+        Task CreateUser(User user, string password);
+        Task<List<string>> GetUserRoles(User user);
         Task<bool> ValidateUserCredentials(string userName, string password);
-        Task DeleteUserAsync(User user);
+        Task DeleteUser(User user);
         Task<User> FindDifferentUserWithSameUsername(Guid userId, string username);
-        Task EditUserAsync(User user);
+        Task EditUser(User user);
     }
 
 }

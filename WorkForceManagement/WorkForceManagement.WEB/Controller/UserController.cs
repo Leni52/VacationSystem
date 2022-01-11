@@ -23,7 +23,7 @@ namespace WorkForceManagement.WEB.Controller
             _mapper = mapper;
         }
 
-        [HttpPost("Create")]
+        [HttpPost]
         public async Task<IActionResult> CreateUserAsync(UserRequestDTO model)
         {
             if (!ModelState.IsValid)
@@ -34,7 +34,7 @@ namespace WorkForceManagement.WEB.Controller
             var user = new User();
             _mapper.Map(model, user);
 
-            await _userService.AddAsync(user, model.Password, model.IsAdmin);
+            await _userService.Add(user, model.Password, model.IsAdmin);
 
             return Ok(model);
         }
@@ -42,7 +42,7 @@ namespace WorkForceManagement.WEB.Controller
         [HttpDelete("{userId}")]
         public async Task<IActionResult> DeleteUserAsync(Guid userId)
         {
-            await _userService.DeleteAsync(userId);
+            await _userService.Delete(userId);
 
             return Ok();
         }
@@ -58,15 +58,15 @@ namespace WorkForceManagement.WEB.Controller
             var user = new User();
             _mapper.Map(model, user);
 
-            await _userService.EditAsync(userId, user, model.Password, model.IsAdmin);
+            await _userService.Edit(userId, user, model.Password, model.IsAdmin);
 
             return Ok();
         }
 
-        [HttpGet("All")]
+        [HttpGet]
         public async Task<ActionResult<List<UserResponseDTO>>> GetAllUsersAsync()
         {
-            var users = await _userService.GetAllUsersAsync();
+            var users = await _userService.GetAllUsers();
 
             var models = _mapper.Map<List<UserResponseDTO>>(users);
 
@@ -76,7 +76,7 @@ namespace WorkForceManagement.WEB.Controller
         [HttpGet("{id}")]
         public async Task<ActionResult<UserResponseDTO>> GetUserByIdAsync(Guid id)
         {
-            var user = await _userService.GetUserWithIdAsync(id);
+            var user = await _userService.GetUserWithId(id);
             var model = _mapper.Map<UserResponseDTO>(user);
 
             return Ok(model);
