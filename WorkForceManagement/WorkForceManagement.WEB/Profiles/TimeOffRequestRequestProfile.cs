@@ -12,7 +12,7 @@ namespace WorkForceManagement.WEB.Profiles
     {
         public TimeOffRequestRequestProfile()
         {
-            this.CreateMap<TimeOffRequestRequestModel, TimeOffRequest>();
+            this.CreateMap<TimeOffRequestRequestDTO, TimeOffRequest>();
         }
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WorkForceManagement.DTO.Responses
 {
-   public class TimeOffRequestResponseModel
+   public class TimeOffRequestResponseDTO
     {        
         public string Status { get; set; }
         public string Type { get; set; }

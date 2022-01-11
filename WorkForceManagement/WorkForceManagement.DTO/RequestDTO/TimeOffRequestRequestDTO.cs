@@ -4,7 +4,7 @@ using WorkForceManagement.DAL.Entities;
 
 namespace WorkForceManagement.DTO.Requests
 {
-    public class TimeOffRequestRequestModel
+    public class TimeOffRequestRequestDTO
     {
         [Required(ErrorMessage = "Please, add a description:")]
         [MinLength(10, ErrorMessage = "The description is too short.")]

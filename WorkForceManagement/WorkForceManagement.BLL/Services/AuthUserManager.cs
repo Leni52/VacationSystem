@@ -20,25 +20,30 @@ namespace WorkForceManagement.BLL.Services
             errors, services, logger)
         { }
 
-        public async Task<List<User>> GetAllAsync()
+        public async Task<List<User>> GetAll()
         {
             return await Users.ToListAsync();
         }
 
-        public async Task<List<string>> GetUserRolesAsync(User user)
+        public async Task<List<string>> GetUserRoles(User user)
         {
             return (await GetRolesAsync(user)).ToList();
         }
 
-        public async Task CreateUserAsync(User user, string password)
+        public async Task CreateUser(User user, string password)
         {
             await CreateAsync(user, password);
         }
 
-        public async Task<bool> IsUserInRole(string userId, string roleName)
+        public async Task<bool> IsUserInRole(Guid userId, string roleName)
         {
-            User user = await FindByIdAsync(userId);
+            User user = await FindById(userId);
             return await IsInRoleAsync(user, roleName);
+        }
+
+        public async Task<User> FindById(Guid id)
+        {
+            return await FindByIdAsync(id.ToString());
         }
 
         public async Task AddRoleToUser(User user, string role)
@@ -62,21 +67,21 @@ namespace WorkForceManagement.BLL.Services
             return false;
         }
 
-        public async Task DeleteUserAsync(User user)
+        public async Task DeleteUser(User user)
         {
             await DeleteAsync(user);
         }
 
-        public async Task<User> FindDifferentUserWithSameUsername(string userId, string username)
+        public async Task<User> FindDifferentUserWithSameUsername(Guid userId, string username)
         {
-            List<User> users = await GetAllAsync();
+            List<User> users = await GetAll();
 
             return users.FirstOrDefault(user =>
                 user.UserName == username &&
-                user.Id != userId);
+                user.Id != userId.ToString());
         }
 
-        public async Task EditUserAsync(User user)
+        public async Task EditUser(User user)
         {
             await UpdateAsync(user);
         }

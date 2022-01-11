@@ -24,31 +24,31 @@ namespace WorkForceManagement.WEB.Controller
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<TimeOffRequestResponseModel>>> GetAllTimeOffRequests()
+        public async Task<ActionResult<List<TimeOffRequestResponseDTO>>> GetAllTimeOffRequests()
         {
-            List<TimeOffRequestResponseModel> timeOffRequestResponseModel =
-                new List<TimeOffRequestResponseModel>();
+            List<TimeOffRequestResponseDTO> timeOffRequestResponseModel =
+                new List<TimeOffRequestResponseDTO>();
             var requests = await _timeOffRequestService.GetAllRequests();
 
-            timeOffRequestResponseModel = _mapper.Map<List<TimeOffRequestResponseModel>>(requests);
+            timeOffRequestResponseModel = _mapper.Map<List<TimeOffRequestResponseDTO>>(requests);
             return Ok(requests);
         }
 
         [HttpGet("{timeOffRequestId}")]
-        public async Task<ActionResult<TimeOffRequestResponseModel>> GetTimeOffRequest(Guid timeOffRequestId)
+        public async Task<ActionResult<TimeOffRequestResponseDTO>> GetTimeOffRequest(Guid timeOffRequestId)
         {
             TimeOffRequest requestFromDB = await _timeOffRequestService.GetTimeOffRequest(timeOffRequestId);
             if (requestFromDB == null)
             {
                 return NotFound("TimeOff Request doesn't exist.");
             }
-            var requestModel = _mapper.Map<TimeOffRequestResponseModel>(requestFromDB);
+            var requestModel = _mapper.Map<TimeOffRequestResponseDTO>(requestFromDB);
             return Ok(requestModel);
         }
 
 
         [HttpPost]
-        public ActionResult CreateTimeOffRequest(TimeOffRequestRequestModel timeOffRequestRequestModel)
+        public ActionResult CreateTimeOffRequest(TimeOffRequestRequestDTO timeOffRequestRequestModel)
         {
             if (!ModelState.IsValid)
             {
@@ -61,7 +61,7 @@ namespace WorkForceManagement.WEB.Controller
         }
 
         [HttpPut("{timeOffRequestId}")]
-        public async Task<ActionResult> UpdateTimeOffRequest(Guid timeOffRequestId, TimeOffRequestRequestModel timeOffRequestRequestModel)
+        public async Task<ActionResult> UpdateTimeOffRequest(Guid timeOffRequestId, TimeOffRequestRequestDTO timeOffRequestRequestModel)
         {
             TimeOffRequest timeOffRequest = await _timeOffRequestService.GetTimeOffRequest(timeOffRequestId);
             if (!ModelState.IsValid)
