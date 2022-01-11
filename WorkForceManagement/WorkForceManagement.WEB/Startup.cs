@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using WorkForceManagement.BLL.Services;
 using WorkForceManagement.DAL.Data;
 using WorkForceManagement.DAL.Entities;
 
@@ -49,6 +50,13 @@ namespace WorkForceManagement.WEB
             })
                     .AddRoles<IdentityRole>()
                     .AddEntityFrameworkStores<DatabaseContext>();
+
+            // Injecting automapper
+            services.AddAutoMapper(typeof(Startup));
+
+            // Custom services
+            services.AddTransient<IAuthUserManager, AuthUserManager>();
+            services.AddTransient<IUserService, UserService>();
         }
 
 
