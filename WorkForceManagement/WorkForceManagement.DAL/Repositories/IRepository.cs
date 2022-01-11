@@ -19,6 +19,7 @@ namespace WorkForceManagement.DAL.Repositories
         Task CreateOrUpdate(T entity);
 
         Task<T> Remove(T entity);
+        Task SaveChanges();
 
     }
 }
