@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using WorkForceManagement.BLL.Services;
 using WorkForceManagement.DAL.Entities;
 using WorkForceManagement.DTO.RequestModels;
 using WorkForceManagement.DTO.ResponseDTO;
-using WorkForceManagement.DTO.ResponseModels;
+
 
 namespace WorkForceManagement.WEB.Controller
 {
@@ -30,6 +31,7 @@ namespace WorkForceManagement.WEB.Controller
             _userService = userService;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<TeamRequestDTO>> CreateTeam(TeamRequestDTO model)
         {
@@ -64,6 +66,7 @@ namespace WorkForceManagement.WEB.Controller
             return Ok(result);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPatch("{teamId}")]
         public async Task<ActionResult> UpdateTeam(Guid teamId, TeamRequestDTO model)
         {
@@ -78,6 +81,7 @@ namespace WorkForceManagement.WEB.Controller
             return Ok();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{teamId}")]
         public async Task<IActionResult> DeleteTeam(Guid teamId)
         {
@@ -86,6 +90,7 @@ namespace WorkForceManagement.WEB.Controller
             return Ok();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPatch("UpdateTeamLeader/{teamId}&{newLeaderId}")]
         public async Task<IActionResult> UpdateTeamLeader(Guid teamId, Guid newLeaderId)
         {
@@ -96,6 +101,7 @@ namespace WorkForceManagement.WEB.Controller
             return Ok();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("AddUserToTeam/{teamId}&{userId}")]
         public async Task<IActionResult> AddUserToTeam(Guid teamId, Guid userId)
         {
@@ -116,6 +122,7 @@ namespace WorkForceManagement.WEB.Controller
             return Ok(result);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("RemoveUserFromTeam/{teamId}&{userId}")]
         public  async Task<IActionResult> RemoveUserFromTeam(Guid teamId, Guid userId)
         {

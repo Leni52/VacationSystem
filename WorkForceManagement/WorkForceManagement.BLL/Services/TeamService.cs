@@ -20,7 +20,7 @@ namespace WorkForceManagement.BLL.Services
 
         public async Task Create(Team teamToAdd)
         {
-            Team teamWithSameName = _teamRepository.Get(team => team.Name == teamToAdd.Name);
+            Team teamWithSameName = await _teamRepository.Get(team => team.Name == teamToAdd.Name);
             if (teamWithSameName != null)
                 throw new TeamWithSameNameExistsException($"Team with the name:{teamToAdd.Name} already exists!");
 
@@ -30,11 +30,11 @@ namespace WorkForceManagement.BLL.Services
             teamToAdd.CreatorId = Guid.NewGuid().ToString("D"); // TODO Change to currentUser
             teamToAdd.UpdaterId = Guid.NewGuid().ToString("D"); // TODO Change to currentUser
 
-            _teamRepository.CreateOrUpdate(teamToAdd);
+           await _teamRepository.CreateOrUpdate(teamToAdd);
         }
         public async Task<Team> GetTeamWithId(Guid teamId)
         {
-            Team foundTeam = _teamRepository.Get(teamId);
+            Team foundTeam = await _teamRepository.Get(teamId);
             if (foundTeam == null)
                 throw new KeyNotFoundException($"Team with id:{teamId} does not exist!");
 
@@ -43,12 +43,12 @@ namespace WorkForceManagement.BLL.Services
 
         public async Task<List<Team>> GetAllTeams()
         {
-            return _teamRepository.All();
+            return await _teamRepository.All();
         }
 
         public async Task UpdateTeam(Team updatedTeam, Guid teamId)
         {
-            Team teamWithSameName = _teamRepository.Get(
+            Team teamWithSameName = await _teamRepository.Get(
                 team => 
                 team.Name == updatedTeam.Name &&
                 team.Id != teamId); // find different team with same name
@@ -64,13 +64,13 @@ namespace WorkForceManagement.BLL.Services
 
             // foundTeam.UpdaterId = currentUser; //TODO
 
-            _teamRepository.CreateOrUpdate(foundTeam);
+            await _teamRepository.CreateOrUpdate(foundTeam);
         }
         public async Task DeleteTeam(Guid teamId)
         {
             Team teamToDelete = await GetTeamWithId(teamId);
 
-            _teamRepository.Remove(teamToDelete);
+           await _teamRepository.Remove(teamToDelete);
         }
         public async Task UpdateTeamLeader(Guid teamId, User user)
         {
@@ -80,7 +80,7 @@ namespace WorkForceManagement.BLL.Services
 
             foundTeam.TeamLeader = user;
 
-            _teamRepository.CreateOrUpdate(foundTeam);
+           await _teamRepository.CreateOrUpdate(foundTeam);
         }
 
         public async Task AddUserToTeam(Guid teamId, User user)

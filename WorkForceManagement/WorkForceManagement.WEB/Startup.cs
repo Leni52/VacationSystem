@@ -90,6 +90,7 @@ namespace WorkForceManagement.WEB
             // Custom services
             services.AddTransient<IAuthUserManager, AuthUserManager>();
             services.AddTransient<IUserService, UserService>();
+            services.AddTransient<ITeamService, TeamService>();
             services.AddTransient<ITimeOffRequestService, TimeOffRequestService>();
 
             // IdentityServer

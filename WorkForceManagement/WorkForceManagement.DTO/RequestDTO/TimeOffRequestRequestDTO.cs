@@ -1,20 +1,21 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using WorkForceManagement.DAL.Entities;
+using WorkForceManagement.DTO.Constants;
 
 namespace WorkForceManagement.DTO.Requests
 {
     public class TimeOffRequestRequestDTO
     {
-        [Required(ErrorMessage = "Please, add a description:")]
-        [MinLength(10, ErrorMessage = "The description is too short.")]
+        [Required(ErrorMessage = Constants.Constants.ErrorDescription)]
+        [MinLength(10, ErrorMessage = Constants.Constants.ErrorDescriptionMin)]
         [MaxLength(50)]
         public string Description { get; set; }
-        [Required(ErrorMessage = "Please, add the type for your request:")]
+        [Required(ErrorMessage = Constants.Constants.ErrorTimeOffRequestType)]
         public int TimeOffRequestType { get; set; }
-        [Required(ErrorMessage = "Please, add the type for your request:")]
+        [Required(ErrorMessage = Constants.Constants.ErrorStartDate)]
         public DateTime StartDate { get; set; }
-        [Required(ErrorMessage = "Please, add a end date: ")]
+        [Required(ErrorMessage = Constants.Constants.ErrorEndDate)]
         public DateTime EndDate { get; set; }
         //add validation for startdate>enddate
     }
