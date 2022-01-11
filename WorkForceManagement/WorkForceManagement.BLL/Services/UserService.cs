@@ -18,7 +18,8 @@ namespace WorkForceManagement.BLL.Services
 
         public async Task Add(User userToAdd, string password, bool isAdmin)
         {
-            if(await _userManager.FindDifferentUserWithSameUsername(Guid.Parse(userToAdd.Id), userToAdd.UserName) != null)
+            User foundUser = await _userManager.FindDifferentUserWithSameUsername(Guid.Parse(userToAdd.Id), userToAdd.UserName);
+            if (foundUser != null)
             {
                 return;
             }

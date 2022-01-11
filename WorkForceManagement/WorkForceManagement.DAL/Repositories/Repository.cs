@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using WorkForceManagement.DAL.Data;
 using WorkForceManagement.DAL.Entities;
 
@@ -22,7 +23,7 @@ namespace WorkForceManagement.DAL.Repositories
 
         public void CreateOrUpdate(T entity)
         {
-            if (entity.Id == Guid.Empty)
+            if (entity.Id != Guid.Empty)
             {
                 entity.ChangeDate = DateTime.Now;
                 _databaseContext.Set<T>().Update(entity);
@@ -53,6 +54,11 @@ namespace WorkForceManagement.DAL.Repositories
             T removed = _databaseContext.Set<T>().Remove(entity).Entity;
             _databaseContext.SaveChanges();
             return removed;
+        }
+
+        public async Task SaveChanges()
+        {
+            await _databaseContext.SaveChangesAsync();
         }
 
     }
