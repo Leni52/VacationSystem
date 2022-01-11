@@ -8,7 +8,6 @@ namespace WorkForceManagement.DTO.ResponseModels
 {
     public class TeamResponseDTO
     {
-        public Guid Id { get; set; }
         public string Name { get; set; }
         public Guid TeamLeaderId { get; set; }
         public string Description { get; set; }

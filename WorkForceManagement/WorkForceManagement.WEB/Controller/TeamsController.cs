@@ -14,6 +14,7 @@ using WorkForceManagement.DTO.ResponseModels;
 namespace WorkForceManagement.WEB.Controller
 {
     [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
     public class TeamsController : ControllerBase
     {

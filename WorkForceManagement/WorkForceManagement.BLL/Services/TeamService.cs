@@ -30,7 +30,7 @@ namespace WorkForceManagement.BLL.Services
             teamToAdd.CreatorId = Guid.NewGuid().ToString("D"); // TODO Change to currentUser
             teamToAdd.UpdaterId = Guid.NewGuid().ToString("D"); // TODO Change to currentUser
 
-           await _teamRepository.CreateOrUpdate(teamToAdd);
+            await _teamRepository.CreateOrUpdate(teamToAdd);
         }
         public async Task<Team> GetTeamWithId(Guid teamId)
         {
@@ -40,12 +40,10 @@ namespace WorkForceManagement.BLL.Services
 
             return foundTeam;
         }
-
         public async Task<List<Team>> GetAllTeams()
         {
             return await _teamRepository.All();
         }
-
         public async Task UpdateTeam(Team updatedTeam, Guid teamId)
         {
             Team teamWithSameName = await _teamRepository.Get(
@@ -70,19 +68,19 @@ namespace WorkForceManagement.BLL.Services
         {
             Team teamToDelete = await GetTeamWithId(teamId);
 
-           await _teamRepository.Remove(teamToDelete);
+            await _teamRepository.Remove(teamToDelete);
         }
         public async Task UpdateTeamLeader(Guid teamId, User user)
         {
             Team foundTeam = await GetTeamWithId(teamId);
 
+            foundTeam.ChangeDate = DateTime.Now;
             //foundTeam.UpdaterId = currentUser; // TODO
 
             foundTeam.TeamLeader = user;
 
-           await _teamRepository.CreateOrUpdate(foundTeam);
+            await _teamRepository.CreateOrUpdate(foundTeam);
         }
-
         public async Task AddUserToTeam(Guid teamId, User user)
         {
             Team foundTeam = await GetTeamWithId(teamId);
@@ -97,19 +95,16 @@ namespace WorkForceManagement.BLL.Services
 
             return foundTeam.Members;
         }
-
         public async Task RemoveUserFromTeam(Guid teamId, User user)
         {
             Team foundTeam = await GetTeamWithId(teamId);
 
-            if (foundTeam.Members.Any(tempUser => tempUser.Id == user.Id) == false) // the user to remove isnt part of the team
+            if (foundTeam.Members.Any(tempUser => tempUser.Id == user.Id) == false) // User we want to remove, isn't part of the team
                 throw new KeyNotFoundException($" User with id:{user.Id} isnt part of this team!");
 
             foundTeam.Members.Remove(user);
 
             await _teamRepository.SaveChanges();
         }
-
-
     }
 }
