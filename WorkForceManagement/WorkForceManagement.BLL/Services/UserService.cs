@@ -18,7 +18,7 @@ namespace WorkForceManagement.BLL.Services
 
         public async Task AddAsync(User userToAdd, string password, bool isAdmin)
         {
-            if(await _userManager.FindDifferentUserWithSameUsername(userToAdd.Id, userToAdd.UserName) != null)
+            if(await _userManager.FindDifferentUserWithSameUsername(Guid.Parse(userToAdd.Id), userToAdd.UserName) != null)
             {
                 return;
             }
@@ -31,7 +31,7 @@ namespace WorkForceManagement.BLL.Services
             }
         }
 
-        public async Task DeleteAsync(string userId)
+        public async Task DeleteAsync(Guid userId)
         {
             User userToDelete = await _userManager.FindByIdAsync(userId);
 
@@ -41,7 +41,7 @@ namespace WorkForceManagement.BLL.Services
             await _userManager.DeleteUserAsync(userToDelete);
         }
 
-        public async Task EditAsync(string userId, User editedUser, string editedUserPassword, bool isAdmin)
+        public async Task EditAsync(Guid userId, User editedUser, string editedUserPassword, bool isAdmin)
         {
             PasswordHasher<User> hasher = new PasswordHasher<User>();
 
@@ -85,7 +85,7 @@ namespace WorkForceManagement.BLL.Services
             throw new NotImplementedException();
         }
 
-        public async Task<User> GetUserWithIdAsync(string id)
+        public async Task<User> GetUserWithIdAsync(Guid id)
         {
             User user = await _userManager.FindByIdAsync(id);
             if (user == null)
@@ -95,7 +95,7 @@ namespace WorkForceManagement.BLL.Services
 
         public async Task<bool> IsUserAdmin(User currentUser)
         {
-            return await _userManager.IsUserInRole(currentUser.Id , "Admin");
+            return await _userManager.IsUserInRole(Guid.Parse(currentUser.Id) , "Admin");
         }
     }
 }

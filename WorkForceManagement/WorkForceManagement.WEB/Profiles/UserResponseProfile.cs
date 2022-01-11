@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using WorkForceManagement.DAL.Entities;
-using WorkForceManagement.DTO.ResponseModels;
+using WorkForceManagement.DTO.ResponseDTO;
 
 namespace WorkForceManagement.WEB.Profiles
 {
@@ -8,7 +8,7 @@ namespace WorkForceManagement.WEB.Profiles
     {
         public UserResponseProfile()
         {
-            this.CreateMap<User, UserResponseModel>();
+            this.CreateMap<User, UserResponseDTO>();
         }
     }
 }

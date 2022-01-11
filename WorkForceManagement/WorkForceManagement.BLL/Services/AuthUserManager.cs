@@ -35,10 +35,15 @@ namespace WorkForceManagement.BLL.Services
             await CreateAsync(user, password);
         }
 
-        public async Task<bool> IsUserInRole(string userId, string roleName)
+        public async Task<bool> IsUserInRole(Guid userId, string roleName)
         {
             User user = await FindByIdAsync(userId);
             return await IsInRoleAsync(user, roleName);
+        }
+
+        public async Task<User> FindByIdAsync(Guid id)
+        {
+            return await FindByIdAsync(id.ToString());
         }
 
         public async Task AddRoleToUser(User user, string role)
@@ -67,13 +72,13 @@ namespace WorkForceManagement.BLL.Services
             await DeleteAsync(user);
         }
 
-        public async Task<User> FindDifferentUserWithSameUsername(string userId, string username)
+        public async Task<User> FindDifferentUserWithSameUsername(Guid userId, string username)
         {
             List<User> users = await GetAllAsync();
 
             return users.FirstOrDefault(user =>
                 user.UserName == username &&
-                user.Id != userId);
+                user.Id != userId.ToString());
         }
 
         public async Task EditUserAsync(User user)

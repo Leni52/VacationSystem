@@ -1,11 +1,12 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using WorkForceManagement.BLL.Services;
 using WorkForceManagement.DAL.Entities;
-using WorkForceManagement.DTO.RequestModels;
-using WorkForceManagement.DTO.ResponseModels;
+using WorkForceManagement.DTO.RequestDTO;
+using WorkForceManagement.DTO.ResponseDTO;
 
 namespace WorkForceManagement.WEB.Controller
 {
@@ -22,8 +23,8 @@ namespace WorkForceManagement.WEB.Controller
             _mapper = mapper;
         }
 
-        [HttpPost("CreateUser")]
-        public async Task<IActionResult> CreateUserAsync(UserRequestModel model)
+        [HttpPost("Create")]
+        public async Task<IActionResult> CreateUserAsync(UserRequestDTO model)
         {
             if (!ModelState.IsValid)
             {
@@ -38,16 +39,16 @@ namespace WorkForceManagement.WEB.Controller
             return Ok(model);
         }
 
-        [HttpDelete("DeleteUser/{userId}")]
-        public async Task<IActionResult> DeleteUserAsync(string userId)
+        [HttpDelete("{userId}")]
+        public async Task<IActionResult> DeleteUserAsync(Guid userId)
         {
             await _userService.DeleteAsync(userId);
 
             return Ok();
         }
 
-        [HttpPatch("UpdateUser/{userId}")]
-        public async Task<IActionResult> UpdateUserAsync(string userId, UserRequestModel model)
+        [HttpPatch("{userId}")]
+        public async Task<IActionResult> UpdateUserAsync(Guid userId, UserRequestDTO model)
         {
             if (!ModelState.IsValid)
             {
@@ -62,21 +63,21 @@ namespace WorkForceManagement.WEB.Controller
             return Ok();
         }
 
-        [HttpGet("GetAllUsers")]
-        public async Task<ActionResult<List<UserResponseModel>>> GetAllUsersAsync()
+        [HttpGet("All")]
+        public async Task<ActionResult<List<UserResponseDTO>>> GetAllUsersAsync()
         {
             var users = await _userService.GetAllUsersAsync();
 
-            var models = _mapper.Map<List<UserResponseModel>>(users);
+            var models = _mapper.Map<List<UserResponseDTO>>(users);
 
             return Ok(models);
         }
 
-        [HttpGet("GetUserById/{id}")]
-        public async Task<ActionResult<UserResponseModel>> GetUserByIdAsync(string id)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<UserResponseDTO>> GetUserByIdAsync(Guid id)
         {
             var user = await _userService.GetUserWithIdAsync(id);
-            var model = _mapper.Map<UserResponseModel>(user);
+            var model = _mapper.Map<UserResponseDTO>(user);
 
             return Ok(model);
         }
