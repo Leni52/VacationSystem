@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using WorkForceManagement.BLL.Exceptions;
 using WorkForceManagement.DAL.Entities;
 
 namespace WorkForceManagement.BLL.Services
@@ -21,7 +22,7 @@ namespace WorkForceManagement.BLL.Services
             User foundUser = await _userManager.FindDifferentUserWithSameUsername(Guid.Parse(userToAdd.Id), userToAdd.UserName);
             if (foundUser != null)
             {
-                return;
+                throw new UsernameTakenException($"Username: {userToAdd.UserName} already taken!");
             }
 
             await _userManager.CreateUser(userToAdd, password);
@@ -48,7 +49,7 @@ namespace WorkForceManagement.BLL.Services
 
             if (await _userManager.FindDifferentUserWithSameUsername(userId, editedUser.UserName) != null)
             {
-                return;
+                throw new UsernameTakenException($"Username: {editedUser.UserName} already taken!");
             }
 
             User userToEdit = await _userManager.FindById(userId);
@@ -97,6 +98,22 @@ namespace WorkForceManagement.BLL.Services
         public async Task<bool> IsUserAdmin(User currentUser)
         {
             return await _userManager.IsUserInRole(Guid.Parse(currentUser.Id) , "Admin");
+        }
+
+        public async Task MakeUserAdmin(User user)
+        {
+            if (!(await _userManager.IsUserInRole(Guid.Parse(user.Id), "Admin")))
+            {
+                await _userManager.AddRoleToUser(user, "Admin");
+            }
+        }
+
+        public async Task RemoveUserFromAdmin(User user)
+        {
+            if (await _userManager.IsUserInRole(Guid.Parse(user.Id), "Admin"))
+            {
+                await _userManager.RemoveRoleFromUser(user, "Admin");
+            }
         }
     }
 }

@@ -24,7 +24,7 @@ namespace WorkForceManagement.WEB.Controller
             _mapper = mapper;
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateUser(UserRequestDTO model)
         {
@@ -41,7 +41,7 @@ namespace WorkForceManagement.WEB.Controller
             return Ok(model);
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpDelete("{userId}")]
         public async Task<IActionResult> DeleteUser(Guid userId)
         {
@@ -50,7 +50,7 @@ namespace WorkForceManagement.WEB.Controller
             return Ok();
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpPatch("{userId}")]
         public async Task<IActionResult> UpdateUser(Guid userId, UserRequestDTO model)
         {
@@ -84,6 +84,28 @@ namespace WorkForceManagement.WEB.Controller
             var result = _mapper.Map<UserResponseDTO>(user);
 
             return Ok(result);
+        }
+
+        //[Authorize(Roles = "Admin")]
+        [HttpPatch("MakeUserAdmin/{userId}")]
+        public async Task<IActionResult> MakeUserAdmin(Guid userId)
+        {
+            var user = await _userService.GetUserById(userId);
+
+            await _userService.MakeUserAdmin(user);
+
+            return Ok(user);
+        }
+
+        //[Authorize(Roles = "Admin")]
+        [HttpPatch("RemoveUserFromAdmin/{userId}")]
+        public async Task<IActionResult> RemoveUserFromAdmin(Guid userId)
+        {
+            var user = await _userService.GetUserById(userId);
+
+            await _userService.RemoveUserFromAdmin(user);
+
+            return Ok(user);
         }
     }
 }
