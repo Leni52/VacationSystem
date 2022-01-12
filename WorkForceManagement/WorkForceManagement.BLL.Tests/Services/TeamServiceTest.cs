@@ -14,7 +14,7 @@ using Xunit;
 namespace WorkForceManagement.BLL.Tests.Services
 {
     public class TeamServiceTest
-    {
+    { 
         [Fact]
         public async Task Create_ValidTeam_Passes()
         {
@@ -340,5 +340,6 @@ namespace WorkForceManagement.BLL.Tests.Services
             //act
             await Assert.ThrowsAsync<KeyNotFoundException>(() => sut.RemoveUserFromTeam(team.Id, teamMember));
         }
+        
     }
 }
