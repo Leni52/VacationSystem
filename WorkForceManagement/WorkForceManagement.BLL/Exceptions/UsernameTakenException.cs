@@ -3,7 +3,7 @@ using System.Globalization;
 
 namespace WorkForceManagement.BLL.Exceptions
 {
-    class UsernameTakenException : Exception
+    public class UsernameTakenException : Exception
     {
         public UsernameTakenException() : base() { }
 
