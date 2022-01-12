@@ -18,8 +18,9 @@ namespace WorkForceManagement.BLL.Services
         Task<bool> ValidateUserCredentials(string userName, string password);
         Task DeleteUser(User user);
         Task<User> FindDifferentUserWithSameUsername(Guid userId, string username);
-        Task EditUser(User user);
+        Task UpdateUser(User user);
         Task<User> FindByName(string userName);
+        Task<User> GetCurrentUser(ClaimsPrincipal principal);
     }
 
 }
