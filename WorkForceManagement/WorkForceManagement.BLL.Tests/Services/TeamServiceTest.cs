@@ -18,8 +18,8 @@ namespace WorkForceManagement.BLL.Tests.Services
         {
             //arrange
             var teamRepositoryMock = new Mock<IRepository<Team>>();
-            //teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Func<Team, bool>>()))
-              //  .Returns((Team)null);
+            teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Func<Team, bool>>()))
+                .Returns((Team)null);
 
             var sut = new TeamService(teamRepositoryMock.Object);
 
