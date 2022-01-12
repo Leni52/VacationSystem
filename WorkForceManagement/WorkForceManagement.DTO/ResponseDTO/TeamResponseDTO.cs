@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WorkForceManagement.DTO.ResponseModels
+namespace WorkForceManagement.DTO.ResponseDTO
 {
     public class TeamResponseDTO
     {

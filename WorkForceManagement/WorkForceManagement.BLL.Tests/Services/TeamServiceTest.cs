@@ -12,7 +12,7 @@ using Xunit;
 namespace WorkForceManagement.BLL.Tests.Services
 {
     public class TeamServiceTest
-    {
+    { 
         [Fact]
         public async Task CreateAsync_ValidTeam_Passes()
         {
@@ -31,5 +31,6 @@ namespace WorkForceManagement.BLL.Tests.Services
             Assert.Null(result);
             //asert
         }
+        
     }
 }

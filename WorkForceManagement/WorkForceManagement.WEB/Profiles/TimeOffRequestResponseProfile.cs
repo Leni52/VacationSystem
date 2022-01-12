@@ -4,15 +4,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WorkForceManagement.DAL.Entities;
-using WorkForceManagement.DTO.ResponseDTO;
+using WorkForceManagement.DTO.Responses;
 
 namespace WorkForceManagement.WEB.Profiles
 {
-    public class TeamResponseProfile : Profile
+    public class TimeOffRequestResponseProfile:Profile
     {
-        public TeamResponseProfile()
+        public TimeOffRequestResponseProfile()
         {
-            this.CreateMap<Team, TeamResponseDTO>();
+            this.CreateMap<TimeOffRequest, TimeOffRequestResponseDTO>();
         }
     }
 }
