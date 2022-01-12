@@ -2,12 +2,10 @@
 using Moq;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using WorkForceManagement.BLL.Exceptions;
 using WorkForceManagement.BLL.Services;
 using WorkForceManagement.DAL.Entities;
-using WorkForceManagement.BLL.Exceptions;
 using Xunit;
 
 namespace WorkForceManagement.BLL.Tests.Services
@@ -15,35 +13,6 @@ namespace WorkForceManagement.BLL.Tests.Services
     public class UserServiceTests
     {
         PasswordHasher<User> hasher = new PasswordHasher<User>();
-
-
-
-        [Fact]
-        public async Task CreateUser_ValidUser_Passes()
-        {
-            //arrange
-            var authUserManagerMock = new Mock<IAuthUserManager>();
-
-            var sut = new UserService(authUserManagerMock.Object);
-
-            User currentUser = new User()
-            {
-                UserName = "admin",
-            };
-            currentUser.PasswordHash = hasher.HashPassword(currentUser, "adminpass");
-
-
-            User userToAdd = new User()
-            {
-                UserName = "altin",
-            };
-            userToAdd.PasswordHash = hasher.HashPassword(userToAdd, "altin123");
-
-            //act
-            var exception = await Record.ExceptionAsync(() => sut.Add(userToAdd, "altin123", true));
-            //assert
-            Assert.Null(exception); // assert ni exception is thrown
-        }
 
         [Fact]
         public async Task CreateUser_UsernameTaken_ThrowsException()
@@ -74,7 +43,34 @@ namespace WorkForceManagement.BLL.Tests.Services
         }
 
         [Fact]
-        public async Task DeleteAsync_ValidUser_Passes()
+        public async Task CreateUser_ValidUser_Passes()
+        {
+            //arrange
+            var authUserManagerMock = new Mock<IAuthUserManager>();
+
+            var sut = new UserService(authUserManagerMock.Object);
+
+            User currentUser = new User()
+            {
+                UserName = "admin",
+            };
+            currentUser.PasswordHash = hasher.HashPassword(currentUser, "adminpass");
+
+
+            User userToAdd = new User()
+            {
+                UserName = "jack",
+            };
+            userToAdd.PasswordHash = hasher.HashPassword(userToAdd, "jack123");
+
+            //act
+            var exception = await Record.ExceptionAsync(() => sut.Add(userToAdd, "jack123", true));
+            //assert
+            Assert.Null(exception);
+        }
+
+        [Fact]
+        public async Task Delete_ValidUser_Passes()
         {
             //arrange
             var authUserManagerMock = new Mock<IAuthUserManager>();
@@ -87,11 +83,11 @@ namespace WorkForceManagement.BLL.Tests.Services
             Guid userId = Guid.NewGuid();
             //act
             var exception = await Record.ExceptionAsync(() => sut.Delete(userId));
-            Assert.Null(exception); // sut throws no exception
+            Assert.Null(exception);
         }
 
         [Fact]
-        public async Task DeleteAsync_NotFoundUser_ThrowsException()
+        public async Task Deletec_NotFoundUser_ThrowsException()
         {
             //arrange
             var authUserManagerMock = new Mock<IAuthUserManager>();
@@ -106,7 +102,7 @@ namespace WorkForceManagement.BLL.Tests.Services
         }
 
         [Fact]
-        public async Task EditAsync_ValidEntry_ReturnsTrue()
+        public async Task Edit_ValidEntry_ReturnsTrue()
         {
             //arrange
             var authUserManagerMock = new Mock<IAuthUserManager>();
@@ -120,18 +116,18 @@ namespace WorkForceManagement.BLL.Tests.Services
 
             User editedUser = new User()
             {
-                UserName = "altin",
+                UserName = "jack",
             };
-            editedUser.PasswordHash = hasher.HashPassword(editedUser, "altin123");
+            editedUser.PasswordHash = hasher.HashPassword(editedUser, "jack123");
 
             Guid userId = Guid.NewGuid();
             //act
-            var exception = await Record.ExceptionAsync(() => sut.Edit(userId, editedUser, "altin", true));
+            var exception = await Record.ExceptionAsync(() => sut.Edit(userId, editedUser, "jack", true));
             Assert.Null(exception);
         }
 
         [Fact]
-        public async Task GetAllUsersAsync_ValidEntry_Passes()
+        public async Task GetAllUsers_ValidEntry_Passes()
         {
             //arrange
             var authUserManagerMock = new Mock<IAuthUserManager>();
@@ -144,5 +140,21 @@ namespace WorkForceManagement.BLL.Tests.Services
             var exception = await Record.ExceptionAsync(() => sut.GetAllUsers());
             Assert.Null(exception);
         }
+
+        [Fact]
+        public async Task GetUserWithId_InvalidIdNotFoundUser_ThrowsException()
+        {
+            //arrange
+            var authUserManagerMock = new Mock<IAuthUserManager>();
+            authUserManagerMock.Setup(userRep => userRep.FindById(It.IsAny<Guid>()))
+                .ReturnsAsync((User)null);
+
+            var sut = new UserService(authUserManagerMock.Object);
+
+            Guid userId = Guid.NewGuid();
+
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => sut.GetUserById(userId));
+        }
+
     }
 }
