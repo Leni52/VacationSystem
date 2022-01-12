@@ -44,25 +44,20 @@ namespace WorkForceManagement.BLL.Services
         {
             return await _teamRepository.All();
         }
-        public async Task UpdateTeam(Team updatedTeam, Guid teamId)
+        public async Task UpdateTeam(Team teamToUpdate, Guid teamId)
         {
             Team teamWithSameName = await _teamRepository.Get(
                 team => 
-                team.Name == updatedTeam.Name &&
+                team.Name == teamToUpdate.Name &&
                 team.Id != teamId); // find different team with same name
 
             if (teamWithSameName != null)
-                throw new TeamWithSameNameExistsException($"Team with the name:{updatedTeam.Name} already exists!");
+                throw new TeamWithSameNameExistsException($"Team with the name:{teamToUpdate.Name} already exists!");
 
-            Team foundTeam = await GetTeamWithId(teamId);
-
-            foundTeam.ChangeDate = DateTime.Now;
-            foundTeam.Name = updatedTeam.Name;
-            foundTeam.Description = updatedTeam.Description;
-
+            teamToUpdate.ChangeDate = DateTime.Now;
             // foundTeam.UpdaterId = currentUser; //TODO
 
-            await _teamRepository.CreateOrUpdate(foundTeam);
+            await _teamRepository.CreateOrUpdate(teamToUpdate);
         }
         public async Task DeleteTeam(Guid teamId)
         {

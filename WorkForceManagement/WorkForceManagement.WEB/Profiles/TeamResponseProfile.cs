@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WorkForceManagement.DAL.Entities;
-using WorkForceManagement.DTO.ResponseModels;
+using WorkForceManagement.DTO.ResponseDTO;
 
 namespace WorkForceManagement.WEB.Profiles
 {

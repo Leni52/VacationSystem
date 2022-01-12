@@ -9,7 +9,6 @@ using WorkForceManagement.BLL.Services;
 using WorkForceManagement.DAL.Entities;
 using WorkForceManagement.DTO.RequestModels;
 using WorkForceManagement.DTO.ResponseDTO;
-using WorkForceManagement.DTO.ResponseModels;
 
 namespace WorkForceManagement.WEB.Controller
 {
@@ -71,13 +70,13 @@ namespace WorkForceManagement.WEB.Controller
         [HttpPatch("{teamId}")]
         public async Task<ActionResult> UpdateTeam(Guid teamId, TeamRequestDTO model)
         {
-            Team updatedTeam = new Team();
+            Team teamToUpdate = await _teamService.GetTeamWithId(teamId);
             User teamLeader = await _userService.GetUserById(model.TeamLeaderId);
 
-            _mapper.Map(model, updatedTeam);
-            updatedTeam.TeamLeader = teamLeader;
+            _mapper.Map(model, teamToUpdate);
+            teamToUpdate.TeamLeader = teamLeader;
 
-            await _teamService.UpdateTeam(updatedTeam, teamId);
+            await _teamService.UpdateTeam(teamToUpdate, teamId);
 
             return Ok();
         }
