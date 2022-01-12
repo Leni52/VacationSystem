@@ -57,25 +57,23 @@ namespace WorkForceManagement.WEB.Controller
             TimeOffRequest timeOffRequest = _mapper.Map<TimeOffRequest>(timeOffRequestRequestModel);
             timeOffRequest.Type = (TimeOffRequestType)timeOffRequestRequestModel.TimeOffRequestType;
             _timeOffRequestService.CreateTimeOffRequest(timeOffRequest);
-            return Ok();
+            return Ok(timeOffRequest);
         }
 
         [HttpPut("{timeOffRequestId}")]
-        public async Task<ActionResult> UpdateTimeOffRequest(Guid timeOffRequestId, TimeOffRequestRequestDTO timeOffRequestRequestModel)
+        public async Task<ActionResult> UpdateTimeOffRequest(Guid timeOffRequestId, TimeOffRequestRequestDTO timeOffRequestRequestDTO)
         {
             TimeOffRequest timeOffRequest = await _timeOffRequestService.GetTimeOffRequest(timeOffRequestId);
             if (!ModelState.IsValid)
             {
                 return BadRequest();
-            }
-            var tor = _mapper.Map<TimeOffRequest>(timeOffRequestRequestModel);
-            timeOffRequest.Description = timeOffRequestRequestModel.Description;
-            timeOffRequest.ChangeDate = DateTime.Now;
-            timeOffRequest.Type = (TimeOffRequestType)timeOffRequestRequestModel.TimeOffRequestType;
-            timeOffRequest.StartDate = timeOffRequestRequestModel.StartDate;
-            timeOffRequest.EndDate = timeOffRequestRequestModel.EndDate;
-          await _timeOffRequestService.UpdateTimeOffRequest(timeOffRequestId, timeOffRequest.Type);
-            return Ok(timeOffRequest);
+            }        
+           timeOffRequest.ChangeDate = DateTime.Now;
+         TimeOffRequest updatedRequest =  await _timeOffRequestService.UpdateTimeOffRequest(timeOffRequestId,
+              (TimeOffRequestType)timeOffRequestRequestDTO.TimeOffRequestType, timeOffRequestRequestDTO.Description,
+              timeOffRequestRequestDTO.StartDate,
+              timeOffRequestRequestDTO.EndDate);
+            return Ok(updatedRequest);
         }
 
         [HttpDelete("{timeOffRequestId}")]

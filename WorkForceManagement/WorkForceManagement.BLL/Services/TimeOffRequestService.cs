@@ -45,16 +45,23 @@ namespace WorkForceManagement.BLL.Services
             }
             return timeOffRequest;
         }
-        public async Task UpdateTimeOffRequest(Guid Id, TimeOffRequestType timeOffRequestType)
+        public async Task<TimeOffRequest> UpdateTimeOffRequest(Guid timeOffRequestId,
+             TimeOffRequestType timeOffRequestType,  string description,
+              DateTime startDate,
+              DateTime endDate)
         {
-            TimeOffRequest requestToUpdate =await _timeOffRequestRepository.Get(Id);
+            TimeOffRequest requestToUpdate =await _timeOffRequestRepository.Get(timeOffRequestId);
             if (requestToUpdate == null)
             {
                 throw new ItemDoesNotExistException();
             }
             requestToUpdate.Type = timeOffRequestType;
+            requestToUpdate.Description = description;
+            requestToUpdate.StartDate = startDate;
+            requestToUpdate.EndDate = endDate;
 
            await _timeOffRequestRepository.CreateOrUpdate(requestToUpdate);
+            return requestToUpdate;
         }     
                
     }
