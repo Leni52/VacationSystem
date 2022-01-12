@@ -10,10 +10,10 @@ using WorkForceManagement.DAL.Entities;
 using WorkForceManagement.DTO.RequestModels;
 using WorkForceManagement.DTO.ResponseDTO;
 
-
 namespace WorkForceManagement.WEB.Controller
 {
     [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
     public class TeamsController : ControllerBase
     {
@@ -35,13 +35,14 @@ namespace WorkForceManagement.WEB.Controller
         [HttpPost]
         public async Task<ActionResult<TeamRequestDTO>> CreateTeam(TeamRequestDTO model)
         {
+            User currentUser = await _userService.GetCurrentUser(User);
             Team teamToAdd = new Team();
             User teamLeader = await _userService.GetUserById(model.TeamLeaderId);
 
             _mapper.Map(model, teamToAdd);
             teamToAdd.TeamLeader = teamLeader;
 
-            await _teamService.Create(teamToAdd);
+            await _teamService.Create(teamToAdd,currentUser);
 
             return Ok(model);
         }
@@ -70,13 +71,14 @@ namespace WorkForceManagement.WEB.Controller
         [HttpPatch("{teamId}")]
         public async Task<ActionResult> UpdateTeam(Guid teamId, TeamRequestDTO model)
         {
-            Team updatedTeam = new Team();
+            User currentUser = await _userService.GetCurrentUser(User);
+            Team teamToUpdate = await _teamService.GetTeamWithId(teamId);
             User teamLeader = await _userService.GetUserById(model.TeamLeaderId);
 
-            _mapper.Map(model, updatedTeam);
-            updatedTeam.TeamLeader = teamLeader;
+            _mapper.Map(model, teamToUpdate);
+            teamToUpdate.TeamLeader = teamLeader;
 
-            await _teamService.UpdateTeam(updatedTeam, teamId);
+            await _teamService.UpdateTeam(teamToUpdate, teamId, currentUser);
 
             return Ok();
         }
@@ -94,9 +96,10 @@ namespace WorkForceManagement.WEB.Controller
         [HttpPatch("UpdateTeamLeader/{teamId}&{newLeaderId}")]
         public async Task<IActionResult> UpdateTeamLeader(Guid teamId, Guid newLeaderId)
         {
+            User currentUser = await _userService.GetCurrentUser(User);
             User newLeader = await _userService.GetUserById(newLeaderId);
 
-            await _teamService.UpdateTeamLeader(teamId, newLeader);
+            await _teamService.UpdateTeamLeader(teamId, newLeader, currentUser);
 
             return Ok();
         }
@@ -105,9 +108,10 @@ namespace WorkForceManagement.WEB.Controller
         [HttpPost("AddUserToTeam/{teamId}&{userId}")]
         public async Task<IActionResult> AddUserToTeam(Guid teamId, Guid userId)
         {
+            User currentUser = await _userService.GetCurrentUser(User);
             User userToAdd = await _userService.GetUserById(userId);
 
-            await _teamService.AddUserToTeam(teamId, userToAdd);
+            await _teamService.AddUserToTeam(teamId, userToAdd, currentUser);
 
             return Ok();
         }
@@ -126,9 +130,10 @@ namespace WorkForceManagement.WEB.Controller
         [HttpDelete("RemoveUserFromTeam/{teamId}&{userId}")]
         public  async Task<IActionResult> RemoveUserFromTeam(Guid teamId, Guid userId)
         {
+            User currentUser = await _userService.GetCurrentUser(User);
             User userToDelete = await _userService.GetUserById(userId);
 
-            await _teamService.RemoveUserFromTeam(teamId, userToDelete);
+            await _teamService.RemoveUserFromTeam(teamId, userToDelete, currentUser);
 
             return Ok();
         }

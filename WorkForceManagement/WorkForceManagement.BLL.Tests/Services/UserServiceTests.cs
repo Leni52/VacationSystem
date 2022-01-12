@@ -122,7 +122,7 @@ namespace WorkForceManagement.BLL.Tests.Services
 
             Guid userId = Guid.NewGuid();
             //act
-            var exception = await Record.ExceptionAsync(() => sut.Edit(userId, editedUser, "jack", true));
+            var exception = await Record.ExceptionAsync(() => sut.Update(editedUser, "jack", true));
             Assert.Null(exception);
         }
 

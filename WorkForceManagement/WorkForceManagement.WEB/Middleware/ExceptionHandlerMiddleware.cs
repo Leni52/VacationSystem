@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -28,9 +29,11 @@ namespace WorkForceManagement.WEB.Middleware
 
                 switch (error)
                 {
+                    case KeyNotFoundException:
                     case ItemDoesNotExistException e:
                         response.StatusCode = (int)HttpStatusCode.NotFound;
                         break;
+                    case TeamWithSameNameExistsException:
                     case ItemAlreadyExistsException e:                       
                         response.StatusCode = (int)HttpStatusCode.Conflict;
                         break;
