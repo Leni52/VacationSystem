@@ -35,12 +35,12 @@ namespace WorkForceManagement.BLL.Tests.Services
 
             User userToAdd = new User()
             {
-                UserName = "jakup",
+                UserName = "altin",
             };
-            userToAdd.PasswordHash = hasher.HashPassword(userToAdd, "emini");
+            userToAdd.PasswordHash = hasher.HashPassword(userToAdd, "altin123");
 
             //act
-            var exception = await Record.ExceptionAsync(() => sut.Add(userToAdd, "emini", true));
+            var exception = await Record.ExceptionAsync(() => sut.Add(userToAdd, "altin123", true));
             //assert
             Assert.Null(exception); // assert ni exception is thrown
         }
@@ -122,7 +122,7 @@ namespace WorkForceManagement.BLL.Tests.Services
             {
                 UserName = "altin",
             };
-            editedUser.PasswordHash = hasher.HashPassword(editedUser, "jakup");
+            editedUser.PasswordHash = hasher.HashPassword(editedUser, "altin123");
 
             Guid userId = Guid.NewGuid();
             //act
