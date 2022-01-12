@@ -14,20 +14,35 @@ namespace WorkForceManagement.BLL.Tests.Services
  public class TimeOffRequestServiceTests
     {
         [Fact]
-        public async Task CreateAsync_ValidRequest_Passes()
+        public void Create_ValidRequest_Pass()
         {
             //arrange
             var requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
-            
+           
+            var sut = new TimeOffRequestService(requestRepositoryStub.Object);
+
+            TimeOffRequest timeOffRequest = new TimeOffRequest();
+            //act
+            var result = sut.CreateTimeOffRequest(timeOffRequest);
+
+            Assert.NotNull(result);
+            //asert
+        }
+        [Fact]
+        public void Delete_ValidId_Pass()
+        {
+            //arrange
+            var requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
 
             var sut = new TimeOffRequestService(requestRepositoryStub.Object);
 
             TimeOffRequest timeOffRequest = new TimeOffRequest();
             //act
-            var result = await Record.ExceptionAsync(() => sut.CreateTimeOffRequest(timeOffRequest));
+            var result = sut.DeleteTimeOffRequest(timeOffRequest.Id);
 
-            Assert.Null(result);
+            Assert.NotNull(result);
             //asert
-        }
+        }    
+        
     }
 }

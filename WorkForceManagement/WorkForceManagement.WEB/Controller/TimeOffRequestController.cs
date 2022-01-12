@@ -48,14 +48,14 @@ namespace WorkForceManagement.WEB.Controller
 
 
         [HttpPost]
-        public ActionResult CreateTimeOffRequest(TimeOffRequestRequestDTO timeOffRequestRequestModel)
+        public ActionResult CreateTimeOffRequest(TimeOffRequestRequestDTO timeOffRequestRequestDTO)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            TimeOffRequest timeOffRequest = _mapper.Map<TimeOffRequest>(timeOffRequestRequestModel);
-            timeOffRequest.Type = (TimeOffRequestType)timeOffRequestRequestModel.TimeOffRequestType;
+            TimeOffRequest timeOffRequest = _mapper.Map<TimeOffRequest>(timeOffRequestRequestDTO);
+            timeOffRequest.Type = (TimeOffRequestType)timeOffRequestRequestDTO.TimeOffRequestType;
             _timeOffRequestService.CreateTimeOffRequest(timeOffRequest);
             return Ok(timeOffRequest);
         }
@@ -67,12 +67,10 @@ namespace WorkForceManagement.WEB.Controller
             if (!ModelState.IsValid)
             {
                 return BadRequest();
-            }        
-           timeOffRequest.ChangeDate = DateTime.Now;
-         TimeOffRequest updatedRequest =  await _timeOffRequestService.UpdateTimeOffRequest(timeOffRequestId,
-              (TimeOffRequestType)timeOffRequestRequestDTO.TimeOffRequestType, timeOffRequestRequestDTO.Description,
-              timeOffRequestRequestDTO.StartDate,
-              timeOffRequestRequestDTO.EndDate);
+            }
+            var request = _mapper.Map<TimeOffRequest>(timeOffRequestRequestDTO);
+            var updatedType = timeOffRequestRequestDTO.TimeOffRequestType;
+            var updatedRequest = await _timeOffRequestService.UpdateTimeOffRequest(timeOffRequestId, request, updatedType);
             return Ok(updatedRequest);
         }
 
