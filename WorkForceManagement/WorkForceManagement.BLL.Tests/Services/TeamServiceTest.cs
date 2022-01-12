@@ -28,7 +28,7 @@ namespace WorkForceManagement.BLL.Tests.Services
             Team teamToAdd = new Team();
 
             //act
-            var result = await Record.ExceptionAsync(() => sut.Create(teamToAdd));
+            var result = await Record.ExceptionAsync(() => sut.Create(teamToAdd, new User()));
 
             Assert.Null(result);
             //asert
@@ -47,7 +47,7 @@ namespace WorkForceManagement.BLL.Tests.Services
 
             //act
             //asert
-            await Assert.ThrowsAsync<TeamWithSameNameExistsException>(() => sut.Create(teamToAdd));
+            await Assert.ThrowsAsync<TeamWithSameNameExistsException>(() => sut.Create(teamToAdd, new User()));
         }
 
         [Fact]
@@ -111,28 +111,11 @@ namespace WorkForceManagement.BLL.Tests.Services
             var sut = new TeamService(teamRepositoryMock.Object);
 
             //act
-            var result = await Record.ExceptionAsync(() => sut.UpdateTeam(new Team(), Guid.NewGuid()));
+            var result = await Record.ExceptionAsync(() => sut.UpdateTeam(new Team(), Guid.NewGuid(), new User()));
             //asert
             Assert.Null(result); // assert no exception was thrown
         }
 
-        [Fact]
-        public async Task UpdateTeam_InvalidTeamId_ThrowsException()
-        {
-            //arrange
-            var teamRepositoryMock = new Mock<IRepository<Team>>();
-
-            teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Expression<Func<Team, bool>>>()))
-                .ReturnsAsync((Team)null);
-            teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Guid>()))
-                .ReturnsAsync((Team)null);
-
-            var sut = new TeamService(teamRepositoryMock.Object);
-
-            //act
-            //asert
-            await Assert.ThrowsAsync<KeyNotFoundException>(() => sut.UpdateTeam(new Team(), Guid.NewGuid()));
-        }
         [Fact]
         public async Task UpdateTeam_TeamWithSameNameExists_ThrowsException()
         {
@@ -148,7 +131,7 @@ namespace WorkForceManagement.BLL.Tests.Services
 
             //act
             //asert
-            await Assert.ThrowsAsync<TeamWithSameNameExistsException>(() => sut.UpdateTeam(new Team(), Guid.NewGuid()));
+            await Assert.ThrowsAsync<TeamWithSameNameExistsException>(() => sut.UpdateTeam(new Team(), Guid.NewGuid(), new User()));
         }
 
         [Fact]
@@ -196,7 +179,7 @@ namespace WorkForceManagement.BLL.Tests.Services
             var sut = new TeamService(teamRepositoryMock.Object);
 
             //act
-            var result = await Record.ExceptionAsync(() => sut.UpdateTeamLeader(Guid.NewGuid(), new User()));
+            var result = await Record.ExceptionAsync(() => sut.UpdateTeamLeader(Guid.NewGuid(), new User(), new User()));
             //asert
             Assert.Null(result); // assert no exception was thrown
         }
@@ -214,7 +197,7 @@ namespace WorkForceManagement.BLL.Tests.Services
 
             //act
             //asert
-            await Assert.ThrowsAsync<KeyNotFoundException>(() => sut.UpdateTeamLeader(Guid.NewGuid(), new User()));
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => sut.UpdateTeamLeader(Guid.NewGuid(), new User(), new User()));
         }
 
         [Fact]
@@ -229,7 +212,7 @@ namespace WorkForceManagement.BLL.Tests.Services
             var sut = new TeamService(teamRepositoryMock.Object);
 
             //act
-            var result = await Record.ExceptionAsync(() => sut.AddUserToTeam(Guid.NewGuid(), new User()));
+            var result = await Record.ExceptionAsync(() => sut.AddUserToTeam(Guid.NewGuid(), new User(), new User()));
             //asert
             Assert.Null(result); // assert no exception was thrown
         }
@@ -247,7 +230,7 @@ namespace WorkForceManagement.BLL.Tests.Services
 
             //act
             //asert
-            await Assert.ThrowsAsync<KeyNotFoundException>(() => sut.AddUserToTeam(Guid.NewGuid(), new User()));
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => sut.AddUserToTeam(Guid.NewGuid(), new User(), new User()));
         }
 
         [Fact]
@@ -299,7 +282,7 @@ namespace WorkForceManagement.BLL.Tests.Services
             var sut = new TeamService(teamRepositoryMock.Object);
 
             //act
-            var result = await Record.ExceptionAsync(() => sut.RemoveUserFromTeam(team.Id, teamMember));
+            var result = await Record.ExceptionAsync(() => sut.RemoveUserFromTeam(team.Id, teamMember, new User()));
             //asert
             Assert.Null(result); // assert no exception was thrown
         }
@@ -320,7 +303,7 @@ namespace WorkForceManagement.BLL.Tests.Services
             var sut = new TeamService(teamRepositoryMock.Object);
 
             //act
-            await Assert.ThrowsAsync<KeyNotFoundException>(() => sut.RemoveUserFromTeam(team.Id, teamMember));
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => sut.RemoveUserFromTeam(team.Id, teamMember, new User()));
         }
 
         [Fact]
@@ -338,7 +321,7 @@ namespace WorkForceManagement.BLL.Tests.Services
             var sut = new TeamService(teamRepositoryMock.Object);
 
             //act
-            await Assert.ThrowsAsync<KeyNotFoundException>(() => sut.RemoveUserFromTeam(team.Id, teamMember));
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => sut.RemoveUserFromTeam(team.Id, teamMember, new User()));
         }
         
     }
