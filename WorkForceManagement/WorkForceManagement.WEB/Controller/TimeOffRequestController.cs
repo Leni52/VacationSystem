@@ -61,16 +61,15 @@ namespace WorkForceManagement.WEB.Controller
         }
 
         [HttpPut("{timeOffRequestId}")]
-        public async Task<ActionResult> UpdateTimeOffRequest(Guid timeOffRequestId, TimeOffRequestRequestDTO timeOffRequestRequestDTO)
+        public async Task<ActionResult> UpdateTimeOffRequest(Guid timeOffRequestId, TimeOffRequestRequestDTO request)
         {
             TimeOffRequest timeOffRequest = await _timeOffRequestService.GetTimeOffRequest(timeOffRequestId);
             if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
-            var request = _mapper.Map<TimeOffRequest>(timeOffRequestRequestDTO);
-            var updatedType = timeOffRequestRequestDTO.TimeOffRequestType;
-            var updatedRequest = await _timeOffRequestService.UpdateTimeOffRequest(timeOffRequestId, request, updatedType);
+            _mapper.Map(request, timeOffRequest);
+            var updatedRequest = await _timeOffRequestService.UpdateTimeOffRequest(timeOffRequestId, timeOffRequest);
             return Ok(updatedRequest);
         }
 
