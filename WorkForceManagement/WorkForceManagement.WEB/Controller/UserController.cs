@@ -24,7 +24,7 @@ namespace WorkForceManagement.WEB.Controller
             _mapper = mapper;
         }
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateUser(UserRequestDTO model)
         {
@@ -41,7 +41,7 @@ namespace WorkForceManagement.WEB.Controller
             return Ok(model);
         }
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{userId}")]
         public async Task<IActionResult> DeleteUser(Guid userId)
         {
@@ -50,7 +50,7 @@ namespace WorkForceManagement.WEB.Controller
             return Ok();
         }
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPatch("{userId}")]
         public async Task<IActionResult> UpdateUser(Guid userId, UserRequestDTO model)
         {
@@ -86,7 +86,7 @@ namespace WorkForceManagement.WEB.Controller
             return Ok(result);
         }
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPatch("MakeUserAdmin/{userId}")]
         public async Task<IActionResult> MakeUserAdmin(Guid userId)
         {
@@ -97,7 +97,7 @@ namespace WorkForceManagement.WEB.Controller
             return Ok(user);
         }
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPatch("RemoveUserFromAdmin/{userId}")]
         public async Task<IActionResult> RemoveUserFromAdmin(Guid userId)
         {

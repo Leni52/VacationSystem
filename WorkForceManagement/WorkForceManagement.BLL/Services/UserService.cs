@@ -77,9 +77,9 @@ namespace WorkForceManagement.BLL.Services
             return await _userManager.GetAll();
         }
 
-        public Task<User> GetCurrentUser(ClaimsPrincipal principal)
+        public async Task<User> GetCurrentUser(ClaimsPrincipal principal)
         {
-            throw new NotImplementedException();
+            return await _userManager.GetCurrentUser(principal);
         }
 
         public List<Team> GetUserTeams(User currentUser)

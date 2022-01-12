@@ -20,6 +20,7 @@ namespace WorkForceManagement.BLL.Services
         Task<User> FindDifferentUserWithSameUsername(Guid userId, string username);
         Task EditUser(User user);
         Task<User> FindByName(string userName);
+        Task<User> GetCurrentUser(ClaimsPrincipal principal);
     }
 
 }
