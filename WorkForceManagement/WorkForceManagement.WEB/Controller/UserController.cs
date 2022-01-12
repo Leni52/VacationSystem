@@ -33,8 +33,11 @@ namespace WorkForceManagement.WEB.Controller
                 return BadRequest();
             }
 
+            User currentUser = await _userService.GetCurrentUser(User);
+
             var user = new User();
             _mapper.Map(model, user);
+            user.CreatorId = currentUser.Id;
 
             await _userService.Add(user, model.Password, model.IsAdmin);
 
@@ -59,10 +62,17 @@ namespace WorkForceManagement.WEB.Controller
                 return BadRequest();
             }
 
-            var user = new User();
-            _mapper.Map(model, user);
+            User currentUser = await _userService.GetCurrentUser(User);
 
-            await _userService.Edit(userId, user, model.Password, model.IsAdmin);
+            User userToUpdate = await _userService.GetUserById(userId);
+
+            if (userToUpdate == null)
+                throw new KeyNotFoundException($"User with Id:{userId} was not found");
+
+            _mapper.Map(model, userToUpdate);
+            userToUpdate.UpdaterId = currentUser.Id;
+
+            await _userService.Update(userToUpdate, model.Password, model.IsAdmin);
 
             return Ok();
         }

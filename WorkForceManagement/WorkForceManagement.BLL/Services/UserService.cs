@@ -43,33 +43,27 @@ namespace WorkForceManagement.BLL.Services
             await _userManager.DeleteUser(userToDelete);
         }
 
-        public async Task Edit(Guid userId, User editedUser, string editedUserPassword, bool isAdmin)
+        public async Task Update(User updatedUser, string newPassword, bool isAdmin)
         {
             PasswordHasher<User> hasher = new PasswordHasher<User>();
+            Guid userId = Guid.Parse(updatedUser.Id);
 
-            if (await _userManager.FindDifferentUserWithSameUsername(userId, editedUser.UserName) != null)
+            if (await _userManager.FindDifferentUserWithSameUsername(userId, updatedUser.UserName) != null)
             {
-                throw new UsernameTakenException($"Username: {editedUser.UserName} already taken!");
+                throw new UsernameTakenException($"Username: {updatedUser.UserName} already taken!");
             }
-
-            User userToEdit = await _userManager.FindById(userId);
-
-            if (userToEdit == null)
-                throw new KeyNotFoundException($"User with Id:{userId} was not found");
-
-            userToEdit.UserName = editedUser.UserName;
-            userToEdit.PasswordHash = hasher.HashPassword(editedUser, editedUserPassword);
 
             if (isAdmin && !(await _userManager.IsUserInRole(userId, "Admin")))
             {
-                await _userManager.AddRoleToUser(userToEdit, "Admin");
+                await _userManager.AddRoleToUser(updatedUser, "Admin");
             }
             else if(!isAdmin && await _userManager.IsUserInRole(userId, "Admin"))
             {
-                await _userManager.RemoveRoleFromUser(userToEdit, "Admin");
+                await _userManager.RemoveRoleFromUser(updatedUser, "Admin");
             }
 
-            await _userManager.EditUser(userToEdit);
+            updatedUser.ChangeDate = DateTime.Now;
+            await _userManager.UpdateUser(updatedUser);
         }
 
         public async Task<List<User>> GetAllUsers()

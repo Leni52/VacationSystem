@@ -82,7 +82,7 @@ namespace WorkForceManagement.BLL.Services
                 user.Id != userId.ToString());
         }
 
-        public async Task EditUser(User user)
+        public async Task UpdateUser(User user)
         {
             await UpdateAsync(user);
         }
