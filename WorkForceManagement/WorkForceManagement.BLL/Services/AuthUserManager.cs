@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using WorkForceManagement.DAL.Entities;
 
@@ -81,7 +82,7 @@ namespace WorkForceManagement.BLL.Services
                 user.Id != userId.ToString());
         }
 
-        public async Task EditUser(User user)
+        public async Task UpdateUser(User user)
         {
             await UpdateAsync(user);
         }
@@ -89,6 +90,11 @@ namespace WorkForceManagement.BLL.Services
         public async Task<User> FindByName(string userName)
         {
             return await FindByNameAsync(userName);
+        }
+
+        public async Task<User> GetCurrentUser(ClaimsPrincipal principal)
+        {
+            return await GetUserAsync(principal);
         }
     }
 }

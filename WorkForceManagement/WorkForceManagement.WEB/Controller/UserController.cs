@@ -33,8 +33,11 @@ namespace WorkForceManagement.WEB.Controller
                 return BadRequest();
             }
 
+            User currentUser = await _userService.GetCurrentUser(User);
+
             var user = new User();
             _mapper.Map(model, user);
+            user.CreatorId = currentUser.Id;
 
             await _userService.Add(user, model.Password, model.IsAdmin);
 
@@ -59,10 +62,17 @@ namespace WorkForceManagement.WEB.Controller
                 return BadRequest();
             }
 
-            var user = new User();
-            _mapper.Map(model, user);
+            User currentUser = await _userService.GetCurrentUser(User);
 
-            await _userService.Edit(userId, user, model.Password, model.IsAdmin);
+            User userToUpdate = await _userService.GetUserById(userId);
+
+            if (userToUpdate == null)
+                throw new KeyNotFoundException($"User with Id:{userId} was not found");
+
+            _mapper.Map(model, userToUpdate);
+            userToUpdate.UpdaterId = currentUser.Id;
+
+            await _userService.Update(userToUpdate, model.Password, model.IsAdmin);
 
             return Ok();
         }
@@ -84,6 +94,28 @@ namespace WorkForceManagement.WEB.Controller
             var result = _mapper.Map<UserResponseDTO>(user);
 
             return Ok(result);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPatch("MakeUserAdmin/{userId}")]
+        public async Task<IActionResult> MakeUserAdmin(Guid userId)
+        {
+            var user = await _userService.GetUserById(userId);
+
+            await _userService.MakeUserAdmin(user);
+
+            return Ok(user);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPatch("RemoveUserFromAdmin/{userId}")]
+        public async Task<IActionResult> RemoveUserFromAdmin(Guid userId)
+        {
+            var user = await _userService.GetUserById(userId);
+
+            await _userService.RemoveUserFromAdmin(user);
+
+            return Ok(user);
         }
     }
 }
