@@ -79,7 +79,6 @@ namespace WorkForceManagement.BLL.Services
         {
             TimeOffRequest timeOffRequest = await _timeOffRequestRepository.Get(requestId);
            
-            timeOffRequest.Status = TimeOffRequestStatus.Approved;
             timeOffRequest.ChangeDate = DateTime.Now;
             timeOffRequest.UpdaterId = currentUser.Id;
             timeOffRequest.AlreadyApproved.Add(currentUser);
