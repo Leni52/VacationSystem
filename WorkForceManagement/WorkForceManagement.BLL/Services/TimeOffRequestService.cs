@@ -17,21 +17,24 @@ namespace WorkForceManagement.BLL.Services
             _timeOffRequestRepository = timeOffRequestRepository;
         }
        
-        public async Task CreateTimeOffRequest(TimeOffRequest timeOffRequest, string currentUserId)
+        public async Task CreateTimeOffRequest(TimeOffRequest timeOffRequest, User currentUser)
         {
             timeOffRequest.Status = 0;
-            timeOffRequest.CreatorId = currentUserId;
-            await _timeOffRequestRepository.CreateOrUpdate(timeOffRequest);
-        }    
 
+            List<User> approvers = currentUser.Teams.Select(team => team.TeamLeader).ToList();
+            approvers.ForEach(user => timeOffRequest.Approvers.Add(user)); // gets all the approvers and adds them to timeOff
+
+            await _timeOffRequestRepository.CreateOrUpdate(timeOffRequest);
+
+        }    
         public async Task  DeleteTimeOffRequest(Guid Id)
         {
             var request =await _timeOffRequestRepository.Get(Id);
-            if (request == null)
+            if (request != null)
             {
-                throw new ItemDoesNotExistException();
+              await _timeOffRequestRepository.Remove(request);
             }
-            await _timeOffRequestRepository.Remove(request);            
+            throw new ItemDoesNotExistException();
         }
         public async Task<List<TimeOffRequest>> GetAllRequests()
         {
@@ -46,7 +49,7 @@ namespace WorkForceManagement.BLL.Services
             }
             return timeOffRequest;
         }
-        public async Task<TimeOffRequest> UpdateTimeOffRequest(Guid timeOffRequestId, TimeOffRequest timeOffRequest, string currentUserId)
+        public async Task<TimeOffRequest> UpdateTimeOffRequest(Guid timeOffRequestId, TimeOffRequest timeOffRequest)
             
         {
             TimeOffRequest requestToUpdate =await _timeOffRequestRepository.Get(timeOffRequestId);
@@ -54,8 +57,6 @@ namespace WorkForceManagement.BLL.Services
             {
                 throw new ItemDoesNotExistException();
             }
-            requestToUpdate.ChangeDate = DateTime.Now;
-            requestToUpdate.UpdaterId = currentUserId;
             requestToUpdate.Type = timeOffRequest.Type;
             requestToUpdate.Description = timeOffRequest.Description;
             requestToUpdate.StartDate = timeOffRequest.StartDate;
@@ -63,7 +64,30 @@ namespace WorkForceManagement.BLL.Services
 
            await _timeOffRequestRepository.CreateOrUpdate(requestToUpdate);
             return requestToUpdate;
-        }     
-               
+        }
+
+        public async Task RejectTimeOffRequest(Guid timeOffRequestId, User currentUser)
+        {
+            TimeOffRequest timeOffRequest = await GetTimeOffRequest(timeOffRequestId);
+
+            List<User> users = timeOffRequest.Approvers.ToList();
+
+            bool userIsApprover = timeOffRequest.Approvers.Any(user => user.Id == currentUser.Id); // check if currentUser is approver of timeofRequest
+
+            if(userIsApprover == false)
+                throw new UserIsntApproverException($"User with id: {currentUser.Id} cant approve of this TimeOfRequest");
+
+            timeOffRequest.Status = TimeOffRequestStatus.Rejected;
+            timeOffRequest.ChangeDate = DateTime.Now;
+            timeOffRequest.UpdaterId = currentUser.Id;
+
+            await _timeOffRequestRepository.SaveChanges();
+
+            //TODO send email to teamLeaders and to the user.
+        }
+
+
+
+
     }
 }

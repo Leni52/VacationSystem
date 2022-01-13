@@ -6,7 +6,7 @@ namespace WorkForceManagement.DAL.Entities
     {
         public string Name { get; set; }
         public virtual User TeamLeader { get; set; }
-        public virtual List<User> Members { get; set; } = new List<User>();
+        public virtual List<User> Members { get; set; }
         public string Description { get; set; }
     }
 }

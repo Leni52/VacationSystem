@@ -19,7 +19,9 @@ namespace WorkForceManagement.DAL.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Team>().HasOne(t => t.TeamLeader).WithMany(u=>u.Teams);
+            modelBuilder.Entity<Team>().HasOne(t => t.TeamLeader);
+
+            modelBuilder.Entity<Team>().HasMany(t => t.Members).WithMany(u => u.Teams);
 
             modelBuilder.Entity<TimeOffRequest>().HasOne(t => t.Requester);
 
