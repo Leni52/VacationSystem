@@ -17,10 +17,13 @@ namespace WorkForceManagement.BLL.Services
             _timeOffRequestRepository = timeOffRequestRepository;
         }
        
-        public async Task CreateTimeOffRequest(TimeOffRequest timeOffRequest, string currentUserId)
+        public async Task CreateTimeOffRequest(TimeOffRequest timeOffRequest, User currentUser)
         {
             timeOffRequest.Status = 0;
-            timeOffRequest.CreatorId = currentUserId;
+            timeOffRequest.CreatorId = currentUser.Id;
+            List<User> approvers = currentUser.Teams.Select(team => team.TeamLeader).ToList();
+            approvers.ForEach(user => timeOffRequest.Approvers.Add(user)); // gets all the approvers and adds them to timeOff
+
             await _timeOffRequestRepository.CreateOrUpdate(timeOffRequest);
         }    
 
@@ -36,7 +39,8 @@ namespace WorkForceManagement.BLL.Services
         public async Task<List<TimeOffRequest>> GetAllRequests()
         {
             return await _timeOffRequestRepository.All();
-        }
+        }       
+
         public async Task<TimeOffRequest> GetTimeOffRequest(Guid Id)
         {
             TimeOffRequest timeOffRequest=await _timeOffRequestRepository.Get(Id);
@@ -63,7 +67,24 @@ namespace WorkForceManagement.BLL.Services
 
            await _timeOffRequestRepository.CreateOrUpdate(requestToUpdate);
             return requestToUpdate;
-        }     
-               
+        }
+        public List<TimeOffRequest> GetMyRequests(string currentUserId)
+        {
+            List<TimeOffRequest> allRequests = _timeOffRequestRepository
+              .Find(u => u.CreatorId == currentUserId);
+            return allRequests;
+        }
+
+        public async Task ApproveTimeOffRequest(Guid requestId, User currentUser)
+        {
+            TimeOffRequest timeOffRequest = await _timeOffRequestRepository.Get(requestId);
+           
+            timeOffRequest.Status = TimeOffRequestStatus.Approved;
+            timeOffRequest.ChangeDate = DateTime.Now;
+            timeOffRequest.UpdaterId = currentUser.Id;
+            timeOffRequest.AlreadyApproved.Add(currentUser);
+            await _timeOffRequestRepository.SaveChanges();
+
+        }
     }
 }
