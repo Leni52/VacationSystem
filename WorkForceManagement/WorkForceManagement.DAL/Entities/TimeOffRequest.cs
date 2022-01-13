@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace WorkForceManagement.DAL.Entities
 {
@@ -10,6 +11,7 @@ namespace WorkForceManagement.DAL.Entities
         public string Description { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-
+        public virtual List<User> Approvers { get; set; }
+        public virtual List<User> AlreadyApproved { get; set; }
     }
 }

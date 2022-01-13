@@ -11,5 +11,7 @@ namespace WorkForceManagement.DAL.Entities
         public string CreatorId { get; set; }
         public DateTime ChangeDate { get; set; } = DateTime.Now;
         public string UpdaterId { get; set; }
+        public virtual List<TimeOffRequest> TimeOffRequestsToApprove { get; set; }
+        public virtual List<TimeOffRequest> TimeOffRequestsApproved { get; set; }
     }
 }

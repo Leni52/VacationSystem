@@ -20,6 +20,12 @@ namespace WorkForceManagement.DAL.Data
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<Team>().HasOne(t => t.TeamLeader).WithMany(u=>u.Teams);
+
+            modelBuilder.Entity<TimeOffRequest>().HasOne(t => t.Requester);
+
+            modelBuilder.Entity<TimeOffRequest>().HasMany(t => t.Approvers).WithMany(u => u.TimeOffRequestsToApprove).UsingEntity(join => join.ToTable("UserTimeOffRequestsToApprove"));
+
+            modelBuilder.Entity<TimeOffRequest>().HasMany(t => t.AlreadyApproved).WithMany(u => u.TimeOffRequestsApproved).UsingEntity(join => join.ToTable("UserTimeOffRequestsAlreadyApproved"));
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
