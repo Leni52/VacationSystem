@@ -86,6 +86,32 @@ namespace WorkForceManagement.BLL.Services
             //TODO send email to teamLeaders and to the user.
         }
 
+        public async Task<string> CheckTimeOffRequest(Guid timeOffRequestId)
+        {
+            TimeOffRequest timeOffRequest = await GetTimeOffRequest(timeOffRequestId);
+
+            if (timeOffRequest == null)
+            {
+                throw new ItemDoesNotExistException();
+            }
+            if (timeOffRequest.Status == TimeOffRequestStatus.Rejected)
+                return "Rejected";
+
+            int numberOfApprovers = timeOffRequest.Approvers.ToList().Count; // get all needed approvals
+
+            if (numberOfApprovers == timeOffRequest.AlreadyApproved.ToList().Count) // compare with current approvals
+            {
+                timeOffRequest.Status = TimeOffRequestStatus.Approved;
+                return "Approved";
+            }
+            else
+            {
+                timeOffRequest.Status = TimeOffRequestStatus.Awaiting; // in case it has a Created status
+                return "Awaiting";
+            } 
+                
+        }
+
 
 
 

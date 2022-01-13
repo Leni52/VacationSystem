@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using WorkForceManagement.BLL.Exceptions;
 using WorkForceManagement.BLL.Services;
 using WorkForceManagement.DAL.Entities;
 using WorkForceManagement.DTO.Requests;
@@ -101,5 +102,17 @@ namespace WorkForceManagement.WEB.Controller
             return Ok();
         }
 
+        [HttpPatch("CheckTimeOffRequest/{timeOffRequestId}")]
+        public async Task<ActionResult> CheckTimeOffRequest(Guid timeOffRequestId)
+        {
+            try
+            {
+                return Ok(await _timeOffRequestService.CheckTimeOffRequest(timeOffRequestId));
+            }
+            catch(ItemDoesNotExistException ex)
+            {
+                return NotFound(ex.Message);
+            }                    
+        }
     }
 }

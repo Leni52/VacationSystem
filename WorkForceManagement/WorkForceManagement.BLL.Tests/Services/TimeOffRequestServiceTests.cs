@@ -18,12 +18,15 @@ namespace WorkForceManagement.BLL.Tests.Services
         {
             //arrange
             var requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
-           
+            User currentUser = new User()
+            {
+                UserName = "admin",
+            };
             var sut = new TimeOffRequestService(requestRepositoryStub.Object);
 
             TimeOffRequest timeOffRequest = new TimeOffRequest();
             //act
-            var result = sut.CreateTimeOffRequest(timeOffRequest);
+            var result = sut.CreateTimeOffRequest(timeOffRequest, currentUser);
 
             Assert.NotNull(result);
             //asert
