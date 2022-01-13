@@ -7,11 +7,11 @@ namespace WorkForceManagement.BLL.Services
 {
     public interface ITimeOffRequestService
     {
-        Task CreateTimeOffRequest(TimeOffRequest timeOffRequest);
+        Task CreateTimeOffRequest(TimeOffRequest timeOffRequest, string currentUserId);
        Task<List<TimeOffRequest>> GetAllRequests();
        Task<TimeOffRequest> GetTimeOffRequest(Guid Id);
         Task DeleteTimeOffRequest(Guid Id);
-        Task<TimeOffRequest> UpdateTimeOffRequest(Guid timeOffRequestId, TimeOffRequest request);
+        Task<TimeOffRequest> UpdateTimeOffRequest(Guid timeOffRequestId, TimeOffRequest request, string currentUserId);
     
     }
 }

@@ -17,20 +17,21 @@ namespace WorkForceManagement.BLL.Services
             _timeOffRequestRepository = timeOffRequestRepository;
         }
        
-        public async Task CreateTimeOffRequest(TimeOffRequest timeOffRequest)
+        public async Task CreateTimeOffRequest(TimeOffRequest timeOffRequest, string currentUserId)
         {
-            timeOffRequest.Status = 0;           
+            timeOffRequest.Status = 0;
+            timeOffRequest.CreatorId = currentUserId;
             await _timeOffRequestRepository.CreateOrUpdate(timeOffRequest);
         }    
 
         public async Task  DeleteTimeOffRequest(Guid Id)
         {
             var request =await _timeOffRequestRepository.Get(Id);
-            if (request != null)
+            if (request == null)
             {
-              await _timeOffRequestRepository.Remove(request);
+                throw new ItemDoesNotExistException();
             }
-            throw new ItemDoesNotExistException();
+            await _timeOffRequestRepository.Remove(request);            
         }
         public async Task<List<TimeOffRequest>> GetAllRequests()
         {
@@ -45,7 +46,7 @@ namespace WorkForceManagement.BLL.Services
             }
             return timeOffRequest;
         }
-        public async Task<TimeOffRequest> UpdateTimeOffRequest(Guid timeOffRequestId, TimeOffRequest timeOffRequest)
+        public async Task<TimeOffRequest> UpdateTimeOffRequest(Guid timeOffRequestId, TimeOffRequest timeOffRequest, string currentUserId)
             
         {
             TimeOffRequest requestToUpdate =await _timeOffRequestRepository.Get(timeOffRequestId);
@@ -53,6 +54,8 @@ namespace WorkForceManagement.BLL.Services
             {
                 throw new ItemDoesNotExistException();
             }
+            requestToUpdate.ChangeDate = DateTime.Now;
+            requestToUpdate.UpdaterId = currentUserId;
             requestToUpdate.Type = timeOffRequest.Type;
             requestToUpdate.Description = timeOffRequest.Description;
             requestToUpdate.StartDate = timeOffRequest.StartDate;

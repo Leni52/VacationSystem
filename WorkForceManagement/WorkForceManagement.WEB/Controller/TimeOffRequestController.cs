@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -15,11 +16,13 @@ namespace WorkForceManagement.WEB.Controller
     public class TimeOffRequestController : ControllerBase
     {
         private readonly ITimeOffRequestService _timeOffRequestService;
+        private readonly IUserService _userService;
         private readonly IMapper _mapper;
         public TimeOffRequestController(ITimeOffRequestService timeOffRequestService,
-            IMapper mapper)
+           IUserService userService, IMapper mapper)
         {
             _timeOffRequestService = timeOffRequestService;
+            _userService = userService;
             _mapper = mapper;
         }
 
@@ -48,38 +51,43 @@ namespace WorkForceManagement.WEB.Controller
 
 
         [HttpPost]
-        public ActionResult CreateTimeOffRequest(TimeOffRequestRequestDTO timeOffRequestRequestDTO)
+        public async Task<ActionResult> CreateTimeOffRequestAsync(TimeOffRequestRequestDTO timeOffRequestRequestDTO)
         {
+            User currentUser = await _userService.GetCurrentUser(User);
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
             TimeOffRequest timeOffRequest = _mapper.Map<TimeOffRequest>(timeOffRequestRequestDTO);
             timeOffRequest.Type = (TimeOffRequestType)timeOffRequestRequestDTO.TimeOffRequestType;
-            _timeOffRequestService.CreateTimeOffRequest(timeOffRequest);
+           await _timeOffRequestService.CreateTimeOffRequest(timeOffRequest, currentUser.Id);
             return Ok(timeOffRequest);
         }
 
         [HttpPut("{timeOffRequestId}")]
+        [Authorize(Policy = "TimeOffRequestCreator")]
         public async Task<ActionResult> UpdateTimeOffRequest(Guid timeOffRequestId, TimeOffRequestRequestDTO request)
         {
+            User currentUser = await _userService.GetCurrentUser(User);
             TimeOffRequest timeOffRequest = await _timeOffRequestService.GetTimeOffRequest(timeOffRequestId);
             if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
             _mapper.Map(request, timeOffRequest);
-            var updatedRequest = await _timeOffRequestService.UpdateTimeOffRequest(timeOffRequestId, timeOffRequest);
+            var updatedRequest = await _timeOffRequestService.UpdateTimeOffRequest(timeOffRequestId, timeOffRequest, currentUser.Id);
             return Ok(updatedRequest);
         }
 
         [HttpDelete("{timeOffRequestId}")]
-        public ActionResult DeleteTimeOffRequest(Guid timeOffRequestId)
+        [Authorize(Policy = "TimeOffRequestCreator")]
+        public async Task<ActionResult> DeleteTimeOffRequest(Guid timeOffRequestId)
         {
+            User currentUser = await _userService.GetCurrentUser(User);
             if (!(Guid.Empty == timeOffRequestId))
             {
-                _timeOffRequestService.DeleteTimeOffRequest(timeOffRequestId);
-                return Ok();
+               await _timeOffRequestService.DeleteTimeOffRequest(timeOffRequestId);
+                return NoContent();
             }
             return BadRequest();
         }
