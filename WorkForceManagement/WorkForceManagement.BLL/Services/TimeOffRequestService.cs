@@ -17,12 +17,16 @@ namespace WorkForceManagement.BLL.Services
             _timeOffRequestRepository = timeOffRequestRepository;
         }
        
-        public async Task CreateTimeOffRequest(TimeOffRequest timeOffRequest)
+        public async Task CreateTimeOffRequest(TimeOffRequest timeOffRequest, User currentUser)
         {
-            timeOffRequest.Status = 0;           
-            await _timeOffRequestRepository.CreateOrUpdate(timeOffRequest);
-        }    
+            timeOffRequest.Status = 0;
 
+            List<User> approvers = currentUser.Teams.Select(team => team.TeamLeader).ToList();
+            approvers.ForEach(user => timeOffRequest.Approvers.Add(user)); // gets all the approvers and adds them to timeOff
+
+            await _timeOffRequestRepository.CreateOrUpdate(timeOffRequest);
+
+        }    
         public async Task  DeleteTimeOffRequest(Guid Id)
         {
             var request =await _timeOffRequestRepository.Get(Id);
@@ -60,7 +64,30 @@ namespace WorkForceManagement.BLL.Services
 
            await _timeOffRequestRepository.CreateOrUpdate(requestToUpdate);
             return requestToUpdate;
-        }     
-               
+        }
+
+        public async Task RejectTimeOffRequest(Guid timeOffRequestId, User currentUser)
+        {
+            TimeOffRequest timeOffRequest = await GetTimeOffRequest(timeOffRequestId);
+
+            List<User> users = timeOffRequest.Approvers.ToList();
+
+            bool userIsApprover = timeOffRequest.Approvers.Any(user => user.Id == currentUser.Id); // check if currentUser is approver of timeofRequest
+
+            if(userIsApprover == false)
+                throw new UserIsntApproverException($"User with id: {currentUser.Id} cant approve of this TimeOfRequest");
+
+            timeOffRequest.Status = TimeOffRequestStatus.Rejected;
+            timeOffRequest.ChangeDate = DateTime.Now;
+            timeOffRequest.UpdaterId = currentUser.Id;
+
+            await _timeOffRequestRepository.SaveChanges();
+
+            //TODO send email to teamLeaders and to the user.
+        }
+
+
+
+
     }
 }
