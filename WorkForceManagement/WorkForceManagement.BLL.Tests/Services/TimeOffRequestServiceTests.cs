@@ -11,7 +11,7 @@ using Xunit;
 
 namespace WorkForceManagement.BLL.Tests.Services
 {
- public class TimeOffRequestServiceTests
+    public class TimeOffRequestServiceTests
     {
         //create
         [Fact]
@@ -28,7 +28,7 @@ namespace WorkForceManagement.BLL.Tests.Services
 
             TimeOffRequest timeOffRequest = new TimeOffRequest();
             //act
-            var result = sut.CreateTimeOffRequest(timeOffRequest, currentUser.Id);
+            var result = sut.CreateTimeOffRequest(timeOffRequest, currentUser);
 
             Assert.NotNull(result);
             //asert
@@ -42,18 +42,18 @@ namespace WorkForceManagement.BLL.Tests.Services
             {
                 UserName = "admin",
             };
-           var currentUserId = "abc";
+            var currentUserId = "abc";
             var sut = new TimeOffRequestService(requestRepositoryStub.Object);
 
             TimeOffRequest timeOffRequest = new TimeOffRequest();
             //act
-            var result = sut.CreateTimeOffRequest(timeOffRequest, currentUserId);
+            var result = sut.CreateTimeOffRequest(timeOffRequest, currentUser);
 
             Assert.Null(result);
             //asert
         }
         //delete
-            [Fact]
+        [Fact]
         public void Delete_ValidId_Pass()
         {
             //arrange
@@ -91,11 +91,11 @@ namespace WorkForceManagement.BLL.Tests.Services
             var requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
 
             var sut = new TimeOffRequestService(requestRepositoryStub.Object);
-           
+
             //act
             var result = sut.GetAllRequests();
             //asert
-            Assert.IsType<List<TimeOffRequest>>(await sut.GetAllRequests());      
+            Assert.IsType<List<TimeOffRequest>>(await sut.GetAllRequests());
         }
         [Fact]
         public async void GetRequest_ValidRequest_Pass()
@@ -107,11 +107,11 @@ namespace WorkForceManagement.BLL.Tests.Services
             TimeOffRequest request = new TimeOffRequest();
             Guid reqId = request.Id;
             //act
-            var result =await sut.GetTimeOffRequest(reqId);
+            var result = await sut.GetTimeOffRequest(reqId);
             //asert
-            Assert.IsType<TimeOffRequest>(result);               
+            Assert.IsType<TimeOffRequest>(result);
         }
-        
+
         [Fact]
         public async void GetRequest_InvalidRequest_Fail()
         {
