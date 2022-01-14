@@ -131,5 +131,18 @@ namespace WorkForceManagement.BLL.Services
             timeOffRequest.AlreadyApproved.Add(currentUser);
             await _timeOffRequestRepository.SaveChanges();
         }
+
+        public async Task ApproveAutomatically(Guid requestId, User user)
+        {
+            TimeOffRequest request = await  _timeOffRequestRepository.Get(requestId);
+            if (request.Type == TimeOffRequestType.SickLeave)
+            {
+                request.Status = TimeOffRequestStatus.Approved;
+            }           
+            if (request.Approvers.Count == 0)
+            { //if the user doesnt belong to any team
+                request.Status = TimeOffRequestStatus.Approved;
+            }            
+        }
     }
 }
