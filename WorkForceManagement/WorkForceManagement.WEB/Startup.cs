@@ -97,7 +97,8 @@ namespace WorkForceManagement.WEB
 
             //policy
             services.AddTransient<IAuthorizationHandler, TimeOffRequestCreatorHandler>();
-           
+            services.AddTransient<IAuthorizationHandler, TeamLeaderHandler>();
+
             // IdentityServer
             var builder = services.AddIdentityServer((options) =>
             {
@@ -116,6 +117,8 @@ namespace WorkForceManagement.WEB
                 {
                     options.AddPolicy("TimeOffRequestCreator", policy =>
                     policy.Requirements.Add(new TimeOffRequestCreatorRequirement()));
+                    options.AddPolicy("TeamLeader", policy =>
+                    policy.Requirements.Add(new TeamLeaderRequirement()));
                     options.AddPolicy("Admin", policy =>
                            policy.RequireRole("Admin"));
 

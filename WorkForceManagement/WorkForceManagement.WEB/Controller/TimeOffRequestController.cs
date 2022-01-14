@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -67,6 +68,7 @@ namespace WorkForceManagement.WEB.Controller
         }
 
         [HttpPut("{timeOffRequestId}")]
+        [Authorize(Policy = "TimeOffRequestCreator")]
         public async Task<ActionResult> UpdateTimeOffRequest(Guid timeOffRequestId, TimeOffRequestRequestDTO request)
         {
             User currentUser = await _userService.GetCurrentUser(User);
@@ -81,6 +83,7 @@ namespace WorkForceManagement.WEB.Controller
         }
 
         [HttpDelete("{timeOffRequestId}")]
+        [Authorize(Policy = "TimeOffRequestCreator")]
         public ActionResult DeleteTimeOffRequest(Guid timeOffRequestId)
         {
             if (!(Guid.Empty == timeOffRequestId))
@@ -102,6 +105,7 @@ namespace WorkForceManagement.WEB.Controller
             return Ok(myRequestsDTO);
         }
         [HttpPatch("ApproveTimeOffRequest/{timeOffRequestId}")]
+        [Authorize(Policy = "TeamLeader")]
         public async Task<ActionResult> ApproveTimeOffRequest(Guid timeOffRequestId)
         {
             User currentUser = await _userService.GetCurrentUser(User);
@@ -109,6 +113,7 @@ namespace WorkForceManagement.WEB.Controller
             return Ok();
         }
         [HttpPatch("RejectTimeOffRequest/{timeOffRequestId}")]
+        [Authorize(Policy = "TeamLeader")]
         public async Task<ActionResult> RejectTimeOffRequest(Guid timeOffRequestId)
         {
             User currentUser = await _userService.GetCurrentUser(User);
