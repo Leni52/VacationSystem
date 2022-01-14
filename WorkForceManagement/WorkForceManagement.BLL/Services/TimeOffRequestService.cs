@@ -23,7 +23,7 @@ namespace WorkForceManagement.BLL.Services
 
             List<User> approvers = currentUser.Teams.Select(team => team.TeamLeader).ToList();
             approvers.ForEach(user => timeOffRequest.Approvers.Add(user)); // gets all the approvers and adds them to timeOff
-
+            approvers.ForEach(user => user.TimeOffRequestsToApprove.Add(timeOffRequest));
             await _timeOffRequestRepository.CreateOrUpdate(timeOffRequest);
 
         }
