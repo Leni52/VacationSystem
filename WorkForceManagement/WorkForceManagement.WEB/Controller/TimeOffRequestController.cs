@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using WorkForceManagement.BLL.Exceptions;
 using WorkForceManagement.BLL.Services;
+using WorkForceManagement.DAL;
 using WorkForceManagement.DAL.Entities;
 using WorkForceManagement.DTO.Requests;
 using WorkForceManagement.DTO.Responses;
@@ -18,14 +19,17 @@ namespace WorkForceManagement.WEB.Controller
     {
         private readonly ITimeOffRequestService _timeOffRequestService;
         private readonly IUserService _userService;
+        private readonly IMailService _mailService;
         private readonly IMapper _mapper;
         public TimeOffRequestController(
             ITimeOffRequestService timeOffRequestService,
             IUserService userSerivce,
+            IMailService mailService,
             IMapper mapper)
         {
             _timeOffRequestService = timeOffRequestService;
             _userService = userSerivce;
+            _mailService = mailService;
             _mapper = mapper;
         }
 
@@ -113,6 +117,25 @@ namespace WorkForceManagement.WEB.Controller
 
             await _timeOffRequestService.AnswerTimeOffRequest(timeOffRequestId, isApproved, currentUser);
 
+            if(await _timeOffRequestService.CheckTimeOffRequest(timeOffRequestId) == "Approved")
+            {
+                List<User> usersToSendEmailTo = await _userService.GetUsersUnderTeamLeader(currentUser);
+
+                if(usersToSendEmailTo.Count != 0)
+                {
+                    foreach (User u in usersToSendEmailTo)
+                    {
+                        await _mailService.SendEmail(new MailRequest()
+                        {
+                            ToEmail = u.Email,
+                            Body = "TeamLeader OOO",
+                            Subject = $"{currentUser.UserName} is OOO until {_timeOffRequestService.GetTimeOffRequest(timeOffRequestId).Result.EndDate}!"
+                        });
+                    }
+                }
+                
+            }
+
             return Ok();
         }
 
@@ -128,7 +151,5 @@ namespace WorkForceManagement.WEB.Controller
                 return NotFound(ex.Message);
             }
         }
-
-        
     }
 }

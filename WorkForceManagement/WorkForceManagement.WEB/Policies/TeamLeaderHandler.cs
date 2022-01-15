@@ -38,7 +38,7 @@ namespace WorkForceManagement.WEB.Policies
             if (request == null || user == null)
             {
                 context.Fail();
-                await System.Threading.Tasks.Task.CompletedTask;
+                await Task.CompletedTask;
                 return;
             }
             if (request.Approvers.Contains(user))
@@ -46,7 +46,7 @@ namespace WorkForceManagement.WEB.Policies
                 context.Succeed(requirement);
                 return;
             }            
-            await System.Threading.Tasks.Task.CompletedTask;
+            await Task.CompletedTask;
             return;
         }
     }

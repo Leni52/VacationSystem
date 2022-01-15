@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using WorkForceManagement.BLL.Exceptions;
@@ -10,10 +11,12 @@ namespace WorkForceManagement.BLL.Services
 {
     public class UserService : IUserService
     {
+        private readonly ITeamService _teamService;
         private readonly IAuthUserManager _userManager;
 
-        public UserService(IAuthUserManager userManager)
+        public UserService(ITeamService teamService, IAuthUserManager userManager)
         {
+            _teamService = teamService;
             _userManager = userManager;
         }
 
@@ -78,7 +81,7 @@ namespace WorkForceManagement.BLL.Services
 
         public List<Team> GetUserTeams(User currentUser)
         {
-            throw new NotImplementedException();
+            return currentUser.Teams.ToList();
         }
 
         public async Task<User> GetUserById(Guid id)
@@ -108,6 +111,19 @@ namespace WorkForceManagement.BLL.Services
             {
                 await _userManager.RemoveRoleFromUser(user, "Admin");
             }
+        }
+
+        public async Task<List<User>> GetUsersUnderTeamLeader(User user)
+        {
+            List<User> users = new List<User>();
+            List<Team> teams = _teamService.GetAllTeams().Result.Where(t => t.TeamLeader == user).ToList();
+
+            foreach(Team t in teams)
+            {
+                users.AddRange(await _teamService.GetAllTeamMembers(t.Id));
+            }
+
+            return users;
         }
     }
 }
