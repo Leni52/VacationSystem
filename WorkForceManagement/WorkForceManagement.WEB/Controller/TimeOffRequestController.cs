@@ -104,22 +104,15 @@ namespace WorkForceManagement.WEB.Controller
             var myRequestsDTO = _mapper.Map<List<TimeOffRequestRequestDTO>>(myRequests);
             return Ok(myRequestsDTO);
         }
-        [HttpPatch("ApproveTimeOffRequest/{timeOffRequestId}")]
+
+        [HttpPatch("{timeOffRequestId}/AnswerTimeOffRequest/{isApproved}")]
         [Authorize(Policy = "TeamLeader")]
-        public async Task<ActionResult> ApproveTimeOffRequest(Guid timeOffRequestId)
-        {
-            User currentUser = await _userService.GetCurrentUser(User);
-            await _timeOffRequestService.ApproveTimeOffRequest(timeOffRequestId, currentUser);
-            return Ok();
-        }
-        [HttpPatch("RejectTimeOffRequest/{timeOffRequestId}")]
-        [Authorize(Policy = "TeamLeader")]
-        public async Task<ActionResult> RejectTimeOffRequest(Guid timeOffRequestId)
+        public async Task<ActionResult> AnswerTimeOffRequest(Guid timeOffRequestId, bool isApproved)
         {
             User currentUser = await _userService.GetCurrentUser(User);
 
-            await _timeOffRequestService.RejectTimeOffRequest(timeOffRequestId, currentUser);
-            //await _timeOffRequestService
+            await _timeOffRequestService.AnswerTimeOffRequest(timeOffRequestId, isApproved, currentUser);
+
             return Ok();
         }
 
@@ -135,5 +128,7 @@ namespace WorkForceManagement.WEB.Controller
                 return NotFound(ex.Message);
             }
         }
+
+        
     }
 }
