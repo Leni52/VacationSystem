@@ -122,13 +122,17 @@ namespace WorkForceManagement.BLL.Services
                 await ApproveTimeOffRequest(timeOffRequest, currentUser);
             } else
             {
-                await RejectTimeOffRequest(timeOffRequest);
+                await RejectTimeOffRequest(timeOffRequest, currentUser);
             }
         }
 
-        public async Task RejectTimeOffRequest(TimeOffRequest timeOffRequest)
+        public async Task RejectTimeOffRequest(TimeOffRequest timeOffRequest, User currentUser)
         {
             timeOffRequest.Status = TimeOffRequestStatus.Rejected;
+
+            // removes the request from the approvers timeOffRequestsToApprove
+            timeOffRequest.Approvers.ForEach(approver => approver.TimeOffRequestsToApprove.Remove(timeOffRequest));
+
             await _timeOffRequestRepository.SaveChanges();
             //TODO send email to teamLeaders and to the user.
         }
@@ -155,6 +159,13 @@ namespace WorkForceManagement.BLL.Services
             if (numberOfApprovers == timeOffRequest.AlreadyApproved.ToList().Count) // compare with current approvals
             {
                 timeOffRequest.Status = TimeOffRequestStatus.Approved;
+
+                // To all approvers, removing the request from toApprove and adding it to Approved list
+                List<User> approvers = timeOffRequest.Approvers.ToList();
+
+                approvers.ForEach(approver => approver.TimeOffRequestsToApprove.Remove(timeOffRequest));
+                approvers.ForEach(approver => approver.TimeOffRequestsApproved.Add(timeOffRequest));
+
                 await _timeOffRequestRepository.SaveChanges();
                 return "Approved";
             }
