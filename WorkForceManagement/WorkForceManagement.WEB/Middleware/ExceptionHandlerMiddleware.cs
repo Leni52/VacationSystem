@@ -35,6 +35,7 @@ namespace WorkForceManagement.WEB.Middleware
                         break;
                     case TeamWithSameNameExistsException:
                     case UsernameTakenException:
+                    case TimeOffRequestIsClosedException:
                     case ItemAlreadyExistsException e:
                         response.StatusCode = (int)HttpStatusCode.Conflict;
                         break;

@@ -23,7 +23,7 @@ namespace WorkForceManagement.DAL.Data
 
             modelBuilder.Entity<Team>().HasMany(t => t.Members).WithMany(u => u.Teams);
 
-            modelBuilder.Entity<TimeOffRequest>().HasOne(t => t.Requester);
+            modelBuilder.Entity<TimeOffRequest>().HasOne(t => t.Requester).WithMany(u => u.CreatedTimeOffRequests);
 
             modelBuilder.Entity<TimeOffRequest>().HasMany(t => t.Approvers).WithMany(u => u.TimeOffRequestsToApprove).UsingEntity(join => join.ToTable("UserTimeOffRequestsToApprove"));
 

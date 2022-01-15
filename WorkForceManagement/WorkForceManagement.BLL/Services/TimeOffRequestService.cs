@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using WorkForceManagement.BLL.Exceptions;
 using WorkForceManagement.DAL.Entities;
@@ -21,11 +20,38 @@ namespace WorkForceManagement.BLL.Services
         {
             timeOffRequest.Status = 0;
 
-            List<User> approvers = currentUser.Teams.Select(team => team.TeamLeader).ToList();
-            approvers.ForEach(user => timeOffRequest.Approvers.Add(user)); // gets all the approvers and adds them to timeOff
+            List<User> approvers = GetApprovers(currentUser);
+
+            approvers.ForEach(user => timeOffRequest.Approvers.Add(user));
             approvers.ForEach(user => user.TimeOffRequestsToApprove.Add(timeOffRequest));
+            currentUser.CreatedTimeOffRequests.Add(timeOffRequest);
+
             await _timeOffRequestRepository.CreateOrUpdate(timeOffRequest);
 
+            await CheckTimeOffRequest(timeOffRequest.Id);
+        }
+        private List<User> GetApprovers(User currentUser)
+        { // gets all the approvers and checks if they themselves are not in a timeoff
+
+            List<User> potentialApprovers = currentUser.Teams.Select(team => team.TeamLeader).ToList();
+            List<User> validatedApprovers = new List<User>();
+
+            foreach(User user in potentialApprovers)
+            {
+                bool teamLeaderIsAway = false;
+                foreach(TimeOffRequest timeOffRequest in user.CreatedTimeOffRequests)
+                {
+                    if(timeOffRequest.Status == TimeOffRequestStatus.Approved &&
+                        DateTime.Now >= timeOffRequest.StartDate && DateTime.Now <= timeOffRequest.EndDate)
+                    { // if the leader has an approved tof in the time of creating the request dont make him approver
+                        teamLeaderIsAway = true;
+                        break;
+                    }
+                }
+                if (teamLeaderIsAway == false)
+                    validatedApprovers.Add(user);
+            }
+            return validatedApprovers;
         }
         public async Task DeleteTimeOffRequest(Guid Id)
         {
@@ -33,8 +59,8 @@ namespace WorkForceManagement.BLL.Services
             if (request != null)
             {
                 await _timeOffRequestRepository.Remove(request);
-            }
-            throw new ItemDoesNotExistException();
+            } else 
+                throw new ItemDoesNotExistException();
         }
         public async Task<List<TimeOffRequest>> GetAllRequests()
         {
@@ -74,23 +100,47 @@ namespace WorkForceManagement.BLL.Services
             return allRequests;
         }
 
-        public async Task RejectTimeOffRequest(Guid timeOffRequestId, User currentUser)
+        public async Task AnswerTimeOffRequest(Guid timeOffRequestId, bool isApproved, User currentUser)
         {
             TimeOffRequest timeOffRequest = await GetTimeOffRequest(timeOffRequestId);
 
-            List<User> users = timeOffRequest.Approvers.ToList();
+            if(timeOffRequest.Status == TimeOffRequestStatus.Approved ||
+                timeOffRequest.Status == TimeOffRequestStatus.Rejected)
+            { // the time off request has already been decided
+                throw new TimeOffRequestIsClosedException($"Time off request with id:{timeOffRequestId}, is already closed");
+            }
 
-            bool userIsApprover = timeOffRequest.Approvers.Any(user => user.Id == currentUser.Id); // check if currentUser is approver of timeofRequest
+            bool currentUserIsApprover = timeOffRequest.Approvers.Any(user => user.Id == currentUser.Id);
+            if (currentUserIsApprover == false)
+                throw new UserIsntApproverException($"User with Id:{currentUser.Id}, cant approve this Time Off Request");
 
-            if (userIsApprover == false)
-                throw new UserIsntApproverException($"User with id: {currentUser.Id} cant approve of this TimeOfRequest");
-
-            timeOffRequest.Status = TimeOffRequestStatus.Rejected;
             timeOffRequest.ChangeDate = DateTime.Now;
             timeOffRequest.UpdaterId = currentUser.Id;
 
+            if (isApproved)
+            {
+                await ApproveTimeOffRequest(timeOffRequest, currentUser);
+            } else
+            {
+                await RejectTimeOffRequest(timeOffRequest, currentUser);
+            }
+        }
+
+        public async Task RejectTimeOffRequest(TimeOffRequest timeOffRequest, User currentUser)
+        {
+            timeOffRequest.Status = TimeOffRequestStatus.Rejected;
+
+            // removes the request from the approvers timeOffRequestsToApprove
+            timeOffRequest.Approvers.ForEach(approver => approver.TimeOffRequestsToApprove.Remove(timeOffRequest));
+
             await _timeOffRequestRepository.SaveChanges();
             //TODO send email to teamLeaders and to the user.
+        }
+        public async Task ApproveTimeOffRequest(TimeOffRequest timeOffRequest, User currentUser)
+        {
+            timeOffRequest.AlreadyApproved.Add(currentUser);
+            await _timeOffRequestRepository.SaveChanges();
+            await CheckTimeOffRequest(timeOffRequest.Id);
         }
 
         public async Task<string> CheckTimeOffRequest(Guid timeOffRequestId)
@@ -109,27 +159,22 @@ namespace WorkForceManagement.BLL.Services
             if (numberOfApprovers == timeOffRequest.AlreadyApproved.ToList().Count) // compare with current approvals
             {
                 timeOffRequest.Status = TimeOffRequestStatus.Approved;
+
+                // To all approvers, removing the request from toApprove and adding it to Approved list
+                List<User> approvers = timeOffRequest.Approvers.ToList();
+
+                approvers.ForEach(approver => approver.TimeOffRequestsToApprove.Remove(timeOffRequest));
+                approvers.ForEach(approver => approver.TimeOffRequestsApproved.Add(timeOffRequest));
+
+                await _timeOffRequestRepository.SaveChanges();
                 return "Approved";
             }
             else
             {
                 timeOffRequest.Status = TimeOffRequestStatus.Awaiting; // in case it has a Created status
+                await _timeOffRequestRepository.SaveChanges();
                 return "Awaiting";
             }
-
-        }
-
-        public async Task ApproveTimeOffRequest(Guid requestId, User currentUser)
-        {
-            TimeOffRequest timeOffRequest = await _timeOffRequestRepository.Get(requestId);
-            if (timeOffRequest.AlreadyApproved.Contains(currentUser))
-            {
-                throw new AlreadyApprovedByThisUserException("You already approved this request.");
-            }
-            timeOffRequest.ChangeDate = DateTime.Now;
-            timeOffRequest.UpdaterId = currentUser.Id;
-            timeOffRequest.AlreadyApproved.Add(currentUser);
-            await _timeOffRequestRepository.SaveChanges();
         }
 
         public async Task ApproveAutomatically(Guid requestId, User user)
