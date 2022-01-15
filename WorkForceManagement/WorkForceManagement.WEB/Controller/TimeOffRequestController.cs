@@ -64,7 +64,7 @@ namespace WorkForceManagement.WEB.Controller
 
             timeOffRequest.Type = (TimeOffRequestType)timeOffRequestRequestDTO.TimeOffRequestType;
             await _timeOffRequestService.CreateTimeOffRequest(timeOffRequest, currentUser);
-            return Ok(timeOffRequest);
+            return Ok(timeOffRequestRequestDTO);
         }
 
         [HttpPut("{timeOffRequestId}")]
@@ -84,11 +84,11 @@ namespace WorkForceManagement.WEB.Controller
 
         [HttpDelete("{timeOffRequestId}")]
         [Authorize(Policy = "TimeOffRequestCreator")]
-        public ActionResult DeleteTimeOffRequest(Guid timeOffRequestId)
+        public async  Task<ActionResult> DeleteTimeOffRequest(Guid timeOffRequestId)
         {
             if (!(Guid.Empty == timeOffRequestId))
             {
-                _timeOffRequestService.DeleteTimeOffRequest(timeOffRequestId);
+                await _timeOffRequestService.DeleteTimeOffRequest(timeOffRequestId);
                 return NoContent();
             }
             return BadRequest();
