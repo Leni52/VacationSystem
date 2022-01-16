@@ -38,9 +38,11 @@ namespace WorkForceManagement.WEB.Controller
         {
             List<TimeOffRequestResponseDTO> timeOffRequestResponseModel =
                 new List<TimeOffRequestResponseDTO>();
+            
             var requests = await _timeOffRequestService.GetAllRequests();
 
             timeOffRequestResponseModel = _mapper.Map<List<TimeOffRequestResponseDTO>>(requests);
+            
             return Ok(timeOffRequestResponseModel);
         }
 
@@ -48,11 +50,14 @@ namespace WorkForceManagement.WEB.Controller
         public async Task<ActionResult<TimeOffRequestResponseDTO>> GetTimeOffRequest(Guid timeOffRequestId)
         {
             TimeOffRequest requestFromDB = await _timeOffRequestService.GetTimeOffRequest(timeOffRequestId);
+            
             if (requestFromDB == null)
             {
                 return NotFound("TimeOff Request doesn't exist.");
             }
+            
             var requestModel = _mapper.Map<TimeOffRequestResponseDTO>(requestFromDB);
+            
             return Ok(requestModel);
         }
 
@@ -63,11 +68,15 @@ namespace WorkForceManagement.WEB.Controller
             {
                 return BadRequest(ModelState);
             }
+            
             User currentUser = await _userService.GetCurrentUser(User);
+            
             TimeOffRequest timeOffRequest = _mapper.Map<TimeOffRequest>(timeOffRequestRequestDTO);
 
             timeOffRequest.Type = (TimeOffRequestType)timeOffRequestRequestDTO.TimeOffRequestType;
+            
             await _timeOffRequestService.CreateTimeOffRequest(timeOffRequest, currentUser);
+            
             return Ok(timeOffRequestRequestDTO);
         }
 
@@ -76,13 +85,18 @@ namespace WorkForceManagement.WEB.Controller
         public async Task<ActionResult> UpdateTimeOffRequest(Guid timeOffRequestId, TimeOffRequestRequestDTO request)
         {
             User currentUser = await _userService.GetCurrentUser(User);
+            
             TimeOffRequest timeOffRequest = await _timeOffRequestService.GetTimeOffRequest(timeOffRequestId);
+            
             if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
+            
             _mapper.Map(request, timeOffRequest);
+            
             var updatedRequest = await _timeOffRequestService.UpdateTimeOffRequest(timeOffRequestId, timeOffRequest, currentUser.Id);
+            
             return Ok(updatedRequest);
         }
 
@@ -99,13 +113,15 @@ namespace WorkForceManagement.WEB.Controller
         }
 
         [HttpGet("MyRequests")]
+        [Authorize]
         public async Task<ActionResult<List<TimeOffRequest>>> GetMyRequests()
         {
-
             User currentUser = await _userService.GetCurrentUser(User);
-            List<TimeOffRequest> myRequests = new List<TimeOffRequest>();
-            myRequests = _timeOffRequestService.GetMyRequests(currentUser.Id);
-            var myRequestsDTO = _mapper.Map<List<TimeOffRequestRequestDTO>>(myRequests);
+
+            List<TimeOffRequest> myRequests = await _timeOffRequestService.GetMyRequests(currentUser.Id);
+            
+            var myRequestsDTO = _mapper.Map<List<TimeOffRequestResponseDTO>>(myRequests);
+            
             return Ok(myRequestsDTO);
         }
 
@@ -133,7 +149,6 @@ namespace WorkForceManagement.WEB.Controller
                         });
                     }
                 }
-                
             }
 
             return Ok();

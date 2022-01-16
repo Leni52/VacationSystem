@@ -19,6 +19,7 @@ namespace WorkForceManagement.BLL.Services
         public async Task CreateTimeOffRequest(TimeOffRequest timeOffRequest, User currentUser)
         {
             timeOffRequest.Status = 0;
+            timeOffRequest.CreatorId = currentUser.Id;
 
             List<User> approvers = GetApprovers(currentUser);
 
@@ -93,11 +94,11 @@ namespace WorkForceManagement.BLL.Services
             await _timeOffRequestRepository.CreateOrUpdate(requestToUpdate);
             return requestToUpdate;
         }
-        public List<TimeOffRequest> GetMyRequests(string currentUserId)
+        public async Task<List<TimeOffRequest>> GetMyRequests(string currentUserId)
         {
-            List<TimeOffRequest> allRequests = _timeOffRequestRepository
-              .Find(u => u.CreatorId == currentUserId);
-            return allRequests;
+            List<TimeOffRequest> allRequests = await _timeOffRequestRepository.All();
+
+            return allRequests.Where(u => u.CreatorId == currentUserId).ToList();
         }
 
         public async Task AnswerTimeOffRequest(Guid timeOffRequestId, bool isApproved, User currentUser)
