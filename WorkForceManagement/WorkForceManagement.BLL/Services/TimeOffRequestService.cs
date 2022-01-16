@@ -164,7 +164,6 @@ namespace WorkForceManagement.BLL.Services
                 // To all approvers, removing the request from toApprove and adding it to Approved list
                 List<User> approvers = timeOffRequest.Approvers.ToList();
 
-                approvers.ForEach(approver => approver.TimeOffRequestsToApprove.Remove(timeOffRequest));
                 approvers.ForEach(approver => approver.TimeOffRequestsApproved.Add(timeOffRequest));
 
                 await _timeOffRequestRepository.SaveChanges();

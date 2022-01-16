@@ -125,8 +125,8 @@ namespace WorkForceManagement.WEB.Controller
             return Ok(myRequestsDTO);
         }
 
-        [HttpPatch("{timeOffRequestId}/AnswerTimeOffRequest/{isApproved}")]
-        [Authorize(Policy = "TeamLeader")]
+        [HttpPatch("{timeOffRequestId}/AnswerTimeOffRequest/{isApproved:bool}")]
+        //[Authorize(Policy = "TeamLeader")]
         public async Task<ActionResult> AnswerTimeOffRequest(Guid timeOffRequestId, bool isApproved)
         {
             User currentUser = await _userService.GetCurrentUser(User);
