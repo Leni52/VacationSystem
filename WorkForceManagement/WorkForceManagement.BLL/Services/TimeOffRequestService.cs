@@ -30,7 +30,10 @@ namespace WorkForceManagement.BLL.Services
             currentUser.CreatedTimeOffRequests.Add(timeOffRequest);
 
             await _timeOffRequestRepository.CreateOrUpdate(timeOffRequest);
-
+            if (timeOffRequest.Type == TimeOffRequestType.SickLeave)
+            {
+                await ApproveAutomatically(timeOffRequest.Id, currentUser);
+            }
             await CheckTimeOffRequest(timeOffRequest.Id);
         }
         private List<User> GetApprovers(User currentUser)
