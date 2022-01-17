@@ -17,15 +17,15 @@ namespace WorkForceManagement.WEB.Controller
     public class TimeOffRequestController : ControllerBase
     {
         private readonly ITimeOffRequestService _timeOffRequestService;
-        private readonly IUserService _userService;
+        private readonly IUserService _userService;      
         private readonly IMapper _mapper;
         public TimeOffRequestController(
-            ITimeOffRequestService timeOffRequestService,
-            IUserService userSerivce,
+            ITimeOffRequestService timeOffRequestService,           
+            IUserService userService,
             IMapper mapper)
         {
-            _timeOffRequestService = timeOffRequestService;
-            _userService = userSerivce;
+            _timeOffRequestService = timeOffRequestService;         
+            _userService = userService;
             _mapper = mapper;
         }
 
@@ -44,10 +44,7 @@ namespace WorkForceManagement.WEB.Controller
         public async Task<ActionResult<TimeOffRequestResponseDTO>> GetTimeOffRequest(Guid timeOffRequestId)
         {
             TimeOffRequest requestFromDB = await _timeOffRequestService.GetTimeOffRequest(timeOffRequestId);
-            if (requestFromDB == null)
-            {
-                return NotFound("TimeOff Request doesn't exist.");
-            }
+            
             var requestModel = _mapper.Map<TimeOffRequestResponseDTO>(requestFromDB);
             return Ok(requestModel);
         }

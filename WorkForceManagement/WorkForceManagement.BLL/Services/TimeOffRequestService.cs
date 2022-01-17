@@ -21,8 +21,10 @@ namespace WorkForceManagement.BLL.Services
 
         public async Task CreateTimeOffRequest(TimeOffRequest timeOffRequest, User currentUser)
         {
+            
             timeOffRequest.Status = 0;
-
+            timeOffRequest.CreatorId = currentUser.Id;
+            timeOffRequest.UpdaterId = currentUser.Id;
             List<User> approvers = GetApprovers(currentUser);
 
             approvers.ForEach(user => timeOffRequest.Approvers.Add(user));
@@ -146,7 +148,8 @@ namespace WorkForceManagement.BLL.Services
 
             //email to requester            
             MailRequest mailRequest = new MailRequest();
-            mailRequest.Body = "Your request has been rejected.";
+            mailRequest.Body = $"Your request with start date: {timeOffRequest.StartDate} " +
+                $"and end date: {timeOffRequest.EndDate} has been rejected.";
             mailRequest.Subject = "Rejected request.";
             mailRequest.ToEmail = timeOffRequest.Requester.Email;
             await _mailService.SendEmail(mailRequest);
@@ -157,7 +160,8 @@ namespace WorkForceManagement.BLL.Services
             await _timeOffRequestRepository.SaveChanges();
             //email to requester            
             MailRequest mailRequest = new MailRequest();
-            mailRequest.Body = "Your request has been approved.";
+            mailRequest.Body = $"Your request with start date: {timeOffRequest.StartDate} and" +
+                $"end date: {timeOffRequest.EndDate} has been approved.";
             mailRequest.Subject = "Approved request.";
             mailRequest.ToEmail = timeOffRequest.Requester.Email;
             await _mailService.SendEmail(mailRequest);
@@ -206,7 +210,8 @@ namespace WorkForceManagement.BLL.Services
                 request.Status = TimeOffRequestStatus.Approved;
                 //email to requester            
                 MailRequest mailRequest = new MailRequest();
-                mailRequest.Body = "Your request for sick leave has been automatically approved.";
+                mailRequest.Body = $"Your request for sick leave between {request.StartDate}" +
+                    $"and {request.EndDate}  has been automatically approved.";
                 mailRequest.Subject = "Approved request.";
                 mailRequest.ToEmail = request.Requester.Email;
                 await _mailService.SendEmail(mailRequest);
@@ -216,7 +221,8 @@ namespace WorkForceManagement.BLL.Services
                 request.Status = TimeOffRequestStatus.Approved;
                 //email to requester            
                 MailRequest mailRequest = new MailRequest();
-                mailRequest.Body = "Your request has been approved.";
+                mailRequest.Body = $"Your request with start date: {request.StartDate} and" +
+                $"end date: {request.EndDate} has been approved.";
                 mailRequest.Subject = "Approved request.";
                 mailRequest.ToEmail = request.Requester.Email;
                 await _mailService.SendEmail(mailRequest);
