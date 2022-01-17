@@ -76,24 +76,6 @@ namespace WorkForceManagement.WEB.Controller
             timeOffRequest.Type = (TimeOffRequestType)timeOffRequestRequestDTO.TimeOffRequestType;
             
             await _timeOffRequestService.CreateTimeOffRequest(timeOffRequest, currentUser);
-
-            if(await _timeOffRequestService.CheckTimeOffRequest(timeOffRequest.Id) == "Approved")
-            {
-                List<User> usersToSendEmailTo = await _userService.GetUsersUnderTeamLeader(currentUser);
-
-                if (usersToSendEmailTo.Count != 0)
-                {
-                    foreach (User u in usersToSendEmailTo)
-                    {
-                        await _mailService.SendEmail(new MailRequest()
-                        {
-                            ToEmail = u.Email,
-                            Body = "TeamLeader OOO",
-                            Subject = $"{currentUser.UserName} is OOO until {_timeOffRequestService.GetTimeOffRequest(timeOffRequest.Id).Result.EndDate}!"
-                        });
-                    }
-                }
-            }
             
             return Ok(timeOffRequestRequestDTO);
         }
@@ -150,24 +132,6 @@ namespace WorkForceManagement.WEB.Controller
             User currentUser = await _userService.GetCurrentUser(User);
 
             await _timeOffRequestService.AnswerTimeOffRequest(timeOffRequestId, isApproved, currentUser);
-
-            if(await _timeOffRequestService.CheckTimeOffRequest(timeOffRequestId) == "Approved")
-            {
-                List<User> usersToSendEmailTo = await _userService.GetUsersUnderTeamLeader(currentUser);
-
-                if(usersToSendEmailTo.Count != 0)
-                {
-                    foreach (User u in usersToSendEmailTo)
-                    {
-                        await _mailService.SendEmail(new MailRequest()
-                        {
-                            ToEmail = u.Email,
-                            Body = "TeamLeader OOO",
-                            Subject = $"{currentUser.UserName} is OOO until {_timeOffRequestService.GetTimeOffRequest(timeOffRequestId).Result.EndDate}!"
-                        });
-                    }
-                }
-            }
 
             return Ok();
         }

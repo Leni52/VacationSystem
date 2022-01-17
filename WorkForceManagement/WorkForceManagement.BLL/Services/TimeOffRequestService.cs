@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WorkForceManagement.BLL.Exceptions;
+using WorkForceManagement.DAL;
 using WorkForceManagement.DAL.Entities;
 using WorkForceManagement.DAL.Repositories;
 
@@ -11,9 +12,14 @@ namespace WorkForceManagement.BLL.Services
     public class TimeOffRequestService : ITimeOffRequestService
     {
         private readonly IRepository<TimeOffRequest> _timeOffRequestRepository;
-        public TimeOffRequestService(IRepository<TimeOffRequest> timeOffRequestRepository)
+        private readonly IUserService _userService;
+        private readonly IMailService _mailService;
+
+        public TimeOffRequestService(IRepository<TimeOffRequest> timeOffRequestRepository, IUserService userService, IMailService mailService)
         {
             _timeOffRequestRepository = timeOffRequestRepository;
+            _userService = userService;
+            _mailService = mailService;
         }
 
         public async Task CreateTimeOffRequest(TimeOffRequest timeOffRequest, User currentUser)
@@ -153,9 +159,15 @@ namespace WorkForceManagement.BLL.Services
                 throw new ItemDoesNotExistException();
             }
             if (timeOffRequest.Status == TimeOffRequestStatus.Rejected)
+            {
                 return "Rejected";
+            }
+            else if (timeOffRequest.Status == TimeOffRequestStatus.Approved)
+            {
+                return "Approved";
+            }
 
-            int numberOfApprovers = timeOffRequest.Approvers.ToList().Count; // get all needed approvals
+            int numberOfApprovers = timeOffRequest.Approvers.ToList().Count;
 
             if (numberOfApprovers == timeOffRequest.AlreadyApproved.ToList().Count) // compare with current approvals
             {
@@ -165,8 +177,10 @@ namespace WorkForceManagement.BLL.Services
                 List<User> approvers = timeOffRequest.Approvers.ToList();
 
                 approvers.ForEach(approver => approver.TimeOffRequestsApproved.Add(timeOffRequest));
-
                 await _timeOffRequestRepository.SaveChanges();
+
+                await NotifyTeamMembersLeaderIsOOO(timeOffRequest);
+
                 return "Approved";
             }
             else
@@ -188,6 +202,24 @@ namespace WorkForceManagement.BLL.Services
             { //if the user doesnt belong to any team
                 request.Status = TimeOffRequestStatus.Approved;
             }            
+        }
+
+        private async Task NotifyTeamMembersLeaderIsOOO(TimeOffRequest timeOffRequest)
+        {
+            List<User> usersToSendEmailTo = await _userService.GetUsersUnderTeamLeader(timeOffRequest.Requester);
+
+            if (usersToSendEmailTo.Count != 0)
+            {
+                foreach (User u in usersToSendEmailTo)
+                {
+                    await _mailService.SendEmail(new MailRequest()
+                    {
+                        ToEmail = u.Email,
+                        Body = "TeamLeader OOO",
+                        Subject = $"{timeOffRequest.Requester.UserName} is OOO until {timeOffRequest.EndDate}!"
+                    });
+                }
+            }
         }
     }
 }
