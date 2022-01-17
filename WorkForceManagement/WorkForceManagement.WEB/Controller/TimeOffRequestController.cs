@@ -14,6 +14,7 @@ using WorkForceManagement.DTO.Responses;
 namespace WorkForceManagement.WEB.Controller
 {
     [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
     public class TimeOffRequestController : ControllerBase
     {

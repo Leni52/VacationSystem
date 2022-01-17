@@ -139,9 +139,10 @@ namespace WorkForceManagement.BLL.Services
 
             // removes the request from the approvers timeOffRequestsToApprove
             timeOffRequest.Approvers.ForEach(approver => approver.TimeOffRequestsToApprove.Remove(timeOffRequest));
-
+            
             await _timeOffRequestRepository.SaveChanges();
-            //TODO send email to teamLeaders and to the user.
+
+            await NotifyApproversOnDecision(TimeOffRequestStatus.Rejected, timeOffRequest);
         }
         public async Task ApproveTimeOffRequest(TimeOffRequest timeOffRequest, User currentUser)
         {
@@ -172,6 +173,7 @@ namespace WorkForceManagement.BLL.Services
             if (numberOfApprovers == timeOffRequest.AlreadyApproved.ToList().Count) // compare with current approvals
             {
                 timeOffRequest.Status = TimeOffRequestStatus.Approved;
+                await NotifyApproversOnDecision(TimeOffRequestStatus.Approved, timeOffRequest);
 
                 // To all approvers, removing the request from toApprove and adding it to Approved list
                 List<User> approvers = timeOffRequest.Approvers.ToList();
@@ -181,6 +183,7 @@ namespace WorkForceManagement.BLL.Services
                 await _timeOffRequestRepository.SaveChanges();
 
                 await NotifyTeamMembersLeaderIsOOO(timeOffRequest);
+                
 
                 return "Approved";
             }
@@ -221,6 +224,34 @@ namespace WorkForceManagement.BLL.Services
                     });
                 }
             }
+        }
+
+        private async Task NotifyApproversOnDecision(TimeOffRequestStatus status, TimeOffRequest timeOffRequest)
+        {
+            string subject = "";
+            string body = "";
+            if(status == TimeOffRequestStatus.Approved)
+            {
+                subject = "Time off Request Approved";
+                body = $"Your time off request with start date: {timeOffRequest.StartDate} and end date: {timeOffRequest.EndDate} is APPROVED";
+            } else if( status == TimeOffRequestStatus.Rejected)
+            {
+                subject = "Time off request Rejected";
+                body = $"Your time off request with start date: {timeOffRequest.StartDate} and end date: {timeOffRequest.EndDate} is Rejected";
+            }
+
+            List<User> approvers = timeOffRequest.Approvers.ToList();
+
+            foreach(User approver in approvers)
+            {
+                await _mailService.SendEmail(new MailRequest()
+                {
+                    ToEmail = approver.Email,
+                    Subject = subject,
+                    Body = body
+                });
+            }
+            
         }
     }
 }
