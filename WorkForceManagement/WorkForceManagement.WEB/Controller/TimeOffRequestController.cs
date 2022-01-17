@@ -94,12 +94,14 @@ namespace WorkForceManagement.WEB.Controller
         [HttpGet("MyRequests")]
         public async Task<ActionResult<List<TimeOffRequest>>> GetMyRequests()
         {
-
             User currentUser = await _userService.GetCurrentUser(User);
-            List<TimeOffRequest> myRequests = new List<TimeOffRequest>();
-            myRequests = _timeOffRequestService.GetMyRequests(currentUser.Id);
-            var myRequestsDTO = _mapper.Map<List<TimeOffRequestRequestDTO>>(myRequests);
-            return Ok(myRequestsDTO);
+            if (currentUser != null)
+            {
+                List<TimeOffRequest> myRequests = await _timeOffRequestService.GetMyRequests(currentUser.Id);
+                var myRequestsDTO = _mapper.Map<List<TimeOffRequestResponseDTO>>(myRequests);
+                return Ok(myRequestsDTO);
+            }
+            return BadRequest();
         }
 
         [HttpPatch("{timeOffRequestId}/AnswerTimeOffRequest/{isApproved}")]

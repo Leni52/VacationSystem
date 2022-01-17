@@ -12,9 +12,9 @@ namespace WorkForceManagement.BLL.Services
         Task<TimeOffRequest> GetTimeOffRequest(Guid Id);
         Task DeleteTimeOffRequest(Guid Id);
         Task<TimeOffRequest> UpdateTimeOffRequest(Guid timeOffRequestId, TimeOffRequest request, string currentUserId);
-        List<TimeOffRequest> GetMyRequests(string currentUserId);
+        Task<List<TimeOffRequest>> GetMyRequests(string currentUserId);
         Task<string> CheckTimeOffRequest(Guid timeOffRequestId);
-        Task ApproveAutomatically(Guid requestId, User user);
+        Task<TimeOffRequest> ApproveAutomatically(Guid requestId, User user);
         Task AnswerTimeOffRequest(Guid timeOffRequestId, bool isApproved, User currentUser);
     }
 }
