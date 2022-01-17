@@ -94,6 +94,22 @@ namespace WorkForceManagement.WEB.Controller
                     }
                 }
             }
+            else
+            {
+                if (timeOffRequest.Type != TimeOffRequestType.SickLeave)
+                {
+                    List<User> approversToSendEmailTo = timeOffRequest.Approvers;
+                    foreach (User u in approversToSendEmailTo)
+                    {
+                        await _mailService.SendEmail(new MailRequest()
+                        {
+                            ToEmail = u.Email,
+                            Body = $"[TimeOffRequest] {currentUser.UserName}",
+                            Subject = $"{currentUser.UserName} is requesting a TOR between the dates {timeOffRequest.StartDate} and {timeOffRequest.EndDate}!"
+                        });
+                    }
+                }
+            }
             
             return Ok(timeOffRequestRequestDTO);
         }
@@ -177,6 +193,7 @@ namespace WorkForceManagement.WEB.Controller
         {
             try
             {
+
                 return Ok(await _timeOffRequestService.CheckTimeOffRequest(timeOffRequestId));
             }
             catch (ItemDoesNotExistException ex)
