@@ -15,11 +15,15 @@ namespace WorkForceManagement.WEB.Controller
     public class TimeOffRequestController : ControllerBase
     {
         private readonly ITimeOffRequestService _timeOffRequestService;
+        private readonly IUserService _userService;
         private readonly IMapper _mapper;
-        public TimeOffRequestController(ITimeOffRequestService timeOffRequestService,
+        public TimeOffRequestController(
+            ITimeOffRequestService timeOffRequestService,
+            IUserService userSerivce,
             IMapper mapper)
         {
             _timeOffRequestService = timeOffRequestService;
+            _userService = userSerivce;
             _mapper = mapper;
         }
 
@@ -31,7 +35,7 @@ namespace WorkForceManagement.WEB.Controller
             var requests = await _timeOffRequestService.GetAllRequests();
 
             timeOffRequestResponseModel = _mapper.Map<List<TimeOffRequestResponseDTO>>(requests);
-            return Ok(requests);
+            return Ok(timeOffRequestResponseModel);
         }
 
         [HttpGet("{timeOffRequestId}")]
@@ -48,16 +52,19 @@ namespace WorkForceManagement.WEB.Controller
 
 
         [HttpPost]
-        public ActionResult CreateTimeOffRequest(TimeOffRequestRequestDTO timeOffRequestRequestDTO)
+        public async Task<ActionResult> CreateTimeOffRequest(TimeOffRequestRequestDTO timeOffRequestRequestDTO)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+            User currentUser = await _userService.GetCurrentUser(User);
             TimeOffRequest timeOffRequest = _mapper.Map<TimeOffRequest>(timeOffRequestRequestDTO);
+
             timeOffRequest.Type = (TimeOffRequestType)timeOffRequestRequestDTO.TimeOffRequestType;
-            _timeOffRequestService.CreateTimeOffRequest(timeOffRequest);
-            return Ok(timeOffRequest);
+            await _timeOffRequestService.CreateTimeOffRequest(timeOffRequest, currentUser);
+
+            return Ok();
         }
 
         [HttpPut("{timeOffRequestId}")]
@@ -82,6 +89,16 @@ namespace WorkForceManagement.WEB.Controller
                 return Ok();
             }
             return BadRequest();
+        }
+
+        [HttpPatch("RejectTimeOffRequest/{timeOffRequestId}")]
+        public async Task<ActionResult> RejectTimeOffRequest(Guid timeOffRequestId)
+        {
+            User currentUser = await _userService.GetCurrentUser(User);
+
+            await _timeOffRequestService.RejectTimeOffRequest(timeOffRequestId, currentUser);
+            //await _timeOffRequestService
+            return Ok();
         }
 
     }

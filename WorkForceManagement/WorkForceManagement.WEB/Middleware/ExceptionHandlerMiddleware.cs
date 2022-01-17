@@ -34,12 +34,16 @@ namespace WorkForceManagement.WEB.Middleware
                         response.StatusCode = (int)HttpStatusCode.NotFound;
                         break;
                     case TeamWithSameNameExistsException:
-                    case ItemAlreadyExistsException e:                       
+                    case UsernameTakenException:
+                    case ItemAlreadyExistsException e:
                         response.StatusCode = (int)HttpStatusCode.Conflict;
                         break;
-                    case InvalidIdException e:                       
+                    case InvalidIdException e:                  
                         response.StatusCode = (int)HttpStatusCode.BadRequest;
                        break;
+                    case UserIsntApproverException:
+                        response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                        break;
 
                     default:                       
                         response.StatusCode = (int)HttpStatusCode.InternalServerError;
