@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -19,6 +20,7 @@ using WorkForceManagement.DAL.Data;
 using WorkForceManagement.DAL.Entities;
 using WorkForceManagement.DAL.Repositories;
 using WorkForceManagement.WEB.Middleware;
+using WorkForceManagement.WEB.Policies;
 
 namespace WorkForceManagement.WEB
 {
@@ -93,6 +95,9 @@ namespace WorkForceManagement.WEB
             services.AddTransient<ITeamService, TeamService>();
             services.AddTransient<ITimeOffRequestService, TimeOffRequestService>();
 
+            //policy
+            services.AddTransient<IAuthorizationHandler, TimeOffRequestCreatorHandler>();
+           
             // IdentityServer
             var builder = services.AddIdentityServer((options) =>
             {
@@ -107,7 +112,14 @@ namespace WorkForceManagement.WEB
             // Authentication
             // Adds the asp.net auth services
             services
-                .AddAuthorization()
+                .AddAuthorization(options=>
+                {
+                    options.AddPolicy("TimeOffRequestCreator", policy =>
+                    policy.Requirements.Add(new TimeOffRequestCreatorRequirement()));
+                    options.AddPolicy("Admin", policy =>
+                           policy.RequireRole("Admin"));
+
+                })
                 .AddAuthentication(options =>
                 {
                     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
