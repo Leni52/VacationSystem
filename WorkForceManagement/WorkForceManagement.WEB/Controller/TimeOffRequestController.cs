@@ -59,7 +59,7 @@ namespace WorkForceManagement.WEB.Controller
             User currentUser = await _userService.GetCurrentUser(User);
             TimeOffRequest timeOffRequest = _mapper.Map<TimeOffRequest>(timeOffRequestRequestDTO);
 
-            timeOffRequest.Type = (TimeOffRequestType)timeOffRequestRequestDTO.TimeOffRequestType;
+            timeOffRequest.Type = (TimeOffRequestType)timeOffRequestRequestDTO.Type;
             await _timeOffRequestService.CreateTimeOffRequest(timeOffRequest, currentUser);
             return Ok(timeOffRequestRequestDTO);
         }
@@ -69,14 +69,15 @@ namespace WorkForceManagement.WEB.Controller
         public async Task<ActionResult> UpdateTimeOffRequest(Guid timeOffRequestId, TimeOffRequestRequestDTO request)
         {
             User currentUser = await _userService.GetCurrentUser(User);
-            TimeOffRequest timeOffRequest = await _timeOffRequestService.GetTimeOffRequest(timeOffRequestId);
+          //  TimeOffRequest timeOffRequest = await _timeOffRequestService.GetTimeOffRequest(timeOffRequestId);
             if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
-            _mapper.Map(request, timeOffRequest);
-            var updatedRequest = await _timeOffRequestService.UpdateTimeOffRequest(timeOffRequestId, timeOffRequest, currentUser.Id);
-            return Ok(updatedRequest);
+            // _mapper.Map(request, timeOffRequest);
+            TimeOffRequest timeOffRequest = _mapper.Map<TimeOffRequest>(request);
+             var updatedRequest = await _timeOffRequestService.UpdateTimeOffRequest(timeOffRequestId, timeOffRequest, currentUser.Id);
+            return Ok();
         }
 
         [HttpDelete("{timeOffRequestId}")]
