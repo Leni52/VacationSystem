@@ -15,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using WorkForceManagement.BLL;
 using WorkForceManagement.BLL.Services;
 using WorkForceManagement.DAL.Data;
 using WorkForceManagement.DAL.Entities;
@@ -36,6 +37,13 @@ namespace WorkForceManagement.WEB
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //mailsettings
+            services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
+            services.AddTransient<IMailService, MailService>();
+            services.AddCors(c =>
+            {
+                c.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin());
+            });
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -97,7 +105,8 @@ namespace WorkForceManagement.WEB
 
             //policy
             services.AddTransient<IAuthorizationHandler, TimeOffRequestCreatorHandler>();
-           
+            services.AddTransient<IAuthorizationHandler, TeamLeaderHandler>();
+
             // IdentityServer
             var builder = services.AddIdentityServer((options) =>
             {
@@ -116,6 +125,8 @@ namespace WorkForceManagement.WEB
                 {
                     options.AddPolicy("TimeOffRequestCreator", policy =>
                     policy.Requirements.Add(new TimeOffRequestCreatorRequirement()));
+                    options.AddPolicy("TeamLeader", policy =>
+                    policy.Requirements.Add(new TeamLeaderRequirement()));
                     options.AddPolicy("Admin", policy =>
                            policy.RequireRole("Admin"));
 

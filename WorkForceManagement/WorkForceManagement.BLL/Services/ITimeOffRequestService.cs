@@ -11,8 +11,9 @@ namespace WorkForceManagement.BLL.Services
         Task<List<TimeOffRequest>> GetAllRequests();
         Task<TimeOffRequest> GetTimeOffRequest(Guid Id);
         Task DeleteTimeOffRequest(Guid Id);
-        Task<TimeOffRequest> UpdateTimeOffRequest(Guid timeOffRequestId, TimeOffRequest request);
-        Task RejectTimeOffRequest(Guid timeOffRequestId, User currentUser);
-        Task<string> CheckTimeOffRequest(Guid timeOffRequestId);
+        Task<TimeOffRequest> UpdateTimeOffRequest(Guid timeOffRequestId, TimeOffRequest request, string currentUserId);
+        Task<List<TimeOffRequest>> GetMyRequests(string currentUserId);
+        Task<string> CheckTimeOffRequest(Guid timeOffRequestId);        
+        Task AnswerTimeOffRequest(Guid timeOffRequestId, bool isApproved, User currentUser);
     }
 }
