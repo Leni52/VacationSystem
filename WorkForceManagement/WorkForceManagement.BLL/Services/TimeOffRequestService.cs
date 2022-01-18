@@ -24,6 +24,8 @@ namespace WorkForceManagement.BLL.Services
 
         public async Task CreateTimeOffRequest(TimeOffRequest timeOffRequest, User currentUser)
         {
+            ValidateTimeOffRequestDates(timeOffRequest.StartDate, timeOffRequest.EndDate, currentUser);
+
             timeOffRequest.Status = 0;
             timeOffRequest.CreatorId = currentUser.Id;
 
@@ -59,6 +61,23 @@ namespace WorkForceManagement.BLL.Services
                     validatedApprovers.Add(user);
             }
             return validatedApprovers;
+        }
+        private void ValidateTimeOffRequestDates(DateTime startDate, DateTime endDate, User currentUser) 
+        {
+            if (startDate > endDate)
+                throw new InvalidDatesException("Invalid time off request dates, the start date should be earlier or equal to end date");
+
+            bool isOverlapping = currentUser.CreatedTimeOffRequests.Any(
+                timeOff =>
+                timeOff.Status != TimeOffRequestStatus.Rejected && 
+                timeOff.StartDate < endDate && 
+                startDate < timeOff.EndDate
+                );
+
+            if (isOverlapping) // if current user already has a timeoffrequest thats not rejected and is overlapping with the current timeOffRequest 
+                throw new OverlappingTimeOffRequestsException($"User with id: {currentUser.Id}, already has a time off request thats overlapping with the current request!");
+
+
         }
         public async Task DeleteTimeOffRequest(Guid Id)
         {
