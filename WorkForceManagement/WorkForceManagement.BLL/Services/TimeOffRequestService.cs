@@ -188,7 +188,17 @@ namespace WorkForceManagement.BLL.Services
                 return "Approved";
             }
             else
-            {
+            {// sending notifications to leaders which nave not yet confirmed, in case of call after creaton it's sent to all team leaders
+                List<User> approversToSendEmailTo = timeOffRequest.Approvers.Except(timeOffRequest.AlreadyApproved).ToList();
+                foreach (User u in approversToSendEmailTo)
+                {
+                    await _mailService.SendEmail(new MailRequest()
+                    {
+                        ToEmail = u.Email,
+                        Body = $"[TimeOffRequest] {timeOffRequest.CreatorId}",
+                        Subject = $"User with id {timeOffRequest.CreatorId} is requesting a TOR between the dates {timeOffRequest.StartDate} and {timeOffRequest.EndDate}!"
+                    });
+                }
                 timeOffRequest.Status = TimeOffRequestStatus.Awaiting; // in case it has a Created status
                 await _timeOffRequestRepository.SaveChanges();
                 return "Awaiting";
