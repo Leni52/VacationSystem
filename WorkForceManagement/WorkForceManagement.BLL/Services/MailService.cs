@@ -17,6 +17,7 @@ namespace WorkForceManagement.BLL.Services
     public class MailService : IMailService
     {
         private readonly MailSettings _mailSettings;
+       
         public MailService(IOptions<MailSettings> options)
         {
             _mailSettings = options.Value;

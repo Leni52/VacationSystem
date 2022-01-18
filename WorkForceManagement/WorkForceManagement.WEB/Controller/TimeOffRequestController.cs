@@ -14,6 +14,7 @@ using WorkForceManagement.DTO.Responses;
 namespace WorkForceManagement.WEB.Controller
 {
     [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
     public class TimeOffRequestController : ControllerBase
     {
@@ -76,40 +77,6 @@ namespace WorkForceManagement.WEB.Controller
             timeOffRequest.Type = (TimeOffRequestType)timeOffRequestRequestDTO.TimeOffRequestType;
             
             await _timeOffRequestService.CreateTimeOffRequest(timeOffRequest, currentUser);
-
-            if(await _timeOffRequestService.CheckTimeOffRequest(timeOffRequest.Id) == "Approved")
-            {
-                List<User> usersToSendEmailTo = await _userService.GetUsersUnderTeamLeader(currentUser);
-
-                if (usersToSendEmailTo.Count != 0)
-                {
-                    foreach (User u in usersToSendEmailTo)
-                    {
-                        await _mailService.SendEmail(new MailRequest()
-                        {
-                            ToEmail = u.Email,
-                            Body = "TeamLeader OOO",
-                            Subject = $"{currentUser.UserName} is OOO until {_timeOffRequestService.GetTimeOffRequest(timeOffRequest.Id).Result.EndDate}!"
-                        });
-                    }
-                }
-            }
-            else
-            {
-                if (timeOffRequest.Type != TimeOffRequestType.SickLeave)
-                {
-                    List<User> approversToSendEmailTo = timeOffRequest.Approvers;
-                    foreach (User u in approversToSendEmailTo)
-                    {
-                        await _mailService.SendEmail(new MailRequest()
-                        {
-                            ToEmail = u.Email,
-                            Body = $"[TimeOffRequest] {currentUser.UserName}",
-                            Subject = $"{currentUser.UserName} is requesting a TOR between the dates {timeOffRequest.StartDate} and {timeOffRequest.EndDate}!"
-                        });
-                    }
-                }
-            }
             
             return Ok(timeOffRequestRequestDTO);
         }
@@ -167,24 +134,6 @@ namespace WorkForceManagement.WEB.Controller
 
             await _timeOffRequestService.AnswerTimeOffRequest(timeOffRequestId, isApproved, currentUser);
 
-            if(await _timeOffRequestService.CheckTimeOffRequest(timeOffRequestId) == "Approved")
-            {
-                List<User> usersToSendEmailTo = await _userService.GetUsersUnderTeamLeader(currentUser);
-
-                if(usersToSendEmailTo.Count != 0)
-                {
-                    foreach (User u in usersToSendEmailTo)
-                    {
-                        await _mailService.SendEmail(new MailRequest()
-                        {
-                            ToEmail = u.Email,
-                            Body = "TeamLeader OOO",
-                            Subject = $"{currentUser.UserName} is OOO until {_timeOffRequestService.GetTimeOffRequest(timeOffRequestId).Result.EndDate}!"
-                        });
-                    }
-                }
-            }
-
             return Ok();
         }
 
@@ -193,7 +142,6 @@ namespace WorkForceManagement.WEB.Controller
         {
             try
             {
-
                 return Ok(await _timeOffRequestService.CheckTimeOffRequest(timeOffRequestId));
             }
             catch (ItemDoesNotExistException ex)
