@@ -141,7 +141,7 @@ namespace WorkForceManagement.BLL.Services
             //TODO send email to teamLeaders 
 
             //email to requester            
-            await SendMailToRequesterApprovedRequest(timeOffRequest.Id, currentUser);
+            await SendMailToRequesterRejectedRequest(timeOffRequest.Id, currentUser);
         }
         public async Task ApproveTimeOffRequest(TimeOffRequest timeOffRequest, User currentUser)
         {
@@ -204,7 +204,7 @@ namespace WorkForceManagement.BLL.Services
             mailRequest.ToEmail = request.Requester.Email;
             await _mailService.SendEmail(mailRequest);
         }
-        public async Task SendMailToRequesterApprovedRejected(Guid requestId, User user)
+        public async Task SendMailToRequesterRejectedRequest(Guid requestId, User user)
         {
             TimeOffRequest request = await _timeOffRequestRepository.Get(requestId);
             //email to requester            
