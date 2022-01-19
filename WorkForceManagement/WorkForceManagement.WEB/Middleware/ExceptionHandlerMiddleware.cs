@@ -33,12 +33,14 @@ namespace WorkForceManagement.WEB.Middleware
                     case ItemDoesNotExistException e:
                         response.StatusCode = (int)HttpStatusCode.NotFound;
                         break;
+                    case OverlappingTimeOffRequestsException:
                     case TeamWithSameNameExistsException:
                     case UsernameTakenException:
                     case TimeOffRequestIsClosedException:
                     case ItemAlreadyExistsException e:
                         response.StatusCode = (int)HttpStatusCode.Conflict;
                         break;
+                    case InvalidDatesException:
                     case InvalidIdException e:                  
                         response.StatusCode = (int)HttpStatusCode.BadRequest;
                        break;
