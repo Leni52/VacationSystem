@@ -238,8 +238,8 @@ namespace WorkForceManagement.BLL.Services
                     await _mailService.SendEmail(new MailRequest()
                     {
                         ToEmail = u.Email,
-                        Body = "TeamLeader OOO",
-                        Subject = $"{timeOffRequest.Requester.UserName} is OOO until {timeOffRequest.EndDate}!"
+                        Subject = "TeamLeader OOO",
+                        Body = $"{timeOffRequest.Requester.UserName} is OOO until {timeOffRequest.EndDate}!"
                     });
                 }
             }
@@ -252,11 +252,11 @@ namespace WorkForceManagement.BLL.Services
             if(status == TimeOffRequestStatus.Approved)
             {
                 subject = "Time off Request Approved";
-                body = $"Your time off request with start date: {timeOffRequest.StartDate} and end date: {timeOffRequest.EndDate} is APPROVED";
+                body = $"Time off request by: {timeOffRequest.Requester.UserName} with start date: {timeOffRequest.StartDate} and end date: {timeOffRequest.EndDate} is APPROVED";
             } else if( status == TimeOffRequestStatus.Rejected)
             {
                 subject = "Time off request Rejected";
-                body = $"Your time off request with start date: {timeOffRequest.StartDate} and end date: {timeOffRequest.EndDate} is Rejected";
+                body = $"Time off request by: {timeOffRequest.Requester.UserName} with start date: {timeOffRequest.StartDate} and end date: {timeOffRequest.EndDate} is REJECTED";
             }
 
             List<User> approvers = timeOffRequest.Approvers.ToList();
