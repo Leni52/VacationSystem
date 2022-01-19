@@ -14,6 +14,7 @@ namespace WorkForceManagement.BLL.Services
         private readonly IRepository<TimeOffRequest> _timeOffRequestRepository;
         private readonly IUserService _userService;
         private readonly IMailService _mailService;
+        private readonly List<DateTime> officialDaysOff = Calendar.GenerateCalendar();
 
         public TimeOffRequestService(
             IRepository<TimeOffRequest> timeOffRequestRepository, 
@@ -28,6 +29,7 @@ namespace WorkForceManagement.BLL.Services
         public async Task CreateTimeOffRequest(TimeOffRequest timeOffRequest, User currentUser)
         {
             ValidateTimeOffRequestDates(timeOffRequest.StartDate, timeOffRequest.EndDate, currentUser);
+            ValidateDaysOff(timeOffRequest.StartDate, timeOffRequest.EndDate);
 
             timeOffRequest.Status = 0;
             timeOffRequest.CreatorId = currentUser.Id;
@@ -79,6 +81,19 @@ namespace WorkForceManagement.BLL.Services
 
 
         }
+        private int ValidateDaysOff(DateTime startDate, DateTime endDate) 
+        {
+            return Enumerable.Range(0, 1 + endDate.Subtract(startDate).Days)
+                .Select(offset => startDate.AddDays(offset))
+                .Where(day => !IsdayOfficialDayOff(day))
+                .Count();
+            //TODO Validate if the count is smaller than days of of the user
+        }
+        private bool IsdayOfficialDayOff(DateTime day)
+        {
+            return officialDaysOff.Any(date => date.Date == day.Date);
+        }
+
         public async Task DeleteTimeOffRequest(Guid Id)
         {
             var request = await _timeOffRequestRepository.Get(Id);
