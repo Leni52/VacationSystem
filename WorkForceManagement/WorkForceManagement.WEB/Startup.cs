@@ -44,6 +44,7 @@ namespace WorkForceManagement.WEB
             {
                 c.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin());
             });
+
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {

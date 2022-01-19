@@ -18,5 +18,6 @@ namespace WorkForceManagement.BLL.Services
         Task<bool> IsUserAdmin(User currentUser);
         Task MakeUserAdmin(User user);
         Task RemoveUserFromAdmin(User user);
+        Task<List<User>> GetUsersUnderTeamLeader(User user);
     }
 }
