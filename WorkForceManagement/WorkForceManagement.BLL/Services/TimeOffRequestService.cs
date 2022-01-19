@@ -12,16 +12,22 @@ namespace WorkForceManagement.BLL.Services
     public class TimeOffRequestService : ITimeOffRequestService
     {
         private readonly IRepository<TimeOffRequest> _timeOffRequestRepository;
+        private readonly IUserService _userService;
         private readonly IMailService _mailService;
 
-        public TimeOffRequestService(IRepository<TimeOffRequest> timeOffRequestRepository, IMailService mailService)
+        public TimeOffRequestService(
+            IRepository<TimeOffRequest> timeOffRequestRepository, 
+            IUserService userService,
+            IMailService mailService)
         {
             _timeOffRequestRepository = timeOffRequestRepository;
+            _userService = userService;
             _mailService = mailService;
         }
 
         public async Task CreateTimeOffRequest(TimeOffRequest timeOffRequest, User currentUser)
         {
+            ValidateTimeOffRequestDates(timeOffRequest.StartDate, timeOffRequest.EndDate, currentUser);
 
             timeOffRequest.Status = 0;
             timeOffRequest.CreatorId = currentUser.Id;
@@ -55,6 +61,23 @@ namespace WorkForceManagement.BLL.Services
                     validatedApprovers.Add(user);
             }
             return validatedApprovers;
+        }
+        private void ValidateTimeOffRequestDates(DateTime startDate, DateTime endDate, User currentUser) 
+        {
+            if (startDate > endDate)
+                throw new InvalidDatesException("Invalid time off request dates, the start date should be earlier or equal to end date");
+
+            bool isOverlapping = currentUser.CreatedTimeOffRequests.Any(
+                timeOff =>
+                timeOff.Status != TimeOffRequestStatus.Rejected && 
+                timeOff.StartDate < endDate && 
+                startDate < timeOff.EndDate
+                );
+
+            if (isOverlapping) // if current user already has a timeoffrequest thats not rejected and is overlapping with the current timeOffRequest 
+                throw new OverlappingTimeOffRequestsException($"User with id: {currentUser.Id}, already has a time off request thats overlapping with the current request!");
+
+
         }
         public async Task DeleteTimeOffRequest(Guid Id)
         {
@@ -142,6 +165,7 @@ namespace WorkForceManagement.BLL.Services
 
             //email to requester            
             await SendMailToRequesterRejectedRequest(timeOffRequest.Id, currentUser);
+            await NotifyApproversOnDecision(TimeOffRequestStatus.Rejected, timeOffRequest);
         }
         public async Task ApproveTimeOffRequest(TimeOffRequest timeOffRequest, User currentUser)
         {
@@ -176,7 +200,8 @@ namespace WorkForceManagement.BLL.Services
                 timeOffRequest.Type == TimeOffRequestType.SickLeave) // compare with current approvals OR it's sick leave
             {
                 timeOffRequest.Status = TimeOffRequestStatus.Approved;
-              await  SendMailToRequesterApprovedRequest(timeOffRequest.Id, timeOffRequest.Requester);
+                await NotifyApproversOnDecision(TimeOffRequestStatus.Approved, timeOffRequest);
+                await  SendMailToRequesterApprovedRequest(timeOffRequest.Id, timeOffRequest.Requester);
                 // To all approvers, removing the request from toApprove and adding it to Approved list
                 List<User> approvers = timeOffRequest.Approvers.ToList();
 
@@ -184,6 +209,8 @@ namespace WorkForceManagement.BLL.Services
                 approvers.ForEach(approver => approver.TimeOffRequestsApproved.Add(timeOffRequest));
 
                 await _timeOffRequestRepository.SaveChanges();
+
+                await NotifyTeamMembersLeaderIsOOO(timeOffRequest);
                 return "Approved";
             }
             else
@@ -224,6 +251,52 @@ namespace WorkForceManagement.BLL.Services
             mailRequest.Subject = "Rejected request.";
             mailRequest.ToEmail = request.Requester.Email;
             await _mailService.SendEmail(mailRequest);
-        }        
+        }
+        private async Task NotifyTeamMembersLeaderIsOOO(TimeOffRequest timeOffRequest)
+        {
+            List<User> usersToSendEmailTo = await _userService.GetUsersUnderTeamLeader(timeOffRequest.Requester);
+
+            if (usersToSendEmailTo.Count != 0)
+            {
+                foreach (User u in usersToSendEmailTo)
+                {
+                    await _mailService.SendEmail(new MailRequest()
+                    {
+                        ToEmail = u.Email,
+                        Subject = "TeamLeader OOO",
+                        Body = $"{timeOffRequest.Requester.UserName} is OOO until {timeOffRequest.EndDate}!"
+                    });
+                }
+            }
+        }
+
+        private async Task NotifyApproversOnDecision(TimeOffRequestStatus status, TimeOffRequest timeOffRequest)
+        {
+            string subject = "";
+            string body = "";
+            if (status == TimeOffRequestStatus.Approved)
+            {
+                subject = "Time off Request Approved";
+                body = $"Time off request by: {timeOffRequest.Requester.UserName} with start date: {timeOffRequest.StartDate} and end date: {timeOffRequest.EndDate} is APPROVED";
+            }
+            else if (status == TimeOffRequestStatus.Rejected)
+            {
+                subject = "Time off request Rejected";
+                body = $"Time off request by: {timeOffRequest.Requester.UserName} with start date: {timeOffRequest.StartDate} and end date: {timeOffRequest.EndDate} is REJECTED";
+            }
+
+            List<User> approvers = timeOffRequest.Approvers.ToList();
+
+            foreach (User approver in approvers)
+            {
+                await _mailService.SendEmail(new MailRequest()
+                {
+                    ToEmail = approver.Email,
+                    Subject = subject,
+                    Body = body
+                });
+            }
+
+        }
     }
 }
