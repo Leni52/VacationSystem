@@ -12,7 +12,7 @@ namespace WorkForceManagement.DTO.Requests
         [MaxLength(50)]
         public string Description { get; set; }
         [Required(ErrorMessage = Constants.Constants.ErrorTimeOffRequestType)]
-        public TimeOffRequestType TimeOffRequestType { get; set; }
+        public TimeOffRequestType Type { get; set; }
         [Required(ErrorMessage = Constants.Constants.ErrorStartDate)]
         public DateTime StartDate { get; set; }
         [Required(ErrorMessage = Constants.Constants.ErrorEndDate)]
