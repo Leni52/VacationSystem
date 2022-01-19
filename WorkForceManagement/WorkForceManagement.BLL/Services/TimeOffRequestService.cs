@@ -85,13 +85,19 @@ namespace WorkForceManagement.BLL.Services
         {
             return Enumerable.Range(0, 1 + endDate.Subtract(startDate).Days)
                 .Select(offset => startDate.AddDays(offset))
-                .Where(day => !IsdayOfficialDayOff(day))
+                .Where(day => !IsDayOfficialDayOff(day) && !IsDayWeekend(day))
                 .Count();
             //TODO Validate if the count is smaller than days of of the user
         }
-        private bool IsdayOfficialDayOff(DateTime day)
+
+        private bool IsDayOfficialDayOff(DateTime day)
         {
             return officialDaysOff.Any(date => date.Date == day.Date);
+        }
+        
+        private bool IsDayWeekend(DateTime day)
+        {
+            return day.DayOfWeek == DayOfWeek.Saturday || day.DayOfWeek == DayOfWeek.Sunday;
         }
 
         public async Task DeleteTimeOffRequest(Guid Id)
