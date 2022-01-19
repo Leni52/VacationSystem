@@ -41,7 +41,8 @@ namespace WorkForceManagement.WEB.Middleware
                         response.StatusCode = (int)HttpStatusCode.Conflict;
                         break;
                     case InvalidDatesException:
-                    case InvalidIdException e:                  
+                    case InvalidIdException:
+                    case InvalidEmailException:
                         response.StatusCode = (int)HttpStatusCode.BadRequest;
                        break;
                     case UserIsntApproverException:
