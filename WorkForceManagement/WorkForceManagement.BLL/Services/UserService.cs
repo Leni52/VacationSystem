@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using WorkForceManagement.BLL.Exceptions;
@@ -28,6 +29,11 @@ namespace WorkForceManagement.BLL.Services
                 throw new UsernameTakenException($"Username: {userToAdd.UserName} already taken!");
             }
 
+            if (!IsEmailValid(userToAdd.Email))
+            {
+                throw new InvalidEmailException($"Email: {userToAdd.Email} is not valid!");
+            }
+
             await _userManager.CreateUser(userToAdd, password);
 
             if (isAdmin)
@@ -35,6 +41,21 @@ namespace WorkForceManagement.BLL.Services
                 await _userManager.AddRoleToUser(userToAdd, "Admin");
             }
         }
+
+        private bool IsEmailValid(string emailaddress)
+        {
+            try
+            {
+                MailAddress m = new MailAddress(emailaddress);
+
+                return true;
+            }
+            catch (FormatException)
+            {
+                return false;
+            }
+        }
+
 
         public async Task Delete(Guid userId)
         {
