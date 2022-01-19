@@ -86,10 +86,12 @@ namespace WorkForceManagement.BLL.Services
             await _teamRepository.SaveChanges();
         }
         public async Task<List<User>> GetAllTeamMembers(Guid teamId)
-        {
+        {          
             Team foundTeam = await GetTeamWithId(teamId);
-
-            return foundTeam.Members;
+            List<User> teamMembers = foundTeam.Members;
+            User teamLeader = foundTeam.TeamLeader;
+            teamMembers.Add(teamLeader);
+            return teamMembers;
         }
         public async Task RemoveUserFromTeam(Guid teamId, User user, User currentUser)
         {
