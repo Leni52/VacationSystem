@@ -17,13 +17,14 @@ namespace WorkForceManagement.BLL.Tests.Services
         {
             //arrange
             var requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
+            var userServiceMock = new Mock<IUserService>();
             var mailService = new Mock<IMailService>();
             User currentUser = new User()
             {
                 UserName = "admin",
             };
 
-            var sut = new TimeOffRequestService(requestRepositoryStub.Object, mailService.Object);
+            var sut = new TimeOffRequestService(requestRepositoryStub.Object,userServiceMock.Object, mailService.Object);
 
             TimeOffRequest timeOffRequest = new TimeOffRequest()
             {
@@ -43,9 +44,11 @@ namespace WorkForceManagement.BLL.Tests.Services
         {
             //arrange
             var requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
+            var userServiceMock = new Mock<IUserService>();
             var mailService = new Mock<IMailService>();
             User currentUser = null;
-            var sut = new TimeOffRequestService(requestRepositoryStub.Object, mailService.Object);
+
+            var sut = new TimeOffRequestService(requestRepositoryStub.Object, userServiceMock.Object, mailService.Object);
             //act
             var result = sut.CreateTimeOffRequest(new TimeOffRequest(), currentUser);
             Assert.False(result.IsCompletedSuccessfully);
@@ -56,13 +59,15 @@ namespace WorkForceManagement.BLL.Tests.Services
         {
             //arrange
             var requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
+            var userServiceMock = new Mock<IUserService>();
             var mailService = new Mock<IMailService>();
             User currentUser = new User() { UserName = "Admin" };
             TimeOffRequest t1 = new TimeOffRequest()
             {
                 Description = "Testing and testing"
             };
-            var sut = new TimeOffRequestService(requestRepositoryStub.Object, mailService.Object);
+
+            var sut = new TimeOffRequestService(requestRepositoryStub.Object, userServiceMock.Object, mailService.Object);
             //act
             var result = sut.CreateTimeOffRequest(t1, currentUser);
             //asert
@@ -74,8 +79,10 @@ namespace WorkForceManagement.BLL.Tests.Services
         {
             //arrange
             var requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
+            var userServiceMock = new Mock<IUserService>();
             var mailService = new Mock<IMailService>();
-            var sut = new TimeOffRequestService(requestRepositoryStub.Object, mailService.Object);
+
+            var sut = new TimeOffRequestService(requestRepositoryStub.Object, userServiceMock.Object, mailService.Object);
 
             TimeOffRequest timeOffRequest = new TimeOffRequest();
             //act
@@ -90,8 +97,10 @@ namespace WorkForceManagement.BLL.Tests.Services
         {
             //arrange
             var requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
+            var userServiceMock = new Mock<IUserService>();
             var mailService = new Mock<IMailService>();
-            var sut = new TimeOffRequestService(requestRepositoryStub.Object, mailService.Object);
+
+            var sut = new TimeOffRequestService(requestRepositoryStub.Object, userServiceMock.Object, mailService.Object);
 
             TimeOffRequest timeOffRequest = new TimeOffRequest();
             //act
@@ -105,13 +114,14 @@ namespace WorkForceManagement.BLL.Tests.Services
         {
             //arrange
             var requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
+            var userServiceMock = new Mock<IUserService>();
             var mailService = new Mock<IMailService>();
             requestRepositoryStub.Setup(reqRep => reqRep.All())
               .ReturnsAsync(new List<TimeOffRequest>());
             User currentUser = new User()
             { UserName = "Admin" };
-            var sut = new TimeOffRequestService(requestRepositoryStub.Object, mailService.Object);
 
+            var sut = new TimeOffRequestService(requestRepositoryStub.Object, userServiceMock.Object, mailService.Object);
 
             //act
             var result = await sut.GetAllRequests();
@@ -124,6 +134,7 @@ namespace WorkForceManagement.BLL.Tests.Services
         {
             //arrange
             var requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
+            var userServiceMock = new Mock<IUserService>();
             var mailService = new Mock<IMailService>();
             User currentUser = new User()
             {
@@ -131,7 +142,8 @@ namespace WorkForceManagement.BLL.Tests.Services
             };
             requestRepositoryStub.Setup(reqRep => reqRep.Get(It.IsAny<Guid>()))
                 .ReturnsAsync(new TimeOffRequest());
-            var sut = new TimeOffRequestService(requestRepositoryStub.Object, mailService.Object);
+
+            var sut = new TimeOffRequestService(requestRepositoryStub.Object, userServiceMock.Object, mailService.Object);
 
             //act
             var result = await sut.GetTimeOffRequest(Guid.NewGuid());
@@ -144,8 +156,10 @@ namespace WorkForceManagement.BLL.Tests.Services
         {
             //arrange
             var requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
+            var userServiceMock = new Mock<IUserService>();
             var mailService = new Mock<IMailService>();
-            var sut = new TimeOffRequestService(requestRepositoryStub.Object, mailService.Object);
+
+            var sut = new TimeOffRequestService(requestRepositoryStub.Object, userServiceMock.Object, mailService.Object);
             //act           
             //asert         
             await Assert.ThrowsAsync<ItemDoesNotExistException>(() => sut.GetTimeOffRequest(Guid.NewGuid()));
@@ -157,8 +171,11 @@ namespace WorkForceManagement.BLL.Tests.Services
         {
             //arrange
             var requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
+            var userServiceMock = new Mock<IUserService>();
             var mailService = new Mock<IMailService>();
-            var sut = new TimeOffRequestService(requestRepositoryStub.Object, mailService.Object);
+
+            var sut = new TimeOffRequestService(requestRepositoryStub.Object, userServiceMock.Object, mailService.Object);
+
             var currentUser = new User() { UserName = "Admin" };
             requestRepositoryStub.Setup(reqRep => reqRep.Get(It.IsAny<Guid>()))
                 .ReturnsAsync(new TimeOffRequest());
@@ -169,5 +186,5 @@ namespace WorkForceManagement.BLL.Tests.Services
             Assert.Null(result);
         }
        
-        }
     }
+}

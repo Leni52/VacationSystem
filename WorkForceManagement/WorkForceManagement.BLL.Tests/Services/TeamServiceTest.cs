@@ -206,8 +206,10 @@ namespace WorkForceManagement.BLL.Tests.Services
             //arrange
             var teamRepositoryMock = new Mock<IRepository<Team>>();
 
+            var team = new Team() { Members = new List<User>() };
+
             teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Guid>()))
-                .ReturnsAsync(new Team());
+                .ReturnsAsync(team);
 
             var sut = new TeamService(teamRepositoryMock.Object);
 
@@ -239,8 +241,10 @@ namespace WorkForceManagement.BLL.Tests.Services
             //arrange
             var teamRepositoryMock = new Mock<IRepository<Team>>();
 
+            var team = new Team() { Members = new List<User>(), TeamLeader = new User() };
+
             teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Guid>()))
-                .ReturnsAsync(new Team());
+                .ReturnsAsync(team);
 
             var sut = new TeamService(teamRepositoryMock.Object);
 
@@ -272,7 +276,7 @@ namespace WorkForceManagement.BLL.Tests.Services
             //arrange
             var teamRepositoryMock = new Mock<IRepository<Team>>();
 
-            Team team = new Team() { Id = Guid.NewGuid()};
+            Team team = new Team() { Id = Guid.NewGuid(), Members = new List<User>()};
             User teamMember = new User() { Id = Guid.NewGuid().ToString() };
             team.Members.Add(teamMember);
 
@@ -293,7 +297,7 @@ namespace WorkForceManagement.BLL.Tests.Services
             //arrange
             var teamRepositoryMock = new Mock<IRepository<Team>>();
 
-            Team team = new Team() { Id = Guid.NewGuid() };
+            Team team = new Team() { Id = Guid.NewGuid(), Members = new List<User>()};
             User teamMember = new User() { Id = Guid.NewGuid().ToString() };
             team.Members.Add(teamMember);
 
@@ -312,7 +316,7 @@ namespace WorkForceManagement.BLL.Tests.Services
             //arrange
             var teamRepositoryMock = new Mock<IRepository<Team>>();
 
-            Team team = new Team() { Id = Guid.NewGuid() };
+            Team team = new Team() { Id = Guid.NewGuid(), Members = new List<User>() };
             User teamMember = new User() { Id = Guid.NewGuid().ToString() };
 
             teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Guid>()))
