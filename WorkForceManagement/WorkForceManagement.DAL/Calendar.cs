@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Google.Apis.Calendar.v3;
+using Google.Apis.Services;
 
 namespace WorkForceManagement.DAL
 {
@@ -7,30 +9,28 @@ namespace WorkForceManagement.DAL
     {
         public static List<DateTime> GenerateCalendar()
         {
+            List<DateTime> calendar = new List<DateTime>();
             int year = DateTime.Now.Year;
 
-            List<DateTime> calendar = new List<DateTime>()
-            {
-            new DateTime(year, 1, 1), //New Year's Day
-            new DateTime(year, 1, 3), //New Year's Day(in lieu)
-            new DateTime(year, 3, 3), //Liberation Day
-            new DateTime(year, 4, 22), //Orthodox Good Friday
-            new DateTime(year, 4, 23), //Orthodox Easter Saturday
-            new DateTime(year, 4, 24), //Orthodox Easter Sunday 
-            new DateTime(year, 4, 25), //Orthodox Easter Monday 
-            new DateTime(year, 5, 1), //Labour Day
-            new DateTime(year, 5, 2), //Labour Day Holiday
-            new DateTime(year, 5, 6), //Saint George's Day / Army Day
-            new DateTime(year, 5, 24), //Culture and Literacy Day
-            new DateTime(year, 9, 6), //Unification Day
-            new DateTime(year, 9, 22), //Independence Day
-            new DateTime(year, 12, 24), //Christmas Eve
-            new DateTime(year, 12, 25), //Christmas Day
-            new DateTime(year, 12, 26), //2nd Day of Christmas
-            new DateTime(year, 12, 27), //Christmas Holiday(in lieu)
-            new DateTime(year, 12, 28) //Christmas Holiday(in lieu)
-            };
+            const string ApiKey = "AIzaSyBHsIolzVysJEA57h5YiaSAQ070D8XZSFw";
+            const string CalendarId = "en.bulgarian.official#holiday@group.v.calendar.google.com";
 
+            var service = new CalendarService(new BaseClientService.Initializer()
+            {
+                ApiKey = ApiKey,
+                ApplicationName = "BG Calendar"
+            });
+
+            var request = service.Events.List(CalendarId);
+            request.Fields = "items(summary,start,end)";
+            var response = request.ExecuteAsync().Result;
+
+            foreach (var item in response.Items)
+            {
+                DateTime Holiday = DateTime.Parse(item.Start.Date);
+                if (Holiday.Year == year && !calendar.Contains(Holiday))//add holidays from the curr year only and ignore duplicate holidays
+                    calendar.Add(Holiday);
+            }
             return calendar;
         }
     }
