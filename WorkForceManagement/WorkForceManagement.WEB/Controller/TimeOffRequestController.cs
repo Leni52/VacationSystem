@@ -51,7 +51,7 @@ namespace WorkForceManagement.WEB.Controller
         }
 
         [HttpPost]
-        public async Task<ActionResult> CreateTimeOffRequest(TimeOffRequestRequestDTO timeOffRequestRequestDTO)
+        public async Task<ActionResult<TimeOffRequestRequestDTO>> CreateTimeOffRequest(TimeOffRequestRequestDTO timeOffRequestRequestDTO)
         {
             if (!ModelState.IsValid)
             {

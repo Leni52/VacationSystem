@@ -88,7 +88,7 @@ namespace WorkForceManagement.WEB.Controller
         {
             await _teamService.DeleteTeam(teamId);
 
-            return Ok();
+            return NoContent();
         }
 
         [Authorize(Roles = "Admin")]

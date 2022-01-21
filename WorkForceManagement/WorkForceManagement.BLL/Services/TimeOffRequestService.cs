@@ -55,8 +55,8 @@ namespace WorkForceManagement.BLL.Services
             foreach (User user in potentialApprovers)
             {
                 bool teamLeaderIsAway = false;
-                var requests = user.CreatedTimeOffRequests.Where(x => x.Status == TimeOffRequestStatus.Approved && x.StartDate <= DateTime.Now
-                && x.EndDate >= DateTime.Now).Any();
+                var requests = user.CreatedTimeOffRequests.Where(x => x.Status == TimeOffRequestStatus.Approved && x.StartDate.Date <= DateTime.Now.Date
+                && x.EndDate.Date >= DateTime.Now.Date).Any();
                 if (requests)
                 { // if the leader has an approved tof in the time of creating the request dont make him approver
                     teamLeaderIsAway = true;
@@ -138,8 +138,8 @@ namespace WorkForceManagement.BLL.Services
             requestToUpdate.UpdaterId = currentUserId;
             requestToUpdate.Type = timeOffRequest.Type;
             requestToUpdate.Description = timeOffRequest.Description;
-            requestToUpdate.StartDate = timeOffRequest.StartDate;
-            requestToUpdate.EndDate = timeOffRequest.EndDate;
+            requestToUpdate.StartDate = timeOffRequest.StartDate.Date;
+            requestToUpdate.EndDate = timeOffRequest.EndDate.Date;
 
             await _timeOffRequestRepository.CreateOrUpdate(requestToUpdate);
             return requestToUpdate;
@@ -164,7 +164,7 @@ namespace WorkForceManagement.BLL.Services
             if (currentUserIsApprover == false)
                 throw new UserIsntApproverException($"User with Id:{currentUser.Id}, cant approve this Time Off Request");
 
-            timeOffRequest.ChangeDate = DateTime.Now;
+            timeOffRequest.ChangeDate = DateTime.Now.Date;
             timeOffRequest.UpdaterId = currentUser.Id;
 
             if (isApproved)
@@ -244,7 +244,7 @@ namespace WorkForceManagement.BLL.Services
                     {
                         ToEmail = u.Email,
                         Body = $"[TimeOffRequest] {timeOffRequest.CreatorId}",
-                        Subject = $"User with id {timeOffRequest.CreatorId} is requesting a TOR between the dates {timeOffRequest.StartDate.Date} and {timeOffRequest.EndDate.Date}!"
+                        Subject = $"User with id {timeOffRequest.CreatorId} is requesting a TOR between the dates {timeOffRequest.StartDate.ToShortDateString()} and {timeOffRequest.EndDate.ToShortDateString()}!"
                     });
                 }
                 timeOffRequest.Status = TimeOffRequestStatus.Awaiting; // in case it has a Created status
@@ -257,8 +257,8 @@ namespace WorkForceManagement.BLL.Services
             TimeOffRequest request = await _timeOffRequestRepository.Get(requestId);
             //email to requester
             MailRequest mailRequest = new MailRequest();
-            mailRequest.Body = $"Your request between {request.StartDate.Date}" +
-                $" and {request.EndDate.Date}  has been approved.";
+            mailRequest.Body = $"Your request between {request.StartDate.ToShortDateString()}" +
+                $" and {request.EndDate.ToShortDateString()}  has been approved.";
             mailRequest.Subject = "Approved request.";
             mailRequest.ToEmail = request.Requester.Email;
             await _mailService.SendEmail(mailRequest);
@@ -268,8 +268,8 @@ namespace WorkForceManagement.BLL.Services
             TimeOffRequest request = await _timeOffRequestRepository.Get(requestId);
             //email to requester            
             MailRequest mailRequest = new MailRequest();
-            mailRequest.Body = $"Your request with start date: {request.StartDate.Date} " +
-                $" and end date: {request.EndDate.Date} has been rejected.";
+            mailRequest.Body = $"Your request with start date: {request.StartDate.ToShortDateString()} " +
+                $" and end date: {request.EndDate.ToShortDateString()} has been rejected.";
             mailRequest.Subject = "Rejected request.";
             mailRequest.ToEmail = request.Requester.Email;
             await _mailService.SendEmail(mailRequest);
@@ -286,7 +286,7 @@ namespace WorkForceManagement.BLL.Services
                     {
                         ToEmail = u.Email,
                         Subject = "TeamLeader OOO",
-                        Body = $"{timeOffRequest.Requester.UserName} is OOO until {timeOffRequest.EndDate.Date}!"
+                        Body = $"{timeOffRequest.Requester.UserName} is OOO until {timeOffRequest.EndDate.ToShortDateString()}!"
                     });
                 }
             }
@@ -299,12 +299,12 @@ namespace WorkForceManagement.BLL.Services
             if (status == TimeOffRequestStatus.Approved)
             {
                 subject = "Time off Request Approved";
-                body = $"Time off request by: {timeOffRequest.Requester.UserName} with start date: {timeOffRequest.StartDate.Date} and end date: {timeOffRequest.EndDate.Date} is APPROVED";
+                body = $"Time off request by: {timeOffRequest.Requester.UserName} with start date: {timeOffRequest.StartDate.ToShortDateString()} and end date: {timeOffRequest.EndDate.ToShortDateString()} is APPROVED";
             }
             else if (status == TimeOffRequestStatus.Rejected)
             {
                 subject = "Time off request Rejected";
-                body = $"Time off request by: {timeOffRequest.Requester.UserName} with start date: {timeOffRequest.StartDate.Date} and end date: {timeOffRequest.EndDate.Date} is REJECTED";
+                body = $"Time off request by: {timeOffRequest.Requester.UserName} with start date: {timeOffRequest.StartDate.ToShortDateString()} and end date: {timeOffRequest.EndDate.ToShortDateString()} is REJECTED";
             }
 
             List<User> approvers = timeOffRequest.Approvers.ToList();

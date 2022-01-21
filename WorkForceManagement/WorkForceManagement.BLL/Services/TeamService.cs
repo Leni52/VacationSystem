@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using WorkForceManagement.BLL.Exceptions;
 using WorkForceManagement.DAL.Entities;
@@ -23,14 +22,14 @@ namespace WorkForceManagement.BLL.Services
             Team teamWithSameName = await _teamRepository.Get(team => team.Name == teamToAdd.Name);
             if (teamWithSameName != null)
                 throw new TeamWithSameNameExistsException($"Team with the name:{teamToAdd.Name} already exists!");
-           
+
             teamToAdd.CreationDate = DateTime.Now;
             teamToAdd.ChangeDate = DateTime.Now;
             teamToAdd.CreatorId = currentUser.Id;
             teamToAdd.UpdaterId = currentUser.Id;
-            
+
             await _teamRepository.CreateOrUpdate(teamToAdd);
-          
+
         }
         public async Task<Team> GetTeamWithId(Guid teamId)
         {
@@ -80,7 +79,8 @@ namespace WorkForceManagement.BLL.Services
         {
             Team foundTeam = await GetTeamWithId(teamId);
             if ((foundTeam.Members.Any(tempUser => tempUser.Id == user.Id)) ||
-                (foundTeam.Members.Any(tempUser=>tempUser.Id ==foundTeam.TeamLeader.Id))) // User we want to add, is part of the team
+                (foundTeam.TeamLeader.Id == user.Id))
+                // User we want to add, is part of the team
                 throw new ItemAlreadyExistsException($" User with id:{user.Id} is part of this team!");
             foundTeam.Members.Add(user);
             foundTeam.UpdaterId = currentUser.Id;
@@ -89,7 +89,7 @@ namespace WorkForceManagement.BLL.Services
             await _teamRepository.SaveChanges();
         }
         public async Task<List<User>> GetAllTeamMembers(Guid teamId)
-        {          
+        {
             Team foundTeam = await GetTeamWithId(teamId);
             List<User> teamMembers = foundTeam.Members;
             User teamLeader = foundTeam.TeamLeader;
@@ -100,9 +100,9 @@ namespace WorkForceManagement.BLL.Services
         {
             Team foundTeam = await GetTeamWithId(teamId);
 
-            if (foundTeam.Members.Any(tempUser => tempUser.Id == user.Id) == false) // User we want to remove, isn't part of the team
+            if (!foundTeam.Members.Any(tempUser => tempUser.Id == user.Id))
+                // User we want to remove, isn't part of the team
                 throw new KeyNotFoundException($" User with id:{user.Id} isnt part of this team!");
-
             foundTeam.Members.Remove(user);
             foundTeam.UpdaterId = currentUser.Id;
             foundTeam.ChangeDate = DateTime.Now.Date;
