@@ -46,9 +46,9 @@ namespace WorkForceManagement.BLL.Services
             await _timeOffRequestRepository.CreateOrUpdate(timeOffRequest);
             await CheckTimeOffRequest(timeOffRequest.Id);
         }
+
         private List<User> GetApprovers(User currentUser)
         { // gets all the approvers and checks if they themselves are not in a timeoff
-
             List<User> potentialApprovers = currentUser.Teams.Select(team => team.TeamLeader).ToList();
             List<User> validatedApprovers = new List<User>();
 
@@ -67,6 +67,7 @@ namespace WorkForceManagement.BLL.Services
             }
             return validatedApprovers;
         }
+
         private void ValidateTimeOffRequestDates(DateTime startDate, DateTime endDate, User currentUser)
         {
             if (startDate > endDate)
@@ -79,11 +80,10 @@ namespace WorkForceManagement.BLL.Services
                 startDate < timeOff.EndDate
                 );
 
-            if (isOverlapping) // if current user already has a timeoffrequest thats not rejected and is overlapping with the current timeOffRequest 
+            if (isOverlapping) // if current user already has a timeoffrequest thats not rejected and is overlapping with the current timeOffRequest
                 throw new OverlappingTimeOffRequestsException($"User with id: {currentUser.Id}, already has a time off request thats overlapping with the current request!");
-
-
         }
+
         private int ValidateDaysOff(DateTime startDate, DateTime endDate)
         {
             return Enumerable.Range(0, 1 + endDate.Subtract(startDate).Days)
@@ -113,10 +113,12 @@ namespace WorkForceManagement.BLL.Services
             else
                 throw new ItemDoesNotExistException();
         }
+
         public async Task<List<TimeOffRequest>> GetAllRequests()
         {
             return await _timeOffRequestRepository.All();
         }
+
         public async Task<TimeOffRequest> GetTimeOffRequest(Guid Id)
         {
             TimeOffRequest timeOffRequest = await _timeOffRequestRepository.Get(Id);
@@ -126,6 +128,7 @@ namespace WorkForceManagement.BLL.Services
             }
             return timeOffRequest;
         }
+
         public async Task<TimeOffRequest> UpdateTimeOffRequest(Guid timeOffRequestId, TimeOffRequest timeOffRequest, string currentUserId)
 
         {
@@ -144,6 +147,7 @@ namespace WorkForceManagement.BLL.Services
             await _timeOffRequestRepository.CreateOrUpdate(requestToUpdate);
             return requestToUpdate;
         }
+
         public async Task<List<TimeOffRequest>> GetMyRequests(string currentUserId)
         {
             List<TimeOffRequest> allRequests = await _timeOffRequestRepository.All();
@@ -187,13 +191,14 @@ namespace WorkForceManagement.BLL.Services
             // removes the request from the approvers timeOffRequestsToApprove
             timeOffRequest.Approvers.ForEach(approver => approver.TimeOffRequestsToApprove.Remove(timeOffRequest));
 
-            await _timeOffRequestRepository.SaveChanges(); 
+            await _timeOffRequestRepository.SaveChanges();
         }
+
         public async Task ApproveTimeOffRequest(TimeOffRequest timeOffRequest, User currentUser)
         {
             timeOffRequest.AlreadyApproved.Add(currentUser);
             await _timeOffRequestRepository.SaveChanges();
-            //email to requester            
+            //email to requester
             await SendMailToRequesterApprovedRequest(timeOffRequest.Id, currentUser); // TODO this might be incorrent or modified at least
             await CheckTimeOffRequest(timeOffRequest.Id);
         }
@@ -210,7 +215,6 @@ namespace WorkForceManagement.BLL.Services
             {
                 return "Rejected";
             }
-
             else if (timeOffRequest.Status == TimeOffRequestStatus.Approved)
             {
                 return "Approved";
@@ -252,6 +256,7 @@ namespace WorkForceManagement.BLL.Services
                 return "Awaiting";
             }
         }
+
         public async Task SendMailToRequesterApprovedRequest(Guid requestId, User user)
         {
             TimeOffRequest request = await _timeOffRequestRepository.Get(requestId);
@@ -263,10 +268,11 @@ namespace WorkForceManagement.BLL.Services
             mailRequest.ToEmail = request.Requester.Email;
             await _mailService.SendEmail(mailRequest);
         }
+
         public async Task SendMailToRequesterRejectedRequest(Guid requestId, User user)
         {
             TimeOffRequest request = await _timeOffRequestRepository.Get(requestId);
-            //email to requester            
+            //email to requester
             MailRequest mailRequest = new MailRequest();
             mailRequest.Body = $"Your request with start date: {request.StartDate.ToShortDateString()} " +
                 $" and end date: {request.EndDate.ToShortDateString()} has been rejected.";
@@ -274,6 +280,7 @@ namespace WorkForceManagement.BLL.Services
             mailRequest.ToEmail = request.Requester.Email;
             await _mailService.SendEmail(mailRequest);
         }
+
         private async Task NotifyTeamMembersLeaderIsOOO(TimeOffRequest timeOffRequest)
         {
             List<User> usersToSendEmailTo = await _userService.GetUsersUnderTeamLeader(timeOffRequest.Requester);
@@ -318,34 +325,52 @@ namespace WorkForceManagement.BLL.Services
                     Body = body
                 });
             }
-
         }
 
         public async Task<List<User>> GetMyColleguesTimeOffRequests(User currentUser)
         {
             List<Team> userTeams = _userService.GetUserTeams(currentUser);
             List<User> teamMembers = new List<User>();
-            List<User> teamMembersOnVacation = new List<User>();            
+            List<User> teamMembersOnVacation = new List<User>();
 
             foreach (var team in userTeams)
             {
                 teamMembers = await _teamService.GetAllTeamMembers(team.Id);
-            }           
-            
+            }
+
             foreach (var user in teamMembers)
             {
                 if (user.CreatedTimeOffRequests.Where(t => t.Status == TimeOffRequestStatus.Approved).Any())
                 {
                     teamMembersOnVacation.Add(user);
                 }
-            }           
+            }
 
             return teamMembersOnVacation;
         }
-        public async Task<bool> canCancel(Guid requestId)
+
+        public async Task CancelTimeOffRequest(Guid timeOffRequestId)
+        {
+            TimeOffRequest timeOffRequest = await _timeOffRequestRepository.Get(timeOffRequestId);
+
+            if (timeOffRequest == null)
+            {
+                throw new ItemDoesNotExistException($"TimeOffRequest with id: {timeOffRequestId} doesn't exist!");
+            }
+
+            if (IsAbleToCancel(timeOffRequest))
+            {
+                await _timeOffRequestRepository.Remove(timeOffRequest);
+            }
+            else
+            {
+                throw new CannotCancelTimeOffRequestException($"TimeOffRequest with id: {timeOffRequestId} cannot be cancelled!"); 
+            }
+        }
+
+        private bool IsAbleToCancel(TimeOffRequest request)
         {
             bool canCancel = false;
-            TimeOffRequest request = await _timeOffRequestRepository.Get(requestId);
             if ((request.Status == TimeOffRequestStatus.Created ||
                 request.Status == TimeOffRequestStatus.Awaiting) &&
                 (request.StartDate >= DateTime.Now.AddDays(3)))
@@ -354,6 +379,5 @@ namespace WorkForceManagement.BLL.Services
             }
             return canCancel;
         }
-    
     }
 }

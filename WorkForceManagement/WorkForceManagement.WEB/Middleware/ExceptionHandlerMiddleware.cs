@@ -46,6 +46,7 @@ namespace WorkForceManagement.WEB.Middleware
                         response.StatusCode = (int)HttpStatusCode.BadRequest;
                        break;
                     case UserIsntApproverException:
+                    case CannotCancelTimeOffRequestException:
                         response.StatusCode = (int)HttpStatusCode.Unauthorized;
                         break;
 
