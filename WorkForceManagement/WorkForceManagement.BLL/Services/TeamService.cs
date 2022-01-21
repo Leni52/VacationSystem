@@ -24,12 +24,19 @@ namespace WorkForceManagement.BLL.Services
             if (teamWithSameName != null)
                 throw new TeamWithSameNameExistsException($"Team with the name:{teamToAdd.Name} already exists!");
 
+            ValidateUserConfirmedEmail(teamToAdd.TeamLeader);
+
             teamToAdd.CreationDate = DateTime.Now;
             teamToAdd.ChangeDate = DateTime.Now;
             teamToAdd.CreatorId = currentUser.Id;
             teamToAdd.UpdaterId = currentUser.Id;
 
             await _teamRepository.CreateOrUpdate(teamToAdd);
+        }
+        private void ValidateUserConfirmedEmail(User user)
+        {
+            if (user.EmailConfirmed == false)
+                throw new UserEmailNotConfirmedException($"Request cant be made, User with Id: {user.Id}, doesn't have email address confirmed");
         }
         public async Task<Team> GetTeamWithId(Guid teamId)
         {
@@ -53,6 +60,8 @@ namespace WorkForceManagement.BLL.Services
             if (teamWithSameName != null)
                 throw new TeamWithSameNameExistsException($"Team with the name:{teamToUpdate.Name} already exists!");
 
+            ValidateUserConfirmedEmail(teamToUpdate.TeamLeader);
+
             teamToUpdate.ChangeDate = DateTime.Now;
             teamToUpdate.UpdaterId = currentUser.Id;
 
@@ -68,6 +77,8 @@ namespace WorkForceManagement.BLL.Services
         {
             Team foundTeam = await GetTeamWithId(teamId);
 
+            ValidateUserConfirmedEmail(user);
+
             foundTeam.ChangeDate = DateTime.Now;
             foundTeam.UpdaterId = currentUser.Id;
 
@@ -78,6 +89,7 @@ namespace WorkForceManagement.BLL.Services
         public async Task AddUserToTeam(Guid teamId, User user, User currentUser)
         {
             Team foundTeam = await GetTeamWithId(teamId);
+            ValidateUserConfirmedEmail(user);
 
             foundTeam.Members.Add(user);
             foundTeam.UpdaterId = currentUser.Id;
