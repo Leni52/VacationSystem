@@ -41,7 +41,6 @@ namespace WorkForceManagement.WEB.Controller
 
             _mapper.Map(model, teamToAdd);
             teamToAdd.TeamLeader = teamLeader;
-
             await _teamService.Create(teamToAdd,currentUser);
 
             return Ok(model);

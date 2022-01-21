@@ -13,16 +13,19 @@ namespace WorkForceManagement.BLL.Services
     {
         private readonly IRepository<TimeOffRequest> _timeOffRequestRepository;
         private readonly IUserService _userService;
+        private readonly ITeamService _teamService;
         private readonly IMailService _mailService;
         private readonly List<DateTime> officialDaysOff = Calendar.GenerateCalendar();
 
         public TimeOffRequestService(
-            IRepository<TimeOffRequest> timeOffRequestRepository, 
+            IRepository<TimeOffRequest> timeOffRequestRepository,
             IUserService userService,
+            ITeamService teamService,
             IMailService mailService)
         {
             _timeOffRequestRepository = timeOffRequestRepository;
             _userService = userService;
+            _teamService = teamService;
             _mailService = mailService;
         }
 
@@ -40,7 +43,7 @@ namespace WorkForceManagement.BLL.Services
             approvers.ForEach(user => user.TimeOffRequestsToApprove.Add(timeOffRequest));
             currentUser.CreatedTimeOffRequests.Add(timeOffRequest);
 
-            await _timeOffRequestRepository.CreateOrUpdate(timeOffRequest);           
+            await _timeOffRequestRepository.CreateOrUpdate(timeOffRequest);
             await CheckTimeOffRequest(timeOffRequest.Id);
         }
         private List<User> GetApprovers(User currentUser)
@@ -64,15 +67,15 @@ namespace WorkForceManagement.BLL.Services
             }
             return validatedApprovers;
         }
-        private void ValidateTimeOffRequestDates(DateTime startDate, DateTime endDate, User currentUser) 
+        private void ValidateTimeOffRequestDates(DateTime startDate, DateTime endDate, User currentUser)
         {
             if (startDate > endDate)
                 throw new InvalidDatesException("Invalid time off request dates, the start date should be earlier or equal to end date");
 
             bool isOverlapping = currentUser.CreatedTimeOffRequests.Any(
                 timeOff =>
-                timeOff.Status != TimeOffRequestStatus.Rejected && 
-                timeOff.StartDate < endDate && 
+                timeOff.Status != TimeOffRequestStatus.Rejected &&
+                timeOff.StartDate < endDate &&
                 startDate < timeOff.EndDate
                 );
 
@@ -81,7 +84,7 @@ namespace WorkForceManagement.BLL.Services
 
 
         }
-        private int ValidateDaysOff(DateTime startDate, DateTime endDate) 
+        private int ValidateDaysOff(DateTime startDate, DateTime endDate)
         {
             return Enumerable.Range(0, 1 + endDate.Subtract(startDate).Days)
                 .Select(offset => startDate.AddDays(offset))
@@ -94,7 +97,7 @@ namespace WorkForceManagement.BLL.Services
         {
             return officialDaysOff.Any(date => date.Date == day.Date);
         }
-        
+
         private bool IsDayWeekend(DateTime day)
         {
             return day.DayOfWeek == DayOfWeek.Saturday || day.DayOfWeek == DayOfWeek.Sunday;
@@ -200,7 +203,7 @@ namespace WorkForceManagement.BLL.Services
         public async Task<string> CheckTimeOffRequest(Guid timeOffRequestId)
         {
             TimeOffRequest timeOffRequest = await GetTimeOffRequest(timeOffRequestId);
-           
+
             if (timeOffRequest == null)
             {
                 throw new ItemDoesNotExistException();
@@ -222,7 +225,7 @@ namespace WorkForceManagement.BLL.Services
             {
                 timeOffRequest.Status = TimeOffRequestStatus.Approved;
                 await NotifyApproversOnDecision(TimeOffRequestStatus.Approved, timeOffRequest);
-                await  SendMailToRequesterApprovedRequest(timeOffRequest.Id, timeOffRequest.Requester);
+                await SendMailToRequesterApprovedRequest(timeOffRequest.Id, timeOffRequest.Requester);
                 // To all approvers, removing the request from toApprove and adding it to Approved list
                 List<User> approvers = timeOffRequest.Approvers.ToList();
 
@@ -243,7 +246,7 @@ namespace WorkForceManagement.BLL.Services
                     {
                         ToEmail = u.Email,
                         Body = $"[TimeOffRequest] {timeOffRequest.CreatorId}",
-                        Subject = $"User with id {timeOffRequest.CreatorId} is requesting a TOR between the dates {timeOffRequest.StartDate} and {timeOffRequest.EndDate}!"
+                        Subject = $"User with id {timeOffRequest.CreatorId} is requesting a TOR between the dates {timeOffRequest.StartDate.Date} and {timeOffRequest.EndDate.Date}!"
                     });
                 }
                 timeOffRequest.Status = TimeOffRequestStatus.Awaiting; // in case it has a Created status
@@ -256,8 +259,8 @@ namespace WorkForceManagement.BLL.Services
             TimeOffRequest request = await _timeOffRequestRepository.Get(requestId);
             //email to requester
             MailRequest mailRequest = new MailRequest();
-            mailRequest.Body = $"Your request between {request.StartDate}" +
-                $" and {request.EndDate}  has been approved.";
+            mailRequest.Body = $"Your request between {request.StartDate.Date}" +
+                $" and {request.EndDate.Date}  has been approved.";
             mailRequest.Subject = "Approved request.";
             mailRequest.ToEmail = request.Requester.Email;
             await _mailService.SendEmail(mailRequest);
@@ -267,8 +270,8 @@ namespace WorkForceManagement.BLL.Services
             TimeOffRequest request = await _timeOffRequestRepository.Get(requestId);
             //email to requester            
             MailRequest mailRequest = new MailRequest();
-            mailRequest.Body = $"Your request with start date: {request.StartDate} " +
-                $" and end date: {request.EndDate} has been rejected.";
+            mailRequest.Body = $"Your request with start date: {request.StartDate.Date} " +
+                $" and end date: {request.EndDate.Date} has been rejected.";
             mailRequest.Subject = "Rejected request.";
             mailRequest.ToEmail = request.Requester.Email;
             await _mailService.SendEmail(mailRequest);
@@ -285,7 +288,7 @@ namespace WorkForceManagement.BLL.Services
                     {
                         ToEmail = u.Email,
                         Subject = "TeamLeader OOO",
-                        Body = $"{timeOffRequest.Requester.UserName} is OOO until {timeOffRequest.EndDate}!"
+                        Body = $"{timeOffRequest.Requester.UserName} is OOO until {timeOffRequest.EndDate.Date}!"
                     });
                 }
             }
@@ -298,12 +301,12 @@ namespace WorkForceManagement.BLL.Services
             if (status == TimeOffRequestStatus.Approved)
             {
                 subject = "Time off Request Approved";
-                body = $"Time off request by: {timeOffRequest.Requester.UserName} with start date: {timeOffRequest.StartDate} and end date: {timeOffRequest.EndDate} is APPROVED";
+                body = $"Time off request by: {timeOffRequest.Requester.UserName} with start date: {timeOffRequest.StartDate.Date} and end date: {timeOffRequest.EndDate.Date} is APPROVED";
             }
             else if (status == TimeOffRequestStatus.Rejected)
             {
                 subject = "Time off request Rejected";
-                body = $"Time off request by: {timeOffRequest.Requester.UserName} with start date: {timeOffRequest.StartDate} and end date: {timeOffRequest.EndDate} is REJECTED";
+                body = $"Time off request by: {timeOffRequest.Requester.UserName} with start date: {timeOffRequest.StartDate.Date} and end date: {timeOffRequest.EndDate.Date} is REJECTED";
             }
 
             List<User> approvers = timeOffRequest.Approvers.ToList();
@@ -318,6 +321,28 @@ namespace WorkForceManagement.BLL.Services
                 });
             }
 
+        }
+
+        public async Task<List<User>> GetMyColleguesTimeOffRequests(User currentUser)
+        {
+            List<Team> userTeams = _userService.GetUserTeams(currentUser);
+            List<User> teamMembers = new List<User>();
+            List<User> teamMembersOnVacation = new List<User>();            
+
+            foreach (var team in userTeams)
+            {
+                teamMembers = await _teamService.GetAllTeamMembers(team.Id);
+            }           
+            
+            foreach (var user in teamMembers)
+            {
+                if (user.CreatedTimeOffRequests.Where(t => t.Status == TimeOffRequestStatus.Approved).Any())
+                {
+                    teamMembersOnVacation.Add(user);
+                }
+            }           
+
+            return teamMembersOnVacation;
         }
     }
 }

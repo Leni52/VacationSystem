@@ -27,7 +27,7 @@ namespace WorkForceManagement.DAL.Repositories
         {
             if (entity.Id != Guid.Empty)
             {
-                entity.ChangeDate = DateTime.Now;
+                entity.ChangeDate = DateTime.Now.Date;
                 _databaseContext.Set<T>().Update(entity);
             }
             else

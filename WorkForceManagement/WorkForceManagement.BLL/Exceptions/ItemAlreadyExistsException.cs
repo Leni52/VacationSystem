@@ -3,8 +3,7 @@ using System.Runtime.Serialization;
 
 namespace WorkForceManagement.BLL.Exceptions
 {
-    namespace WorkForceManagement.BLL
-    {
+    
         [Serializable]
         public class ItemAlreadyExistsException : Exception
         {
@@ -24,7 +23,7 @@ namespace WorkForceManagement.BLL.Exceptions
             {
             }
         }
-    }
+    
 }
 
     

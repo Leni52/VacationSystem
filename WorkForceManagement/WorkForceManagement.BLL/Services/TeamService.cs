@@ -23,13 +23,14 @@ namespace WorkForceManagement.BLL.Services
             Team teamWithSameName = await _teamRepository.Get(team => team.Name == teamToAdd.Name);
             if (teamWithSameName != null)
                 throw new TeamWithSameNameExistsException($"Team with the name:{teamToAdd.Name} already exists!");
-
+           
             teamToAdd.CreationDate = DateTime.Now;
             teamToAdd.ChangeDate = DateTime.Now;
             teamToAdd.CreatorId = currentUser.Id;
             teamToAdd.UpdaterId = currentUser.Id;
-
+            
             await _teamRepository.CreateOrUpdate(teamToAdd);
+          
         }
         public async Task<Team> GetTeamWithId(Guid teamId)
         {
@@ -78,10 +79,12 @@ namespace WorkForceManagement.BLL.Services
         public async Task AddUserToTeam(Guid teamId, User user, User currentUser)
         {
             Team foundTeam = await GetTeamWithId(teamId);
-
+            if ((foundTeam.Members.Any(tempUser => tempUser.Id == user.Id)) ||
+                (foundTeam.Members.Any(tempUser=>tempUser.Id ==foundTeam.TeamLeader.Id))) // User we want to add, is part of the team
+                throw new ItemAlreadyExistsException($" User with id:{user.Id} is part of this team!");
             foundTeam.Members.Add(user);
             foundTeam.UpdaterId = currentUser.Id;
-            foundTeam.ChangeDate = DateTime.Now;
+            foundTeam.ChangeDate = DateTime.Now.Date;
 
             await _teamRepository.SaveChanges();
         }
@@ -102,7 +105,7 @@ namespace WorkForceManagement.BLL.Services
 
             foundTeam.Members.Remove(user);
             foundTeam.UpdaterId = currentUser.Id;
-            foundTeam.ChangeDate = DateTime.Now;
+            foundTeam.ChangeDate = DateTime.Now.Date;
 
             await _teamRepository.SaveChanges();
         }
