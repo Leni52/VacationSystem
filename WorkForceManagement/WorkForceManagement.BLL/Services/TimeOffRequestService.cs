@@ -181,22 +181,20 @@ namespace WorkForceManagement.BLL.Services
         {
             timeOffRequest.Status = TimeOffRequestStatus.Rejected;
 
+            await SendMailToRequesterRejectedRequest(timeOffRequest.Id, currentUser);
+            await NotifyApproversOnDecision(TimeOffRequestStatus.Rejected, timeOffRequest);
+
             // removes the request from the approvers timeOffRequestsToApprove
             timeOffRequest.Approvers.ForEach(approver => approver.TimeOffRequestsToApprove.Remove(timeOffRequest));
 
-            await _timeOffRequestRepository.SaveChanges();
-            //TODO send email to teamLeaders 
-
-            //email to requester            
-            await SendMailToRequesterRejectedRequest(timeOffRequest.Id, currentUser);
-            await NotifyApproversOnDecision(TimeOffRequestStatus.Rejected, timeOffRequest);
+            await _timeOffRequestRepository.SaveChanges(); 
         }
         public async Task ApproveTimeOffRequest(TimeOffRequest timeOffRequest, User currentUser)
         {
             timeOffRequest.AlreadyApproved.Add(currentUser);
             await _timeOffRequestRepository.SaveChanges();
             //email to requester            
-            await SendMailToRequesterApprovedRequest(timeOffRequest.Id, currentUser);
+            await SendMailToRequesterApprovedRequest(timeOffRequest.Id, currentUser); // TODO this might be incorrent or modified at least
             await CheckTimeOffRequest(timeOffRequest.Id);
         }
 
