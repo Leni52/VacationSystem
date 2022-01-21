@@ -117,5 +117,15 @@ namespace WorkForceManagement.WEB.Controller
 
             return Ok(user);
         }
+
+        [ApiExplorerSettings(IgnoreApi = true)]
+        [HttpGet("ConfirmEmail")]
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+
+            await _userService.ConfirmEmailAdress(userId, token);
+
+            return Ok();
+        }
     }
 }

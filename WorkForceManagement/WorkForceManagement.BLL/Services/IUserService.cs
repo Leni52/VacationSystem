@@ -19,5 +19,6 @@ namespace WorkForceManagement.BLL.Services
         Task MakeUserAdmin(User user);
         Task RemoveUserFromAdmin(User user);
         Task<List<User>> GetUsersUnderTeamLeader(User user);
+        Task ConfirmEmailAdress(string userId, string token);
     }
 }
