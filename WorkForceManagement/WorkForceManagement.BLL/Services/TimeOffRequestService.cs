@@ -342,5 +342,18 @@ namespace WorkForceManagement.BLL.Services
 
             return teamMembersOnVacation;
         }
+        public async Task<bool> canCancel(Guid requestId)
+        {
+            bool canCancel = false;
+            TimeOffRequest request = await _timeOffRequestRepository.Get(requestId);
+            if ((request.Status == TimeOffRequestStatus.Created ||
+                request.Status == TimeOffRequestStatus.Awaiting) &&
+                (request.StartDate >= DateTime.Now.AddDays(3)))
+            {
+                canCancel = true;
+            }
+            return canCancel;
+        }
+    
     }
 }
