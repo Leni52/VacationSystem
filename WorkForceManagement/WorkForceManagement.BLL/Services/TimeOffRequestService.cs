@@ -34,7 +34,7 @@ namespace WorkForceManagement.BLL.Services
             ValidateTimeOffRequestDates(timeOffRequest.StartDate, timeOffRequest.EndDate, currentUser);
             ValidateDaysOff(timeOffRequest.StartDate, timeOffRequest.EndDate);
 
-            timeOffRequest.Status = 0;
+            timeOffRequest.Status = TimeOffRequestStatus.Created;
             timeOffRequest.CreatorId = currentUser.Id;
             timeOffRequest.UpdaterId = currentUser.Id;
             List<User> approvers = GetApprovers(currentUser);
@@ -171,6 +171,11 @@ namespace WorkForceManagement.BLL.Services
             timeOffRequest.ChangeDate = DateTime.Now.Date;
             timeOffRequest.UpdaterId = currentUser.Id;
 
+            if (timeOffRequest.Status == TimeOffRequestStatus.Created)
+            {
+                timeOffRequest.Status = TimeOffRequestStatus.Awaiting;
+            }
+
             if (isApproved)
             {
                 await ApproveTimeOffRequest(timeOffRequest, currentUser);
@@ -242,6 +247,7 @@ namespace WorkForceManagement.BLL.Services
             else
             {// sending notifications to leaders which nave not yet confirmed, in case of call after creaton it's sent to all team leaders
                 List<User> approversToSendEmailTo = timeOffRequest.Approvers.Except(timeOffRequest.AlreadyApproved).ToList();
+
                 foreach (User u in approversToSendEmailTo)
                 {
                     await _mailService.SendEmail(new MailRequest()
@@ -251,9 +257,9 @@ namespace WorkForceManagement.BLL.Services
                         Subject = $"User with id {timeOffRequest.CreatorId} is requesting a TOR between the dates {timeOffRequest.StartDate.ToShortDateString()} and {timeOffRequest.EndDate.ToShortDateString()}!"
                     });
                 }
-                timeOffRequest.Status = TimeOffRequestStatus.Awaiting; // in case it has a Created status
+
                 await _timeOffRequestRepository.SaveChanges();
-                return "Awaiting";
+                return timeOffRequest.Status == TimeOffRequestStatus.Awaiting ? "Awaiting" : "Created";
             }
         }
 

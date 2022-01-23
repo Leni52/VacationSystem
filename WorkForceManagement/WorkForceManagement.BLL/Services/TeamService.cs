@@ -23,6 +23,8 @@ namespace WorkForceManagement.BLL.Services
             if (teamWithSameName != null)
                 throw new TeamWithSameNameExistsException($"Team with the name:{teamToAdd.Name} already exists!");
 
+            ValidateUserConfirmedEmail(teamToAdd.TeamLeader);
+
             teamToAdd.CreationDate = DateTime.Now;
             teamToAdd.ChangeDate = DateTime.Now;
             teamToAdd.CreatorId = currentUser.Id;
@@ -30,6 +32,11 @@ namespace WorkForceManagement.BLL.Services
 
             await _teamRepository.CreateOrUpdate(teamToAdd);
 
+        }
+        private void ValidateUserConfirmedEmail(User user)
+        {
+            if (user.EmailConfirmed == false)
+                throw new UserEmailNotConfirmedException($"Request cant be made, User with Id: {user.Id}, doesn't have email address confirmed");
         }
         public async Task<Team> GetTeamWithId(Guid teamId)
         {
@@ -53,6 +60,8 @@ namespace WorkForceManagement.BLL.Services
             if (teamWithSameName != null)
                 throw new TeamWithSameNameExistsException($"Team with the name:{teamToUpdate.Name} already exists!");
 
+            ValidateUserConfirmedEmail(teamToUpdate.TeamLeader);
+
             teamToUpdate.ChangeDate = DateTime.Now;
             teamToUpdate.UpdaterId = currentUser.Id;
 
@@ -68,6 +77,8 @@ namespace WorkForceManagement.BLL.Services
         {
             Team foundTeam = await GetTeamWithId(teamId);
 
+            ValidateUserConfirmedEmail(user);
+
             foundTeam.ChangeDate = DateTime.Now;
             foundTeam.UpdaterId = currentUser.Id;
 
@@ -82,6 +93,8 @@ namespace WorkForceManagement.BLL.Services
                 (foundTeam.TeamLeader.Id == user.Id))
                 // User we want to add, is part of the team
                 throw new ItemAlreadyExistsException($" User with id:{user.Id} is part of this team!");
+            ValidateUserConfirmedEmail(user);
+
             foundTeam.Members.Add(user);
             foundTeam.UpdaterId = currentUser.Id;
             foundTeam.ChangeDate = DateTime.Now.Date;

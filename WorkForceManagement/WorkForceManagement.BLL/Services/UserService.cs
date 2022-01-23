@@ -1,11 +1,14 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mail;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using WorkForceManagement.BLL.Exceptions;
+using WorkForceManagement.DAL;
 using WorkForceManagement.DAL.Entities;
 
 namespace WorkForceManagement.BLL.Services
@@ -14,11 +17,13 @@ namespace WorkForceManagement.BLL.Services
     {
         private readonly ITeamService _teamService;
         private readonly IAuthUserManager _userManager;
+        private readonly IMailService _mailService;
 
-        public UserService(ITeamService teamService, IAuthUserManager userManager)
+        public UserService(ITeamService teamService, IAuthUserManager userManager, IMailService mailService)
         {
             _teamService = teamService;
             _userManager = userManager;
+            _mailService = mailService;
         }
 
         public async Task Add(User userToAdd, string password, bool isAdmin)
@@ -34,12 +39,32 @@ namespace WorkForceManagement.BLL.Services
                 throw new InvalidEmailException($"Email: {userToAdd.Email} is not valid!");
             }
 
+            userToAdd.TwoFactorEnabled = true;
             await _userManager.CreateUser(userToAdd, password);
+
+            await EmailUserWithConfirmationToken(userToAdd);
 
             if (isAdmin)
             {
                 await _userManager.AddRoleToUser(userToAdd, "Admin");
             }
+        }
+        private async Task EmailUserWithConfirmationToken(User userToAdd)
+        {
+            var confirmEmailToken = await _userManager.GenerateEmailConfirmationTokenAsync(userToAdd);
+            var encodedEmailToken = Encoding.UTF8.GetBytes(confirmEmailToken);
+            var validEmailToken = WebEncoders.Base64UrlEncode(encodedEmailToken);
+
+            string appUrl = "https://localhost:5000"; // TODO this probably should be changed to be included in app settings
+            string url = $"{appUrl}/api/User/confirmemail?userid={userToAdd.Id}&token={validEmailToken}";
+
+            await _mailService.SendEmail(new MailRequest()
+                {
+                    ToEmail = userToAdd.Email,
+                    Subject = "Confirm your email",
+                    Body = $"<p>Confirm your email by <a href='{url}'> Clicking Here </a>  </p>"
+                });
+
         }
 
         private bool IsEmailValid(string emailaddress)
@@ -145,6 +170,16 @@ namespace WorkForceManagement.BLL.Services
             }
 
             return users;
+        }
+
+        public async Task ConfirmEmailAdress(string userId, string token)
+        {
+            User user = await GetUserById(Guid.Parse(userId));
+
+            var decodedToken = WebEncoders.Base64UrlDecode(token);
+            string normalToken = Encoding.UTF8.GetString(decodedToken);
+
+            await _userManager.ConfirmEmailAsync(user, normalToken);
         }
     }
 }

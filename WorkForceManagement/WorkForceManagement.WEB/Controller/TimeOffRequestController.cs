@@ -48,6 +48,7 @@ namespace WorkForceManagement.WEB.Controller
             TimeOffRequest requestFromDB = await _timeOffRequestService.GetTimeOffRequest(timeOffRequestId);
 
             var requestModel = _mapper.Map<TimeOffRequestResponseDTO>(requestFromDB);
+
             return Ok(requestModel);
         }
 
@@ -130,6 +131,21 @@ namespace WorkForceManagement.WEB.Controller
             }
         }
 
+        [HttpGet("RequestsWaitingForApproval")]
+        [Authorize]
+        public async Task<ActionResult<List<TimeOffRequest>>> RequestsWaitingForApproval()
+        {
+            User currentUser = await _userService.GetCurrentUser(User);
+
+            if (currentUser != null)
+            {
+                var requestsDTO = _mapper.Map<List<TimeOffRequestResponseDTO>>(currentUser.TimeOffRequestsToApprove);
+
+                return Ok(requestsDTO);
+            }
+
+            return BadRequest();
+        }
         [HttpGet("MyColleguesVacation")]
         public async Task<ActionResult> GetMyColleguesVacationList()
         {
