@@ -67,6 +67,7 @@ namespace WorkForceManagement.BLL.Services
             }
             return validatedApprovers;
         }
+
         private void ValidateTimeOffRequestDates(DateTime startDate, DateTime endDate, User currentUser)
         {
             if (startDate > endDate)
@@ -82,6 +83,7 @@ namespace WorkForceManagement.BLL.Services
             if (isOverlapping) // if current user already has a timeoffrequest thats not rejected and is overlapping with the current timeOffRequest
                 throw new OverlappingTimeOffRequestsException($"User with id: {currentUser.Id}, already has a time off request thats overlapping with the current request!");
         }
+
         private int ValidateDaysOff(DateTime startDate, DateTime endDate)
         {
             return Enumerable.Range(0, 1 + endDate.Subtract(startDate).Days)
@@ -336,27 +338,46 @@ namespace WorkForceManagement.BLL.Services
         {
             List<Team> userTeams = _userService.GetUserTeams(currentUser);
             List<User> teamMembers = new List<User>();
-            List<User> teamMembersOnVacation = new List<User>();            
+            List<User> teamMembersOnVacation = new List<User>();
 
             foreach (var team in userTeams)
             {
                 teamMembers = await _teamService.GetAllTeamMembers(team.Id);
-            }           
-            
+            }
+
             foreach (var user in teamMembers)
             {
                 if (user.CreatedTimeOffRequests.Where(t => t.Status == TimeOffRequestStatus.Approved).Any())
                 {
                     teamMembersOnVacation.Add(user);
                 }
-            }           
+            }
 
             return teamMembersOnVacation;
         }
-        private async Task<bool> IsAbleToCancel(Guid requestId)
+
+        public async Task CancelTimeOffRequest(Guid timeOffRequestId)
+        {
+            TimeOffRequest timeOffRequest = await _timeOffRequestRepository.Get(timeOffRequestId);
+
+            if (timeOffRequest == null)
+            {
+                throw new ItemDoesNotExistException($"TimeOffRequest with id: {timeOffRequestId} doesn't exist!");
+            }
+
+            if (IsAbleToCancel(timeOffRequest))
+            {
+                await _timeOffRequestRepository.Remove(timeOffRequest);
+            }
+            else
+            {
+                throw new CannotCancelTimeOffRequestException($"TimeOffRequest with id: {timeOffRequestId} cannot be cancelled!"); 
+            }
+        }
+
+        private bool IsAbleToCancel(TimeOffRequest request)
         {
             bool canCancel = false;
-        TimeOffRequest request = await _timeOffRequestRepository.Get(requestId);
             if ((request.Status == TimeOffRequestStatus.Created ||
                 request.Status == TimeOffRequestStatus.Awaiting) &&
                 (request.StartDate >= DateTime.Now.AddDays(3)))

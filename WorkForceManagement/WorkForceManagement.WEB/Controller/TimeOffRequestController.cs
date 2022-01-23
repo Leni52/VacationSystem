@@ -72,7 +72,7 @@ namespace WorkForceManagement.WEB.Controller
         public async Task<ActionResult> UpdateTimeOffRequest(Guid timeOffRequestId, TimeOffRequestRequestDTO request)
         {
             User currentUser = await _userService.GetCurrentUser(User);
-              if (!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
@@ -130,18 +130,6 @@ namespace WorkForceManagement.WEB.Controller
                 return NotFound(ex.Message);
             }
         }
-        [HttpGet("MyColleguesVacation")]
-        public async Task<ActionResult> GetMyColleguesVacationList()
-        {
-            User currentUser = await _userService.GetCurrentUser(User);
-            if (currentUser != null)
-            {
-                List<User> membersOnVacation =await _timeOffRequestService.GetMyColleguesTimeOffRequests(currentUser);
-                var membersOnVacationDTO = _mapper.Map<List<UserResponseDTO>>(membersOnVacation);              
-                return Ok(membersOnVacationDTO);
-            }
-            return BadRequest();
-        }
 
         [HttpGet("RequestsWaitingForApproval")]
         [Authorize]
@@ -157,6 +145,31 @@ namespace WorkForceManagement.WEB.Controller
             }
 
             return BadRequest();
+        }
+        [HttpGet("MyColleguesVacation")]
+        public async Task<ActionResult> GetMyColleguesVacationList()
+        {
+            User currentUser = await _userService.GetCurrentUser(User);
+            
+            if (currentUser != null)
+            {
+                List<User> membersOnVacation = await _timeOffRequestService.GetMyColleguesTimeOffRequests(currentUser);
+                
+                var membersOnVacationDTO = _mapper.Map<List<UserResponseDTO>>(membersOnVacation);
+                
+                return Ok(membersOnVacationDTO);
+            }
+
+            return BadRequest();
+        }
+
+        [HttpPatch("CancelTimeOffRequest/{timeOffRequestId}")]
+        [Authorize(Policy = "TimeOffRequestCreator")]
+        public async Task<ActionResult> CancelTimeOffRequest(Guid timeOffRequestId)
+        {
+            await _timeOffRequestService.CancelTimeOffRequest(timeOffRequestId);
+
+            return Ok();
         }
     }
 }
