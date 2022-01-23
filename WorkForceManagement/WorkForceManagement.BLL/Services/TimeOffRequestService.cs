@@ -331,6 +331,7 @@ namespace WorkForceManagement.BLL.Services
                     Body = body
                 });
             }
+
         }
 
         public async Task<List<User>> GetMyColleguesTimeOffRequests(User currentUser)
