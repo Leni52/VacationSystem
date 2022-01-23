@@ -16,5 +16,6 @@ namespace WorkForceManagement.BLL.Services
         Task RemoveUserFromTeam(Guid teamId, User user, User currentUser);
         Task UpdateTeam(Team teamToUpdate, Guid teamId, User currentUser);
         Task UpdateTeamLeader(Guid teamId, User user, User currentUser);
+       
     }
 }

@@ -8,6 +8,7 @@ using WorkForceManagement.BLL.Exceptions;
 using WorkForceManagement.BLL.Services;
 using WorkForceManagement.DAL.Entities;
 using WorkForceManagement.DTO.Requests;
+using WorkForceManagement.DTO.ResponseDTO;
 using WorkForceManagement.DTO.Responses;
 
 namespace WorkForceManagement.WEB.Controller
@@ -52,7 +53,7 @@ namespace WorkForceManagement.WEB.Controller
         }
 
         [HttpPost]
-        public async Task<ActionResult> CreateTimeOffRequest(TimeOffRequestRequestDTO timeOffRequestRequestDTO)
+        public async Task<ActionResult<TimeOffRequestRequestDTO>> CreateTimeOffRequest(TimeOffRequestRequestDTO timeOffRequestRequestDTO)
         {
             if (!ModelState.IsValid)
             {
@@ -71,8 +72,7 @@ namespace WorkForceManagement.WEB.Controller
         public async Task<ActionResult> UpdateTimeOffRequest(Guid timeOffRequestId, TimeOffRequestRequestDTO request)
         {
             User currentUser = await _userService.GetCurrentUser(User);
-            //  TimeOffRequest timeOffRequest = await _timeOffRequestService.GetTimeOffRequest(timeOffRequestId);
-            if (!ModelState.IsValid)
+              if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
@@ -129,6 +129,18 @@ namespace WorkForceManagement.WEB.Controller
             {
                 return NotFound(ex.Message);
             }
+        }
+        [HttpGet("MyColleguesVacation")]
+        public async Task<ActionResult> GetMyColleguesVacationList()
+        {
+            User currentUser = await _userService.GetCurrentUser(User);
+            if (currentUser != null)
+            {
+                List<User> membersOnVacation =await _timeOffRequestService.GetMyColleguesTimeOffRequests(currentUser);
+                var membersOnVacationDTO = _mapper.Map<List<UserResponseDTO>>(membersOnVacation);              
+                return Ok(membersOnVacationDTO);
+            }
+            return BadRequest();
         }
 
         [HttpGet("RequestsWaitingForApproval")]

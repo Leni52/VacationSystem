@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using WorkForceManagement.BLL.Exceptions;
 using WorkForceManagement.DAL.Entities;
@@ -32,6 +31,7 @@ namespace WorkForceManagement.BLL.Services
             teamToAdd.UpdaterId = currentUser.Id;
 
             await _teamRepository.CreateOrUpdate(teamToAdd);
+
         }
         private void ValidateUserConfirmedEmail(User user)
         {
@@ -89,16 +89,20 @@ namespace WorkForceManagement.BLL.Services
         public async Task AddUserToTeam(Guid teamId, User user, User currentUser)
         {
             Team foundTeam = await GetTeamWithId(teamId);
+            if ((foundTeam.Members.Any(tempUser => tempUser.Id == user.Id)) ||
+                (foundTeam.TeamLeader.Id == user.Id))
+                // User we want to add, is part of the team
+                throw new ItemAlreadyExistsException($" User with id:{user.Id} is part of this team!");
             ValidateUserConfirmedEmail(user);
 
             foundTeam.Members.Add(user);
             foundTeam.UpdaterId = currentUser.Id;
-            foundTeam.ChangeDate = DateTime.Now;
+            foundTeam.ChangeDate = DateTime.Now.Date;
 
             await _teamRepository.SaveChanges();
         }
         public async Task<List<User>> GetAllTeamMembers(Guid teamId)
-        {          
+        {
             Team foundTeam = await GetTeamWithId(teamId);
             List<User> teamMembers = foundTeam.Members;
             User teamLeader = foundTeam.TeamLeader;
@@ -109,12 +113,12 @@ namespace WorkForceManagement.BLL.Services
         {
             Team foundTeam = await GetTeamWithId(teamId);
 
-            if (foundTeam.Members.Any(tempUser => tempUser.Id == user.Id) == false) // User we want to remove, isn't part of the team
+            if (!foundTeam.Members.Any(tempUser => tempUser.Id == user.Id))
+                // User we want to remove, isn't part of the team
                 throw new KeyNotFoundException($" User with id:{user.Id} isnt part of this team!");
-
             foundTeam.Members.Remove(user);
             foundTeam.UpdaterId = currentUser.Id;
-            foundTeam.ChangeDate = DateTime.Now;
+            foundTeam.ChangeDate = DateTime.Now.Date;
 
             await _teamRepository.SaveChanges();
         }
