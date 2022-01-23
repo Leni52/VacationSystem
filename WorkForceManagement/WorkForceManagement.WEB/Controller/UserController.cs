@@ -65,6 +65,7 @@ namespace WorkForceManagement.WEB.Controller
             User currentUser = await _userService.GetCurrentUser(User);
 
             User userToUpdate = await _userService.GetUserById(userId);
+            string oldEmail = userToUpdate.Email;
 
             if (userToUpdate == null)
                 throw new KeyNotFoundException($"User with Id:{userId} was not found");
@@ -72,7 +73,7 @@ namespace WorkForceManagement.WEB.Controller
             _mapper.Map(model, userToUpdate);
             userToUpdate.UpdaterId = currentUser.Id;
 
-            await _userService.Update(userToUpdate, model.Password, model.IsAdmin);
+            await _userService.Update(userToUpdate, oldEmail, model.Password, model.IsAdmin);
 
             return Ok();
         }

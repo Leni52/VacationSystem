@@ -92,7 +92,7 @@ namespace WorkForceManagement.BLL.Services
             await _userManager.DeleteUser(userToDelete);
         }
 
-        public async Task Update(User updatedUser, string newPassword, bool isAdmin)
+        public async Task Update(User updatedUser, string oldEmail,  string newPassword, bool isAdmin)
         {
             PasswordHasher<User> hasher = new PasswordHasher<User>();
             Guid userId = Guid.Parse(updatedUser.Id);
@@ -109,6 +109,12 @@ namespace WorkForceManagement.BLL.Services
             else if(!isAdmin && await _userManager.IsUserInRole(userId, "Admin"))
             {
                 await _userManager.RemoveRoleFromUser(updatedUser, "Admin");
+            }
+
+            if(!updatedUser.Email.Equals(oldEmail))
+            { // if the email gets updated, that email should be confirmed again
+                updatedUser.EmailConfirmed = false;
+                await EmailUserWithConfirmationToken(updatedUser);
             }
 
             updatedUser.ChangeDate = DateTime.Now;
