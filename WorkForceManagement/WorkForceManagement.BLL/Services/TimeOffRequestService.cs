@@ -318,6 +318,10 @@ namespace WorkForceManagement.BLL.Services
             {
                 subject = "Time off request Rejected";
                 body = $"Time off request by: {timeOffRequest.Requester.UserName} with start date: {timeOffRequest.StartDate.ToShortDateString()} and end date: {timeOffRequest.EndDate.ToShortDateString()} is REJECTED";
+            } else if (status == TimeOffRequestStatus.Cancelled)
+            {
+                subject = "Time off request Cancelled";
+                body = $"Time off request by: {timeOffRequest.Requester.UserName} with start date: {timeOffRequest.StartDate.ToShortDateString()} and end date: {timeOffRequest.EndDate.ToShortDateString()} has been CANCELLED";
             }
 
             List<User> approvers = timeOffRequest.Approvers.ToList();
@@ -367,6 +371,8 @@ namespace WorkForceManagement.BLL.Services
 
             if (IsAbleToCancel(timeOffRequest))
             {
+                await NotifyApproversOnDecision(TimeOffRequestStatus.Cancelled, timeOffRequest);
+
                 await _timeOffRequestRepository.Remove(timeOffRequest);
             }
             else
