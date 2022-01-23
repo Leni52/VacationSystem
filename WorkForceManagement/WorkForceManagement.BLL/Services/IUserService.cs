@@ -10,7 +10,7 @@ namespace WorkForceManagement.BLL.Services
     {
         Task Add(User userToAdd, string password, bool isAdmin);
         Task Delete(Guid userId);
-        Task Update(User updatedUser, string newPassword, bool isAdmin);
+        Task Update(User updatedUser, string oldEmail, string newPassword, bool isAdmin);
         Task<List<User>> GetAllUsers();
         List<Team> GetUserTeams(User currentUser);
         Task<User> GetUserById(Guid id);

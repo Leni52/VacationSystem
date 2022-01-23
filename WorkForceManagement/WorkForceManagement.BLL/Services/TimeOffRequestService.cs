@@ -54,15 +54,10 @@ namespace WorkForceManagement.BLL.Services
 
             foreach (User user in potentialApprovers)
             {
-                bool teamLeaderIsAway = false;
-                var requests = user.CreatedTimeOffRequests.Where(x => x.Status == TimeOffRequestStatus.Approved && x.StartDate.Date <= DateTime.Now.Date
-                && x.EndDate.Date >= DateTime.Now.Date).Any();
-                if (requests)
-                { // if the leader has an approved tof in the time of creating the request dont make him approver
-                    teamLeaderIsAway = true;
-                    break;
-                }
-                if (!teamLeaderIsAway)
+                bool teamLeaderIsAway = user.CreatedTimeOffRequests.Any(x => x.Status == TimeOffRequestStatus.Approved && x.StartDate.Date <= DateTime.Now.Date
+                && x.EndDate.Date >= DateTime.Now.Date);
+
+                if (!teamLeaderIsAway) // if approver is not away today add him as validatedApprover
                     validatedApprovers.Add(user);
             }
             return validatedApprovers;
@@ -76,6 +71,7 @@ namespace WorkForceManagement.BLL.Services
             bool isOverlapping = currentUser.CreatedTimeOffRequests.Any(
                 timeOff =>
                 timeOff.Status != TimeOffRequestStatus.Rejected &&
+                timeOff.Status != TimeOffRequestStatus.Cancelled &&
                 timeOff.StartDate < endDate &&
                 startDate < timeOff.EndDate
                 );
@@ -159,7 +155,8 @@ namespace WorkForceManagement.BLL.Services
             TimeOffRequest timeOffRequest = await GetTimeOffRequest(timeOffRequestId);
 
             if (timeOffRequest.Status == TimeOffRequestStatus.Approved ||
-                timeOffRequest.Status == TimeOffRequestStatus.Rejected)
+                timeOffRequest.Status == TimeOffRequestStatus.Rejected ||
+                timeOffRequest.Status == TimeOffRequestStatus.Cancelled)
             { // the time off request has already been decided
                 throw new TimeOffRequestIsClosedException($"Time off request with id:{timeOffRequestId}, is already closed");
             }
@@ -318,6 +315,10 @@ namespace WorkForceManagement.BLL.Services
             {
                 subject = "Time off request Rejected";
                 body = $"Time off request by: {timeOffRequest.Requester.UserName} with start date: {timeOffRequest.StartDate.ToShortDateString()} and end date: {timeOffRequest.EndDate.ToShortDateString()} is REJECTED";
+            } else if (status == TimeOffRequestStatus.Cancelled)
+            {
+                subject = "Time off request Cancelled";
+                body = $"Time off request by: {timeOffRequest.Requester.UserName} with start date: {timeOffRequest.StartDate.ToShortDateString()} and end date: {timeOffRequest.EndDate.ToShortDateString()} has been CANCELLED";
             }
 
             List<User> approvers = timeOffRequest.Approvers.ToList();
@@ -367,6 +368,8 @@ namespace WorkForceManagement.BLL.Services
 
             if (IsAbleToCancel(timeOffRequest))
             {
+                await NotifyApproversOnDecision(TimeOffRequestStatus.Cancelled, timeOffRequest);
+
                 await _timeOffRequestRepository.Remove(timeOffRequest);
             }
             else
