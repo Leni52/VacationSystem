@@ -18,14 +18,15 @@ namespace WorkForceManagement.WEB.Controller
     public class TimeOffRequestController : ControllerBase
     {
         private readonly ITimeOffRequestService _timeOffRequestService;
-        private readonly IUserService _userService;      
+        private readonly IUserService _userService;
         private readonly IMapper _mapper;
+
         public TimeOffRequestController(
-            ITimeOffRequestService timeOffRequestService,           
+            ITimeOffRequestService timeOffRequestService,
             IUserService userService,
             IMapper mapper)
         {
-            _timeOffRequestService = timeOffRequestService;         
+            _timeOffRequestService = timeOffRequestService;
             _userService = userService;
             _mapper = mapper;
         }
@@ -45,8 +46,9 @@ namespace WorkForceManagement.WEB.Controller
         public async Task<ActionResult<TimeOffRequestResponseDTO>> GetTimeOffRequest(Guid timeOffRequestId)
         {
             TimeOffRequest requestFromDB = await _timeOffRequestService.GetTimeOffRequest(timeOffRequestId);
-            
+
             var requestModel = _mapper.Map<TimeOffRequestResponseDTO>(requestFromDB);
+
             return Ok(requestModel);
         }
 
@@ -76,13 +78,13 @@ namespace WorkForceManagement.WEB.Controller
             }
             // _mapper.Map(request, timeOffRequest);
             TimeOffRequest timeOffRequest = _mapper.Map<TimeOffRequest>(request);
-             var updatedRequest = await _timeOffRequestService.UpdateTimeOffRequest(timeOffRequestId, timeOffRequest, currentUser.Id);
+            var updatedRequest = await _timeOffRequestService.UpdateTimeOffRequest(timeOffRequestId, timeOffRequest, currentUser.Id);
             return Ok();
         }
 
         [HttpDelete("{timeOffRequestId}")]
         [Authorize(Policy = "TimeOffRequestCreator")]
-        public async  Task<ActionResult> DeleteTimeOffRequest(Guid timeOffRequestId)
+        public async Task<ActionResult> DeleteTimeOffRequest(Guid timeOffRequestId)
         {
             if (!(Guid.Empty == timeOffRequestId))
             {
@@ -138,6 +140,22 @@ namespace WorkForceManagement.WEB.Controller
                 var membersOnVacationDTO = _mapper.Map<List<UserResponseDTO>>(membersOnVacation);              
                 return Ok(membersOnVacationDTO);
             }
+            return BadRequest();
+        }
+
+        [HttpGet("RequestsWaitingForApproval")]
+        [Authorize]
+        public async Task<ActionResult<List<TimeOffRequest>>> RequestsWaitingForApproval()
+        {
+            User currentUser = await _userService.GetCurrentUser(User);
+
+            if (currentUser != null)
+            {
+                var requestsDTO = _mapper.Map<List<TimeOffRequestResponseDTO>>(currentUser.TimeOffRequestsToApprove);
+
+                return Ok(requestsDTO);
+            }
+
             return BadRequest();
         }
     }
