@@ -109,11 +109,16 @@ namespace WorkForceManagement.WEB.Controller
 
         [HttpPatch("{timeOffRequestId}/AnswerTimeOffRequest/{isApproved}")]
         [Authorize(Policy = "TeamLeader")]
-        public async Task<ActionResult> AnswerTimeOffRequest(Guid timeOffRequestId, bool isApproved)
+        public async Task<ActionResult> AnswerTimeOffRequest(Guid timeOffRequestId, bool isApproved, string reason)
         {
+            if(!isApproved && reason == null)
+            {
+                return BadRequest("If rejected then reason must be included, try again!");
+            }
+
             User currentUser = await _userService.GetCurrentUser(User);
 
-            await _timeOffRequestService.AnswerTimeOffRequest(timeOffRequestId, isApproved, currentUser);
+            await _timeOffRequestService.AnswerTimeOffRequest(timeOffRequestId, isApproved, currentUser, reason);
 
             return Ok();
         }

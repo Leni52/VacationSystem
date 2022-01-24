@@ -150,7 +150,7 @@ namespace WorkForceManagement.BLL.Services
             return allRequests.Where(u => u.CreatorId == currentUserId).ToList();
         }
 
-        public async Task AnswerTimeOffRequest(Guid timeOffRequestId, bool isApproved, User currentUser)
+        public async Task AnswerTimeOffRequest(Guid timeOffRequestId, bool isApproved, User currentUser, string reason)
         {
             TimeOffRequest timeOffRequest = await GetTimeOffRequest(timeOffRequestId);
 
@@ -167,6 +167,7 @@ namespace WorkForceManagement.BLL.Services
 
             timeOffRequest.ChangeDate = DateTime.Now.Date;
             timeOffRequest.UpdaterId = currentUser.Id;
+            timeOffRequest.Reason = reason;
 
             if (timeOffRequest.Status == TimeOffRequestStatus.Created)
             {
