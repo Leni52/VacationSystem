@@ -132,8 +132,7 @@ namespace WorkForceManagement.BLL.Services
 
         public async Task<TimeOffRequest> UpdateTimeOffRequest(Guid timeOffRequestId, TimeOffRequest timeOffRequest, string currentUserId)
 
-        {
-            
+        {   
             ValidateTimeOffRequestDates(timeOffRequest.StartDate, timeOffRequest.EndDate, await _userService.GetUserById(Guid.Parse(currentUserId)));
             ValidateDaysOff(timeOffRequest.StartDate, timeOffRequest.EndDate);
 

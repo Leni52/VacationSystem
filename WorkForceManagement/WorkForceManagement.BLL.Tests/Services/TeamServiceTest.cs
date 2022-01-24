@@ -14,16 +14,22 @@ using Xunit;
 namespace WorkForceManagement.BLL.Tests.Services
 {
     public class TeamServiceTest
-    { 
+    {
+        private readonly Mock<IRepository<Team>> teamRepositoryMock = new Mock<IRepository<Team>>();
+        private readonly TeamService sut;
+
+        public TeamServiceTest()
+        {
+            sut = new TeamService(teamRepositoryMock.Object);
+        }
+
+
         [Fact]
         public async Task Create_ValidTeam_Passes()
         {
             //arrange
-            var teamRepositoryMock = new Mock<IRepository<Team>>();
             teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Expression<Func<Team, bool>>>()))
                 .ReturnsAsync((Team)null);
-
-            var sut = new TeamService(teamRepositoryMock.Object);
 
             var teamLeader = new User() { EmailConfirmed = true };
             Team teamToAdd = new Team() { TeamLeader = teamLeader};
@@ -38,11 +44,8 @@ namespace WorkForceManagement.BLL.Tests.Services
         public async Task Create_TeamNameAlreadyExists_ThrowsException()
         {
             //arrange
-            var teamRepositoryMock = new Mock<IRepository<Team>>();
             teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Expression<Func<Team, bool>>>()))
                 .ReturnsAsync(new Team());
-
-            var sut = new TeamService(teamRepositoryMock.Object);
 
             Team teamToAdd = new Team();
 
@@ -55,11 +58,8 @@ namespace WorkForceManagement.BLL.Tests.Services
         public async Task GetTeamWithId_ValidId_ReturnsTeam()
         {
             //arrange
-            var teamRepositoryMock = new Mock<IRepository<Team>>();
             teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Guid>()))
                 .ReturnsAsync(new Team());
-
-            var sut = new TeamService(teamRepositoryMock.Object);
 
             //act
             //asert
@@ -70,11 +70,8 @@ namespace WorkForceManagement.BLL.Tests.Services
         public async Task GetTeamWithId_InvalidId_ThrowsException()
         {
             //arrange
-            var teamRepositoryMock = new Mock<IRepository<Team>>();
             teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Expression<Func<Team, bool>>>()))
                 .ReturnsAsync(new Team());
-
-            var sut = new TeamService(teamRepositoryMock.Object);
 
             Team teamToAdd = new Team();
 
@@ -87,11 +84,8 @@ namespace WorkForceManagement.BLL.Tests.Services
         public async Task GetAllTeams_Valid_ReturnsListOfTeams()
         {
             //arrange
-            var teamRepositoryMock = new Mock<IRepository<Team>>();
             teamRepositoryMock.Setup(teamRep => teamRep.All())
                 .ReturnsAsync(new List<Team>());
-
-            var sut = new TeamService(teamRepositoryMock.Object);
 
             //act
             //asert
@@ -102,14 +96,10 @@ namespace WorkForceManagement.BLL.Tests.Services
         public async Task UpdateTeam_ValidInput_Passes()
         {
             //arrange
-            var teamRepositoryMock = new Mock<IRepository<Team>>();
-
             teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Expression<Func<Team, bool>>>()))
                 .ReturnsAsync((Team)null);
             teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Guid>()))
                 .ReturnsAsync(new Team());
-
-            var sut = new TeamService(teamRepositoryMock.Object);
 
             var teamLeader = new User() { EmailConfirmed = true };
             var teamToUpdate = new Team() { TeamLeader = teamLeader };
@@ -124,14 +114,10 @@ namespace WorkForceManagement.BLL.Tests.Services
         public async Task UpdateTeam_TeamWithSameNameExists_ThrowsException()
         {
             //arrange
-            var teamRepositoryMock = new Mock<IRepository<Team>>();
-
             teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Expression<Func<Team, bool>>>()))
                 .ReturnsAsync(new Team());
             teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Guid>()))
                 .ReturnsAsync(new Team());
-
-            var sut = new TeamService(teamRepositoryMock.Object);
 
             //act
             //asert
@@ -142,13 +128,8 @@ namespace WorkForceManagement.BLL.Tests.Services
         public async Task DeleteTeam_ValidInput_Passes()
         {
             //arrange
-            var teamRepositoryMock = new Mock<IRepository<Team>>();
-
             teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Guid>()))
                 .ReturnsAsync(new Team());
-
-            var sut = new TeamService(teamRepositoryMock.Object);
-
             //act
             var result = await Record.ExceptionAsync(() => sut.DeleteTeam(Guid.NewGuid()));
             //asert
@@ -159,13 +140,8 @@ namespace WorkForceManagement.BLL.Tests.Services
         public async Task DeleteTeam_InvalidTeamId_ThrowsException()
         {
             //arrange
-            var teamRepositoryMock = new Mock<IRepository<Team>>();
-
             teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Guid>()))
                 .ReturnsAsync((Team)null);
-
-            var sut = new TeamService(teamRepositoryMock.Object);
-
             //act
             //asert
             await Assert.ThrowsAsync<KeyNotFoundException>(() => sut.DeleteTeam(Guid.NewGuid()));
@@ -175,12 +151,8 @@ namespace WorkForceManagement.BLL.Tests.Services
         public async Task UpdateTeamLeader_ValidInput_Passes()
         {
             //arrange
-            var teamRepositoryMock = new Mock<IRepository<Team>>();
-
             teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Guid>()))
                 .ReturnsAsync(new Team());
-
-            var sut = new TeamService(teamRepositoryMock.Object);
 
             var newTeamLeader = new User() { EmailConfirmed = true };
             //act
@@ -193,13 +165,8 @@ namespace WorkForceManagement.BLL.Tests.Services
         public async Task UpdateTeamLeader_InvalidTeamId_ThrowsException()
         {
             //arrange
-            var teamRepositoryMock = new Mock<IRepository<Team>>();
-
             teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Guid>()))
                 .ReturnsAsync((Team)null);
-
-            var sut = new TeamService(teamRepositoryMock.Object);
-
             //act
             //asert
             await Assert.ThrowsAsync<KeyNotFoundException>(() => sut.UpdateTeamLeader(Guid.NewGuid(), new User(), new User()));
@@ -209,16 +176,11 @@ namespace WorkForceManagement.BLL.Tests.Services
         public async Task AddUserToTeam_ValidInput_Passes()
         {
             //arrange
-            var teamRepositoryMock = new Mock<IRepository<Team>>();
-
-            var team = new Team() { Members = new List<User>() };
+            var team = new Team() { TeamLeader = new User(), Members = new List<User>() };
             var userToAdd = new User() { EmailConfirmed = true };
 
             teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Guid>()))
                 .ReturnsAsync(team);
-
-            var sut = new TeamService(teamRepositoryMock.Object);
-
             //act
             var result = await Record.ExceptionAsync(() => sut.AddUserToTeam(Guid.NewGuid(), userToAdd, new User()));
             //asert
@@ -229,12 +191,8 @@ namespace WorkForceManagement.BLL.Tests.Services
         public async Task AddUserToTeam_InvalidTeamId_ThrowsException()
         {
             //arrange
-            var teamRepositoryMock = new Mock<IRepository<Team>>();
-
             teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Guid>()))
                 .ReturnsAsync((Team)null);
-
-            var sut = new TeamService(teamRepositoryMock.Object);
 
             //act
             //asert
@@ -245,14 +203,10 @@ namespace WorkForceManagement.BLL.Tests.Services
         public async Task GetAllTeamMembers_ValidInput_Passes()
         {
             //arrange
-            var teamRepositoryMock = new Mock<IRepository<Team>>();
-
             var team = new Team() { Members = new List<User>(), TeamLeader = new User() };
 
             teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Guid>()))
                 .ReturnsAsync(team);
-
-            var sut = new TeamService(teamRepositoryMock.Object);
 
             //act
             var result = await Record.ExceptionAsync(() => sut.GetAllTeamMembers(Guid.NewGuid()));
@@ -264,13 +218,8 @@ namespace WorkForceManagement.BLL.Tests.Services
         public async Task GetAllTeamMembers_InvalidTeamId_ThrowsException()
         {
             //arrange
-            var teamRepositoryMock = new Mock<IRepository<Team>>();
-
             teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Guid>()))
                 .ReturnsAsync((Team)null);
-
-            var sut = new TeamService(teamRepositoryMock.Object);
-
             //act
             //asert
             await Assert.ThrowsAsync<KeyNotFoundException>(() => sut.GetAllTeamMembers(Guid.NewGuid()));
@@ -280,17 +229,12 @@ namespace WorkForceManagement.BLL.Tests.Services
         public async Task RemoveUserFromTeam_ValidInput_Passes()
         {
             //arrange
-            var teamRepositoryMock = new Mock<IRepository<Team>>();
-
             Team team = new Team() { Id = Guid.NewGuid(), Members = new List<User>()};
             User teamMember = new User() { Id = Guid.NewGuid().ToString() };
             team.Members.Add(teamMember);
 
             teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Guid>()))
                 .ReturnsAsync(team);
-
-            var sut = new TeamService(teamRepositoryMock.Object);
-
             //act
             var result = await Record.ExceptionAsync(() => sut.RemoveUserFromTeam(team.Id, teamMember, new User()));
             //asert
@@ -301,17 +245,12 @@ namespace WorkForceManagement.BLL.Tests.Services
         public async Task RemoveUserFromTeam_InvalidTeamId_ThrowsException()
         {
             //arrange
-            var teamRepositoryMock = new Mock<IRepository<Team>>();
-
             Team team = new Team() { Id = Guid.NewGuid(), Members = new List<User>()};
             User teamMember = new User() { Id = Guid.NewGuid().ToString() };
             team.Members.Add(teamMember);
 
             teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Guid>()))
                 .ReturnsAsync((Team)null);
-
-            var sut = new TeamService(teamRepositoryMock.Object);
-
             //act
             await Assert.ThrowsAsync<KeyNotFoundException>(() => sut.RemoveUserFromTeam(team.Id, teamMember, new User()));
         }
@@ -320,16 +259,11 @@ namespace WorkForceManagement.BLL.Tests.Services
         public async Task RemoveUserFromTeam_UserIsntPartOfTeam_ThrowsException()
         {
             //arrange
-            var teamRepositoryMock = new Mock<IRepository<Team>>();
-
             Team team = new Team() { Id = Guid.NewGuid(), Members = new List<User>() };
             User teamMember = new User() { Id = Guid.NewGuid().ToString() };
 
             teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Guid>()))
                 .ReturnsAsync(team);
-
-            var sut = new TeamService(teamRepositoryMock.Object);
-
             //act
             await Assert.ThrowsAsync<KeyNotFoundException>(() => sut.RemoveUserFromTeam(team.Id, teamMember, new User()));
         }

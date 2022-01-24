@@ -12,20 +12,25 @@ namespace WorkForceManagement.BLL.Tests.Services
 {
     public class UserServiceTests
     {
+        private readonly Mock<IAuthUserManager> authUserManagerMock = new Mock<IAuthUserManager>();
+        private readonly Mock<IMailService> mailServiceMock = new Mock<IMailService>();
+        private readonly Mock<ITeamService> teamServiceMock = new Mock<ITeamService>();
+        private readonly UserService sut;
+
         PasswordHasher<User> hasher = new PasswordHasher<User>();
+
+        public UserServiceTests()
+        {
+            sut = new UserService(teamServiceMock.Object, authUserManagerMock.Object, mailServiceMock.Object);
+        }
 
         [Fact]
         public async Task CreateUser_UsernameTaken_ThrowsException()
         {
             //arrange
-            var authUserManagerMock = new Mock<IAuthUserManager>();
-            var mailServiceMock = new Mock<IMailService>();
-            var teamServiceMock = new Mock<ITeamService>();
 
             authUserManagerMock.Setup(userRep => userRep.FindDifferentUserWithSameUsername(It.IsAny<Guid>(), It.IsAny<string>()))
                 .ReturnsAsync(new User());
-
-            var sut = new UserService(teamServiceMock.Object, authUserManagerMock.Object, mailServiceMock.Object);
 
             User currentUser = new User()
             {
@@ -48,10 +53,6 @@ namespace WorkForceManagement.BLL.Tests.Services
         public async Task CreateUser_ValidUser_Passes()
         {
             //arrange
-            var authUserManagerMock = new Mock<IAuthUserManager>();
-            var teamServiceMock = new Mock<ITeamService>();
-            var mailServiceMock = new Mock<IMailService>();
-
             User currentUser = new User()
             {
                 UserName = "admin",
@@ -69,11 +70,6 @@ namespace WorkForceManagement.BLL.Tests.Services
 
             authUserManagerMock.Setup(auth => auth.GenerateEmailConfirmationTokenAsync(It.IsAny<User>()))
                 .ReturnsAsync("testToken");
-
-            var sut = new UserService(teamServiceMock.Object, authUserManagerMock.Object, mailServiceMock.Object);
-
-            
-
             //act
             var exception = await Record.ExceptionAsync(() => sut.Add(userToAdd, "jack123", true));
             //assert
@@ -84,14 +80,8 @@ namespace WorkForceManagement.BLL.Tests.Services
         public async Task Delete_ValidUser_Passes()
         {
             //arrange
-            var authUserManagerMock = new Mock<IAuthUserManager>();
-            var teamServiceMock = new Mock<ITeamService>();
-            var mailServiceMock = new Mock<IMailService>();
-
             authUserManagerMock.Setup(userRep => userRep.FindById(It.IsAny<Guid>()))
                 .ReturnsAsync(new User());
-
-            var sut = new UserService(teamServiceMock.Object, authUserManagerMock.Object, mailServiceMock.Object);
 
             Guid userId = Guid.NewGuid();
             //act
@@ -103,14 +93,8 @@ namespace WorkForceManagement.BLL.Tests.Services
         public async Task Deletec_NotFoundUser_ThrowsException()
         {
             //arrange
-            var authUserManagerMock = new Mock<IAuthUserManager>();
-            var teamServiceMock = new Mock<ITeamService>();
-            var mailServiceMock = new Mock<IMailService>();
-
             authUserManagerMock.Setup(userRep => userRep.FindById(It.IsAny<Guid>()))
                 .ReturnsAsync((User)null);
-
-            var sut = new UserService(teamServiceMock.Object, authUserManagerMock.Object, mailServiceMock.Object);
 
             Guid userId = Guid.NewGuid();
             //act
@@ -121,26 +105,21 @@ namespace WorkForceManagement.BLL.Tests.Services
         public async Task Edit_ValidEntry_ReturnsTrue()
         {
             //arrange
-            var authUserManagerMock = new Mock<IAuthUserManager>();
-            var teamServiceMock = new Mock<ITeamService>();
-            var mailServiceMock = new Mock<IMailService>();
-
             authUserManagerMock.Setup(userRep => userRep.FindDifferentUserWithSameUsername(It.IsAny<Guid>(), It.IsAny<string>()))
                 .ReturnsAsync((User)null);
             authUserManagerMock.Setup(userRep => userRep.FindById(It.IsAny<Guid>()))
                 .ReturnsAsync(new User());
 
-            var sut = new UserService(teamServiceMock.Object, authUserManagerMock.Object, mailServiceMock.Object);
-
             User editedUser = new User()
             {
                 UserName = "jack",
+                Email = "test1@gmail.com"
             };
             editedUser.PasswordHash = hasher.HashPassword(editedUser, "jack123");
 
             Guid userId = Guid.NewGuid();
             //act
-            var exception = await Record.ExceptionAsync(() => sut.Update(editedUser, "jack", true));
+            var exception = await Record.ExceptionAsync(() => sut.Update(editedUser,"test1@gmail.com", "jack", true));
             Assert.Null(exception);
         }
 
@@ -148,14 +127,8 @@ namespace WorkForceManagement.BLL.Tests.Services
         public async Task GetAllUsers_ValidEntry_Passes()
         {
             //arrange
-            var authUserManagerMock = new Mock<IAuthUserManager>();
-            var teamServiceMock = new Mock<ITeamService>();
-            var mailServiceMock = new Mock<IMailService>();
-
             authUserManagerMock.Setup(userRep => userRep.GetAll())
                 .ReturnsAsync(new List<User>());
-
-            var sut = new UserService(teamServiceMock.Object, authUserManagerMock.Object, mailServiceMock.Object);
 
             //act
             var exception = await Record.ExceptionAsync(() => sut.GetAllUsers());
@@ -166,14 +139,8 @@ namespace WorkForceManagement.BLL.Tests.Services
         public async Task GetUserWithId_InvalidIdNotFoundUser_ThrowsException()
         {
             //arrange
-            var authUserManagerMock = new Mock<IAuthUserManager>();
-            var teamServiceMock = new Mock<ITeamService>();
-            var mailServiceMock = new Mock<IMailService>();
-
             authUserManagerMock.Setup(userRep => userRep.FindById(It.IsAny<Guid>()))
                 .ReturnsAsync((User)null);
-
-            var sut = new UserService(teamServiceMock.Object, authUserManagerMock.Object, mailServiceMock.Object);
 
             Guid userId = Guid.NewGuid();
 
