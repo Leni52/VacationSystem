@@ -34,10 +34,7 @@ namespace WorkForceManagement.BLL.Services
                 throw new UsernameTakenException($"Username: {userToAdd.UserName} already taken!");
             }
 
-            if (!IsEmailValid(userToAdd.Email))
-            {
-                throw new InvalidEmailException($"Email: {userToAdd.Email} is not valid!");
-            }
+            await IsEmailValid(userToAdd.Email);
 
             userToAdd.TwoFactorEnabled = true;
             await _userManager.CreateUser(userToAdd, password);
@@ -67,17 +64,20 @@ namespace WorkForceManagement.BLL.Services
 
         }
 
-        private bool IsEmailValid(string emailaddress)
+        private async Task IsEmailValid(string emailAddress)
         {
             try
             {
-                MailAddress m = new MailAddress(emailaddress);
+                MailAddress m = new MailAddress(emailAddress);
 
-                return true;
+                if(await _userManager.FindByEmail(emailAddress) != null)
+                {
+                    throw new EmailAddressAlreadyInUseException($"Email: {emailAddress} already in use!");
+                }
             }
             catch (FormatException)
             {
-                return false;
+                throw new InvalidEmailException($"Email: {emailAddress} is not valid!");
             }
         }
 
