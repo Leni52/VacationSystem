@@ -366,7 +366,8 @@ namespace WorkForceManagement.BLL.Services
 
             foreach (var user in teamMembers)
             {
-                if (user.CreatedTimeOffRequests.Where(t => t.Status == TimeOffRequestStatus.Approved).Any())
+                if ((user.CreatedTimeOffRequests.Where(t => t.Status == TimeOffRequestStatus.Approved).Any()) &&                    
+                    (user.CreatedTimeOffRequests.Where(t => t.EndDate >= DateTime.Now).Any()))
                 {
                     teamMembersOnVacation.Add(user);
                 }
