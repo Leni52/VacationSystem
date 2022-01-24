@@ -41,7 +41,6 @@ namespace WorkForceManagement.WEB.Controller
 
             _mapper.Map(model, teamToAdd);
             teamToAdd.TeamLeader = teamLeader;
-
             await _teamService.Create(teamToAdd,currentUser);
 
             return Ok(model);
@@ -89,7 +88,7 @@ namespace WorkForceManagement.WEB.Controller
         {
             await _teamService.DeleteTeam(teamId);
 
-            return Ok();
+            return NoContent();
         }
 
         [Authorize(Roles = "Admin")]

@@ -17,6 +17,6 @@ namespace WorkForceManagement.DTO.Requests
         public DateTime StartDate { get; set; }
         [Required(ErrorMessage = Constants.Constants.ErrorEndDate)]
         public DateTime EndDate { get; set; }
-        //add validation for startdate>enddate
+       
     }
 }

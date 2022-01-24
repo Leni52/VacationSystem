@@ -43,9 +43,11 @@ namespace WorkForceManagement.WEB.Middleware
                     case InvalidDatesException:
                     case InvalidIdException:
                     case InvalidEmailException:
+                    case UserEmailNotConfirmedException:
                         response.StatusCode = (int)HttpStatusCode.BadRequest;
                        break;
                     case UserIsntApproverException:
+                    case CannotCancelTimeOffRequestException:
                         response.StatusCode = (int)HttpStatusCode.Unauthorized;
                         break;
 

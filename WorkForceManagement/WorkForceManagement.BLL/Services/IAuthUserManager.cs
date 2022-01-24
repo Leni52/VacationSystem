@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity;
+using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -21,6 +22,8 @@ namespace WorkForceManagement.BLL.Services
         Task UpdateUser(User user);
         Task<User> FindByName(string userName);
         Task<User> GetCurrentUser(ClaimsPrincipal principal);
+        Task<string> GenerateEmailConfirmationTokenAsync(User user);
+        Task<IdentityResult> ConfirmEmailAsync(User user, string token);
     }
 
 }

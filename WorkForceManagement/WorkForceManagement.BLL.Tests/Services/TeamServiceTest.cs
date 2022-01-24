@@ -25,10 +25,11 @@ namespace WorkForceManagement.BLL.Tests.Services
 
             var sut = new TeamService(teamRepositoryMock.Object);
 
-            Team teamToAdd = new Team();
+            var teamLeader = new User() { EmailConfirmed = true };
+            Team teamToAdd = new Team() { TeamLeader = teamLeader};
 
             //act
-            var result = await Record.ExceptionAsync(() => sut.Create(teamToAdd, new User()));
+            var result = await Record.ExceptionAsync(() => sut.Create(teamToAdd, teamLeader));
 
             Assert.Null(result);
             //asert
@@ -110,8 +111,11 @@ namespace WorkForceManagement.BLL.Tests.Services
 
             var sut = new TeamService(teamRepositoryMock.Object);
 
+            var teamLeader = new User() { EmailConfirmed = true };
+            var teamToUpdate = new Team() { TeamLeader = teamLeader };
+
             //act
-            var result = await Record.ExceptionAsync(() => sut.UpdateTeam(new Team(), Guid.NewGuid(), new User()));
+            var result = await Record.ExceptionAsync(() => sut.UpdateTeam(teamToUpdate, Guid.NewGuid(), new User()));
             //asert
             Assert.Null(result); // assert no exception was thrown
         }
@@ -178,8 +182,9 @@ namespace WorkForceManagement.BLL.Tests.Services
 
             var sut = new TeamService(teamRepositoryMock.Object);
 
+            var newTeamLeader = new User() { EmailConfirmed = true };
             //act
-            var result = await Record.ExceptionAsync(() => sut.UpdateTeamLeader(Guid.NewGuid(), new User(), new User()));
+            var result = await Record.ExceptionAsync(() => sut.UpdateTeamLeader(Guid.NewGuid(), newTeamLeader, new User()));
             //asert
             Assert.Null(result); // assert no exception was thrown
         }
@@ -207,6 +212,7 @@ namespace WorkForceManagement.BLL.Tests.Services
             var teamRepositoryMock = new Mock<IRepository<Team>>();
 
             var team = new Team() { Members = new List<User>() };
+            var userToAdd = new User() { EmailConfirmed = true };
 
             teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Guid>()))
                 .ReturnsAsync(team);
@@ -214,7 +220,7 @@ namespace WorkForceManagement.BLL.Tests.Services
             var sut = new TeamService(teamRepositoryMock.Object);
 
             //act
-            var result = await Record.ExceptionAsync(() => sut.AddUserToTeam(Guid.NewGuid(), new User(), new User()));
+            var result = await Record.ExceptionAsync(() => sut.AddUserToTeam(Guid.NewGuid(), userToAdd, new User()));
             //asert
             Assert.Null(result); // assert no exception was thrown
         }
