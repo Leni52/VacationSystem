@@ -32,7 +32,7 @@ namespace WorkForceManagement.BLL.Services
         public async Task CreateTimeOffRequest(TimeOffRequest timeOffRequest, User currentUser)
         {
             ValidateTimeOffRequestDates(timeOffRequest.StartDate, timeOffRequest.EndDate, currentUser);
-            ValidateDaysOff(timeOffRequest.StartDate, timeOffRequest.EndDate);
+            timeOffRequest.WorkingDaysOff = ValidateDaysOff(timeOffRequest.StartDate, timeOffRequest.EndDate);
 
             timeOffRequest.Status = TimeOffRequestStatus.Created;
             timeOffRequest.CreatorId = currentUser.Id;
@@ -83,6 +83,8 @@ namespace WorkForceManagement.BLL.Services
 
             if (isOverlapping) // if current user already has a timeoffrequest thats not rejected and is overlapping with the current timeOffRequest
                 throw new OverlappingTimeOffRequestsException($"User with id: {currentUser.Id}, already has a time off request thats overlapping with the current request!");
+
+
         }
 
         private int ValidateDaysOff(DateTime startDate, DateTime endDate)
@@ -134,13 +136,14 @@ namespace WorkForceManagement.BLL.Services
 
         {   
             ValidateTimeOffRequestDates(timeOffRequest.StartDate, timeOffRequest.EndDate, await _userService.GetUserById(Guid.Parse(currentUserId)));
-            ValidateDaysOff(timeOffRequest.StartDate, timeOffRequest.EndDate);
+            int daysOff =  ValidateDaysOff(timeOffRequest.StartDate, timeOffRequest.EndDate);
 
             TimeOffRequest requestToUpdate = await _timeOffRequestRepository.Get(timeOffRequestId);
             if (requestToUpdate == null)
             {
                 throw new ItemDoesNotExistException();
             }
+            requestToUpdate.WorkingDaysOff = daysOff;
             requestToUpdate.ChangeDate = DateTime.Now;
             requestToUpdate.UpdaterId = currentUserId;
             requestToUpdate.Type = timeOffRequest.Type;

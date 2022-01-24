@@ -250,9 +250,5 @@ namespace WorkForceManagement.BLL.Tests.Services
             //act
             await Assert.ThrowsAsync<UserIsntApproverException>(() => sut.AnswerTimeOffRequest(timeOffRequestId, true, currentUser, "reason"));
         }
-
-
-
-
     }
 }
