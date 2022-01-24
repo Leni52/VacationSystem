@@ -69,6 +69,11 @@ namespace WorkForceManagement.BLL.Services
             if (startDate > endDate)
                 throw new InvalidDatesException("Invalid time off request dates, the start date should be earlier or equal to end date");
 
+            int requestedDays = ValidateDaysOff(startDate, endDate);
+            int totalDays = currentUser.DaysOff;
+            if (requestedDays > totalDays)
+                throw new InvalidDatesException("The number of requested days exceeds the maximum number available");
+
             bool isOverlapping = currentUser.CreatedTimeOffRequests.Any(
                 timeOff =>
                 timeOff.Status != TimeOffRequestStatus.Rejected && 
@@ -227,6 +232,8 @@ namespace WorkForceManagement.BLL.Services
                 approvers.ForEach(approver => approver.TimeOffRequestsToApprove.Remove(timeOffRequest));
                 approvers.ForEach(approver => approver.TimeOffRequestsApproved.Add(timeOffRequest));
 
+                timeOffRequest.Requester.DaysOff -= ValidateDaysOff(timeOffRequest.StartDate, timeOffRequest.EndDate);
+                //subtract the available days since the request is approved
                 await _timeOffRequestRepository.SaveChanges();
 
                 await NotifyTeamMembersLeaderIsOOO(timeOffRequest);
