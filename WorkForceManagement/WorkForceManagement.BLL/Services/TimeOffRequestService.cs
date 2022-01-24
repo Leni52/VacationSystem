@@ -167,7 +167,10 @@ namespace WorkForceManagement.BLL.Services
 
             timeOffRequest.ChangeDate = DateTime.Now.Date;
             timeOffRequest.UpdaterId = currentUser.Id;
-            timeOffRequest.Reason = reason;
+            if(reason.Length != 0)
+            {
+                timeOffRequest.Reason = reason;
+            }
 
             if (timeOffRequest.Status == TimeOffRequestStatus.Created)
             {
@@ -221,6 +224,10 @@ namespace WorkForceManagement.BLL.Services
             else if (timeOffRequest.Status == TimeOffRequestStatus.Approved)
             {
                 return "Approved";
+            }
+            else if(timeOffRequest.Status == TimeOffRequestStatus.Cancelled)
+            {
+                return "Cancelled";
             }
 
             int numberOfApprovers = timeOffRequest.Approvers.ToList().Count; // get all needed approvals
@@ -371,7 +378,7 @@ namespace WorkForceManagement.BLL.Services
             {
                 await NotifyApproversOnDecision(TimeOffRequestStatus.Cancelled, timeOffRequest);
 
-                await _timeOffRequestRepository.Remove(timeOffRequest);
+                timeOffRequest.Status = TimeOffRequestStatus.Cancelled;
             }
             else
             {

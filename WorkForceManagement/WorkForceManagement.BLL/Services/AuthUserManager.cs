@@ -59,7 +59,17 @@ namespace WorkForceManagement.BLL.Services
 
         public async Task<bool> ValidateUserCredentials(string userName, string password)
         {
-            User user = await FindByNameAsync(userName);
+            User user;
+
+            if (userName.Contains("@"))
+            {
+                user = await FindByEmailAsync(userName);
+            }
+            else
+            {
+                user = await FindByNameAsync(userName);
+            }
+
             if (user != null)
             {
                 bool result = await CheckPasswordAsync(user, password);
@@ -95,6 +105,11 @@ namespace WorkForceManagement.BLL.Services
         public async Task<User> GetCurrentUser(ClaimsPrincipal principal)
         {
             return await GetUserAsync(principal);
+        }
+
+        public async Task<User> FindByEmail(string email)
+        {
+            return await FindByEmailAsync(email);
         }
     }
 }

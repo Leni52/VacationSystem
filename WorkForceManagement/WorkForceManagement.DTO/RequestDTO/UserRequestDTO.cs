@@ -15,7 +15,7 @@ namespace WorkForceManagement.DTO.RequestDTO
         public string Email { get; set; }
 
         [Required]
-        [MinLength(3)]
+        [MinLength(6)]
         [MaxLength(50)]
         public string Password { get; set; }
 

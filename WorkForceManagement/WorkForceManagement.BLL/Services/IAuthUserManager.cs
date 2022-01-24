@@ -24,6 +24,6 @@ namespace WorkForceManagement.BLL.Services
         Task<User> GetCurrentUser(ClaimsPrincipal principal);
         Task<string> GenerateEmailConfirmationTokenAsync(User user);
         Task<IdentityResult> ConfirmEmailAsync(User user, string token);
+        Task<User> FindByEmail(string email);
     }
-
 }

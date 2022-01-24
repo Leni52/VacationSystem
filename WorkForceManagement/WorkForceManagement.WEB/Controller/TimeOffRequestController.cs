@@ -111,11 +111,6 @@ namespace WorkForceManagement.WEB.Controller
         [Authorize(Policy = "TeamLeader")]
         public async Task<ActionResult> AnswerTimeOffRequest(Guid timeOffRequestId, bool isApproved, string reason)
         {
-            if(!isApproved && reason == null)
-            {
-                return BadRequest("If rejected then reason must be included, try again!");
-            }
-
             User currentUser = await _userService.GetCurrentUser(User);
 
             await _timeOffRequestService.AnswerTimeOffRequest(timeOffRequestId, isApproved, currentUser, reason);

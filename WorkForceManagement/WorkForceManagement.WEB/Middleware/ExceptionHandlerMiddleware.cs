@@ -30,14 +30,15 @@ namespace WorkForceManagement.WEB.Middleware
                 switch (error)
                 {
                     case KeyNotFoundException:
-                    case ItemDoesNotExistException e:
+                    case ItemDoesNotExistException:
                         response.StatusCode = (int)HttpStatusCode.NotFound;
                         break;
                     case OverlappingTimeOffRequestsException:
                     case TeamWithSameNameExistsException:
                     case UsernameTakenException:
                     case TimeOffRequestIsClosedException:
-                    case ItemAlreadyExistsException e:
+                    case ItemAlreadyExistsException:
+                    case EmailAddressAlreadyInUseException:
                         response.StatusCode = (int)HttpStatusCode.Conflict;
                         break;
                     case InvalidDatesException:
