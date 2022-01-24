@@ -146,6 +146,45 @@ namespace WorkForceManagement.BLL.Tests.Services
 
             await Assert.ThrowsAsync<KeyNotFoundException>(() => sut.GetUserById(userId));
         }
-        
+
+        [Fact]
+        public async Task IsEmailValid_InvalidEmail_ThrowsException()
+        {
+            //arrange
+            User currentUser = new User()
+            {
+                Id = Guid.NewGuid().ToString(),
+                UserName = "admin",
+                Email = "badEmail"
+            };
+            currentUser.PasswordHash = hasher.HashPassword(currentUser, "adminpass");
+
+            authUserManagerMock.Setup(userRep => userRep.FindDifferentUserWithSameUsername(It.IsAny<Guid>(), It.IsAny<string>()))
+                .ReturnsAsync((User)null);
+
+
+            await Assert.ThrowsAsync<InvalidEmailException>(() => sut.Add(currentUser, "adminpass", true));
+        }
+
+        [Fact]
+        public async Task IsEmailValid_EmailAlreadyInUse_ThrowsException()
+        {
+            //arrange
+            User userToAdd = new User()
+            {
+                Id = Guid.NewGuid().ToString(),
+                UserName = "admin",
+                Email = "test@gmail.com"
+            };
+            userToAdd.PasswordHash = hasher.HashPassword(userToAdd, "adminpass");
+
+            authUserManagerMock.Setup(userRep => userRep.FindDifferentUserWithSameUsername(It.IsAny<Guid>(), It.IsAny<string>()))
+                .ReturnsAsync((User)null);
+            authUserManagerMock.Setup(userRep => userRep.FindByEmail(It.IsAny<string>()))
+                .ReturnsAsync(new User());
+
+            await Assert.ThrowsAsync<EmailAddressAlreadyInUseException>(() => sut.Add(userToAdd, "adminpass", true));
+        }
+
     }
 }
