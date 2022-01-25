@@ -83,8 +83,6 @@ namespace WorkForceManagement.BLL.Services
 
             if (isOverlapping) // if current user already has a timeoffrequest thats not rejected and is overlapping with the current timeOffRequest
                 throw new OverlappingTimeOffRequestsException($"User with id: {currentUser.Id}, already has a time off request thats overlapping with the current request!");
-
-
         }
 
         private int ValidateDaysOff(DateTime startDate, DateTime endDate)
@@ -134,9 +132,9 @@ namespace WorkForceManagement.BLL.Services
 
         public async Task<TimeOffRequest> UpdateTimeOffRequest(Guid timeOffRequestId, TimeOffRequest timeOffRequest, string currentUserId)
 
-        {   
+        {
             ValidateTimeOffRequestDates(timeOffRequest.StartDate, timeOffRequest.EndDate, await _userService.GetUserById(Guid.Parse(currentUserId)));
-            int daysOff =  ValidateDaysOff(timeOffRequest.StartDate, timeOffRequest.EndDate);
+            int daysOff = ValidateDaysOff(timeOffRequest.StartDate, timeOffRequest.EndDate);
 
             TimeOffRequest requestToUpdate = await _timeOffRequestRepository.Get(timeOffRequestId);
             if (requestToUpdate == null)
@@ -178,7 +176,7 @@ namespace WorkForceManagement.BLL.Services
 
             timeOffRequest.ChangeDate = DateTime.Now.Date;
             timeOffRequest.UpdaterId = currentUser.Id;
-            if(reason.Length != 0)
+            if (reason.Length != 0)
             {
                 timeOffRequest.Reason = reason;
             }
@@ -236,7 +234,7 @@ namespace WorkForceManagement.BLL.Services
             {
                 return "Approved";
             }
-            else if(timeOffRequest.Status == TimeOffRequestStatus.Cancelled)
+            else if (timeOffRequest.Status == TimeOffRequestStatus.Cancelled)
             {
                 return "Cancelled";
             }
@@ -271,8 +269,9 @@ namespace WorkForceManagement.BLL.Services
                     await _mailService.SendEmail(new MailRequest()
                     {
                         ToEmail = u.Email,
-                        Body = $"[TimeOffRequest] {timeOffRequest.CreatorId}",
-                        Subject = $"User with id {timeOffRequest.CreatorId} is requesting a TOR between the dates {timeOffRequest.StartDate.ToShortDateString()} and {timeOffRequest.EndDate.ToShortDateString()}!"
+                        Subject = $"{timeOffRequest.Requester.UserName} is requesting a TimeOff!",
+                        Body = $"{timeOffRequest.Requester.UserName} is requesting a TOR between the dates {timeOffRequest.StartDate.ToShortDateString()} and {timeOffRequest.EndDate.ToShortDateString()}!\n" +
+                        $"Total days off: {timeOffRequest.WorkingDaysOff}"
                     });
                 }
 
@@ -316,7 +315,7 @@ namespace WorkForceManagement.BLL.Services
                     await _mailService.SendEmail(new MailRequest()
                     {
                         ToEmail = u.Email,
-                        Subject = "TeamLeader OOO",
+                        Subject = "TeamLeader OOO!",
                         Body = $"{timeOffRequest.Requester.UserName} is OOO until {timeOffRequest.EndDate.ToShortDateString()}!"
                     });
                 }
@@ -336,7 +335,8 @@ namespace WorkForceManagement.BLL.Services
             {
                 subject = "Time off request Rejected";
                 body = $"Time off request by: {timeOffRequest.Requester.UserName} with start date: {timeOffRequest.StartDate.ToShortDateString()} and end date: {timeOffRequest.EndDate.ToShortDateString()} is REJECTED";
-            } else if (status == TimeOffRequestStatus.Cancelled)
+            }
+            else if (status == TimeOffRequestStatus.Cancelled)
             {
                 subject = "Time off request Cancelled";
                 body = $"Time off request by: {timeOffRequest.Requester.UserName} with start date: {timeOffRequest.StartDate.ToShortDateString()} and end date: {timeOffRequest.EndDate.ToShortDateString()} has been CANCELLED";
@@ -353,7 +353,6 @@ namespace WorkForceManagement.BLL.Services
                     Body = body
                 });
             }
-
         }
 
         public async Task<List<User>> GetMyColleguesTimeOffRequests(User currentUser)
@@ -369,7 +368,7 @@ namespace WorkForceManagement.BLL.Services
 
             foreach (var user in teamMembers)
             {
-                if ((user.CreatedTimeOffRequests.Where(t => t.Status == TimeOffRequestStatus.Approved).Any()) &&                    
+                if ((user.CreatedTimeOffRequests.Where(t => t.Status == TimeOffRequestStatus.Approved).Any()) &&
                     (user.CreatedTimeOffRequests.Where(t => t.EndDate >= DateTime.Now).Any()))
                 {
                     teamMembersOnVacation.Add(user);
@@ -396,7 +395,7 @@ namespace WorkForceManagement.BLL.Services
             }
             else
             {
-                throw new CannotCancelTimeOffRequestException($"TimeOffRequest with id: {timeOffRequestId} cannot be cancelled!"); 
+                throw new CannotCancelTimeOffRequestException($"TimeOffRequest with id: {timeOffRequestId} cannot be cancelled!");
             }
         }
 
