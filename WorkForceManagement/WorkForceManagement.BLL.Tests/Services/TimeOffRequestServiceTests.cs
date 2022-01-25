@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using WorkForceManagement.BLL.Exceptions;
 using WorkForceManagement.BLL.Services;
+using WorkForceManagement.BLL.Services.Interfaces;
 using WorkForceManagement.DAL.Entities;
 using WorkForceManagement.DAL.Repositories;
 using Xunit;
@@ -124,7 +125,7 @@ namespace WorkForceManagement.BLL.Tests.Services
             { UserName = "Admin" };
 
             //act
-            var result = await sut.GetMyRequests(currentUser.Id);
+            var result = await sut.GetMyRequests(Guid.Parse(currentUser.Id));
             //asert
             Assert.IsType<List<TimeOffRequest>>(result);
         }

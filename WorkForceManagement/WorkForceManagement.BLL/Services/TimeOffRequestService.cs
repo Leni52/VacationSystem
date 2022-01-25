@@ -176,8 +176,8 @@ namespace WorkForceManagement.BLL.Services
             if (currentUserIsApprover == false)
                 throw new UserIsntApproverException($"User with Id:{currentUser.Id}, cant approve this Time Off Request");
 
-            timeOffRequest.ChangeDate = DateTime.Now.Date;
-            timeOffRequest.UpdaterId = currentUser.Id;
+            request.ChangeDate = DateTime.Now.Date;
+            request.UpdaterId = currentUser.Id;
             if(reason != null)
             {
                 request.Reason = reason;

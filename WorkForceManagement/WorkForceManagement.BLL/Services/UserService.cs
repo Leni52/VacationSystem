@@ -58,7 +58,7 @@ namespace WorkForceManagement.BLL.Services
             var validEmailToken = WebEncoders.Base64UrlEncode(encodedEmailToken);
 
             string appUrl = $"{_configuration["AppUrl"]}";
-            string url = $"{appUrl}/api/User/confirmemail?userid={userToAdd.Id}&token={validEmailToken}";
+            string url = $"{appUrl}/api/User/confirmemail?userid={user.Id}&token={validEmailToken}";
 
             await _mailService.SendEmail(new MailRequest()
             {
