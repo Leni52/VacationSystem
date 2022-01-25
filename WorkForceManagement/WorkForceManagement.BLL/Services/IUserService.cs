@@ -8,16 +8,16 @@ namespace WorkForceManagement.BLL.Services
 {
     public interface IUserService
     {
-        Task Add(User userToAdd, string password, bool isAdmin);
-        Task Delete(Guid userId);
-        Task Update(User updatedUser, string oldEmail, string newPassword, bool isAdmin);
+        Task Add(User user, string password, bool isAdmin);
+        Task Delete(Guid id);
+        Task Update(User user, string oldEmail, string newPassword, bool isAdmin);
         Task<List<User>> GetAllUsers();
-        List<Team> GetUserTeams(User currentUser);
+        List<Team> GetUserTeams(User user);
         Task<User> GetUserById(Guid id);
         Task<User> GetCurrentUser(ClaimsPrincipal principal);
-        Task<bool> IsUserAdmin(User currentUser);
-        Task MakeUserAdmin(Guid userId);
-        Task RemoveUserFromAdmin(Guid userId);
+        Task<bool> IsUserAdmin(User user);
+        Task MakeUserAdmin(Guid id);
+        Task RemoveUserFromAdmin(Guid id);
         Task<List<User>> GetUsersUnderTeamLeader(User user);
         Task ConfirmEmailAdress(string userId, string token);
     }

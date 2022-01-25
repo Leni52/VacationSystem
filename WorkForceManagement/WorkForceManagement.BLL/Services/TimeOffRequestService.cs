@@ -29,30 +29,30 @@ namespace WorkForceManagement.BLL.Services
             _mailService = mailService;
         }
 
-        public async Task CreateTimeOffRequest(TimeOffRequest timeOffRequest, User currentUser)
+        public async Task CreateTimeOffRequest(TimeOffRequest request, User currentUser)
         {
-            ValidateTimeOffRequestDates(timeOffRequest.StartDate, timeOffRequest.EndDate, currentUser);
-            timeOffRequest.WorkingDaysOff = ValidateDaysOff(timeOffRequest.StartDate, timeOffRequest.EndDate);
+            ValidateTimeOffRequestDates(request.StartDate, request.EndDate, currentUser);
+            request.WorkingDaysOff = ValidateDaysOff(request.StartDate, request.EndDate);
 
-            timeOffRequest.Status = TimeOffRequestStatus.Created;
-            timeOffRequest.CreatorId = currentUser.Id;
-            timeOffRequest.UpdaterId = currentUser.Id;
-            List<User> approvers = GetApprovers(currentUser);
+            request.Status = TimeOffRequestStatus.Created;
+            request.CreatorId = currentUser.Id;
+            request.UpdaterId = currentUser.Id;
+            var approvers = GetApprovers(currentUser);
 
-            approvers.ForEach(user => timeOffRequest.Approvers.Add(user));
-            approvers.ForEach(user => user.TimeOffRequestsToApprove.Add(timeOffRequest));
-            currentUser.CreatedTimeOffRequests.Add(timeOffRequest);
+            approvers.ForEach(user => request.Approvers.Add(user));
+            approvers.ForEach(user => user.TimeOffRequestsToApprove.Add(request));
+            currentUser.CreatedTimeOffRequests.Add(request);
 
-            await _timeOffRequestRepository.CreateOrUpdate(timeOffRequest);
-            await CheckTimeOffRequest(timeOffRequest.Id);
+            await _timeOffRequestRepository.CreateOrUpdate(request);
+            await CheckTimeOffRequest(request.Id);
         }
 
         private List<User> GetApprovers(User currentUser)
         { // gets all the approvers and checks if they themselves are not in a timeoff
-            List<User> potentialApprovers = currentUser.Teams.Select(team => team.TeamLeader).ToList();
-            List<User> validatedApprovers = new List<User>();
+            var potentialApprovers = currentUser.Teams.Select(team => team.TeamLeader).ToList();
+            var validatedApprovers = new List<User>();
 
-            foreach (User user in potentialApprovers)
+            foreach (var user in potentialApprovers)
             {
                 bool teamLeaderIsAway = user.CreatedTimeOffRequests.Any(x => x.Status == TimeOffRequestStatus.Approved && x.StartDate.Date <= DateTime.Now.Date
                 && x.EndDate.Date >= DateTime.Now.Date);
@@ -63,17 +63,17 @@ namespace WorkForceManagement.BLL.Services
             return validatedApprovers;
         }
 
-        private void ValidateTimeOffRequestDates(DateTime startDate, DateTime endDate, User currentUser)
+        private void ValidateTimeOffRequestDates(DateTime startDate, DateTime endDate, User user)
         {
             if (startDate > endDate)
                 throw new InvalidDatesException("Invalid time off request dates, the start date should be earlier or equal to end date");
 
             int requestedDays = ValidateDaysOff(startDate, endDate);
-            int totalDays = currentUser.DaysOff;
+            int totalDays = user.DaysOff;
             if (requestedDays > totalDays)
                 throw new InvalidDatesException("The number of requested days exceeds the maximum number available");
 
-            bool isOverlapping = currentUser.CreatedTimeOffRequests.Any(
+            bool isOverlapping = user.CreatedTimeOffRequests.Any(
                 timeOff =>
                 timeOff.Status != TimeOffRequestStatus.Rejected &&
                 timeOff.Status != TimeOffRequestStatus.Cancelled &&
@@ -82,7 +82,7 @@ namespace WorkForceManagement.BLL.Services
                 );
 
             if (isOverlapping) // if current user already has a timeoffrequest thats not rejected and is overlapping with the current timeOffRequest
-                throw new OverlappingTimeOffRequestsException($"User with id: {currentUser.Id}, already has a time off request thats overlapping with the current request!");
+                throw new OverlappingTimeOffRequestsException($"User with id: {user.Id}, already has a time off request thats overlapping with the current request!");
         }
 
         private int ValidateDaysOff(DateTime startDate, DateTime endDate)
@@ -121,12 +121,12 @@ namespace WorkForceManagement.BLL.Services
 
         public async Task<TimeOffRequest> GetTimeOffRequest(Guid Id)
         {
-            TimeOffRequest timeOffRequest = await _timeOffRequestRepository.Get(Id);
-            if (timeOffRequest == null)
+            var request = await _timeOffRequestRepository.Get(Id);
+            if (request == null)
             {
                 throw new ItemDoesNotExistException();
             }
-            return timeOffRequest;
+            return request;
         }
 
         public async Task<TimeOffRequest> UpdateTimeOffRequest(Guid timeOffRequestId, TimeOffRequest timeOffRequest, string currentUserId)
@@ -152,198 +152,203 @@ namespace WorkForceManagement.BLL.Services
             return requestToUpdate;
         }
 
-        public async Task<List<TimeOffRequest>> GetMyRequests(string currentUserId)
+        public async Task<List<TimeOffRequest>> GetMyRequests(Guid userId)
         {
-            List<TimeOffRequest> allRequests = await _timeOffRequestRepository.All();
-            return allRequests.Where(u => u.CreatorId == currentUserId).ToList();
+            var requests = await _timeOffRequestRepository.All();
+            return requests.Where(request => request.CreatorId == userId.ToString()).ToList();
         }
 
-        public async Task AnswerTimeOffRequest(Guid timeOffRequestId, bool isApproved, User currentUser, string reason)
+        public async Task AnswerTimeOffRequest(Guid id, bool isApproved, User currentUser, string reason)
         {
-            TimeOffRequest timeOffRequest = await GetTimeOffRequest(timeOffRequestId);
+            var request = await GetTimeOffRequest(id);
 
-            if (timeOffRequest.Status == TimeOffRequestStatus.Approved ||
-                timeOffRequest.Status == TimeOffRequestStatus.Rejected ||
-                timeOffRequest.Status == TimeOffRequestStatus.Cancelled)
+            if (request.Status == TimeOffRequestStatus.Approved ||
+                request.Status == TimeOffRequestStatus.Rejected ||
+                request.Status == TimeOffRequestStatus.Cancelled)
             { // the time off request has already been decided
-                throw new TimeOffRequestIsClosedException($"Time off request with id:{timeOffRequestId}, is already closed");
+                throw new TimeOffRequestIsClosedException($"Time off request with id:{id}, is already closed");
             }
 
-            bool currentUserIsApprover = timeOffRequest.Approvers.Any(user => user.Id == currentUser.Id);
+            bool currentUserIsApprover = request.Approvers.Any(user => user.Id == currentUser.Id);
             if (currentUserIsApprover == false)
                 throw new UserIsntApproverException($"User with Id:{currentUser.Id}, cant approve this Time Off Request");
 
-            timeOffRequest.ChangeDate = DateTime.Now.Date;
-            timeOffRequest.UpdaterId = currentUser.Id;
+            request.ChangeDate = DateTime.Now.Date;
+            request.UpdaterId = currentUser.Id;
             if (reason.Length != 0)
             {
-                timeOffRequest.Reason = reason;
+                request.Reason = reason;
             }
 
-            if (timeOffRequest.Status == TimeOffRequestStatus.Created)
+            if (request.Status == TimeOffRequestStatus.Created)
             {
-                timeOffRequest.Status = TimeOffRequestStatus.Awaiting;
+                request.Status = TimeOffRequestStatus.Awaiting;
             }
 
             if (isApproved)
             {
-                await ApproveTimeOffRequest(timeOffRequest, currentUser);
+                await ApproveTimeOffRequest(request, currentUser);
             }
             else
             {
-                await RejectTimeOffRequest(timeOffRequest, currentUser);
+                await RejectTimeOffRequest(request, currentUser);
             }
         }
 
-        public async Task RejectTimeOffRequest(TimeOffRequest timeOffRequest, User currentUser)
+        public async Task RejectTimeOffRequest(TimeOffRequest request, User currentUser)
         {
-            timeOffRequest.Status = TimeOffRequestStatus.Rejected;
+            request.Status = TimeOffRequestStatus.Rejected;
 
-            await SendMailToRequesterRejectedRequest(timeOffRequest.Id, currentUser);
-            await NotifyApproversOnDecision(TimeOffRequestStatus.Rejected, timeOffRequest);
+            await SendMailToRequesterRejectedRequest(request.Id);
+            await NotifyApproversOnDecision(TimeOffRequestStatus.Rejected, request);
 
             // removes the request from the approvers timeOffRequestsToApprove
-            timeOffRequest.Approvers.ForEach(approver => approver.TimeOffRequestsToApprove.Remove(timeOffRequest));
+            request.Approvers.ForEach(approver => approver.TimeOffRequestsToApprove.Remove(request));
 
             await _timeOffRequestRepository.SaveChanges();
         }
 
-        public async Task ApproveTimeOffRequest(TimeOffRequest timeOffRequest, User currentUser)
+        public async Task ApproveTimeOffRequest(TimeOffRequest request, User currentUser)
         {
-            timeOffRequest.AlreadyApproved.Add(currentUser);
+            request.AlreadyApproved.Add(currentUser);
             await _timeOffRequestRepository.SaveChanges();
             //email to requester
-            await SendMailToRequesterApprovedRequest(timeOffRequest.Id, currentUser);
-            await CheckTimeOffRequest(timeOffRequest.Id);
+            await SendMailToRequesterApprovedRequest(request.Id);
+            await CheckTimeOffRequest(request.Id);
         }
 
-        public async Task<string> CheckTimeOffRequest(Guid timeOffRequestId)
+        public async Task<string> CheckTimeOffRequest(Guid id)
         {
-            TimeOffRequest timeOffRequest = await GetTimeOffRequest(timeOffRequestId);
+            var request = await GetTimeOffRequest(id);
 
-            if (timeOffRequest == null)
+            if (request == null)
             {
                 throw new ItemDoesNotExistException();
             }
-            if (timeOffRequest.Status == TimeOffRequestStatus.Rejected)
+            if (request.Status == TimeOffRequestStatus.Rejected)
             {
                 return "Rejected";
             }
-            else if (timeOffRequest.Status == TimeOffRequestStatus.Approved)
+            else if (request.Status == TimeOffRequestStatus.Approved)
             {
                 return "Approved";
             }
-            else if (timeOffRequest.Status == TimeOffRequestStatus.Cancelled)
+            else if (request.Status == TimeOffRequestStatus.Cancelled)
             {
                 return "Cancelled";
             }
 
-            int numberOfApprovers = timeOffRequest.Approvers.ToList().Count; // get all needed approvals
+            int numberOfApprovers = request.Approvers.ToList().Count; // get all needed approvals
 
-            if (numberOfApprovers == timeOffRequest.AlreadyApproved.ToList().Count ||
-                timeOffRequest.Type == TimeOffRequestType.SickLeave) // compare with current approvals OR it's sick leave
+            if (numberOfApprovers == request.AlreadyApproved.ToList().Count ||
+                request.Type == TimeOffRequestType.SickLeave) // compare with current approvals OR it's sick leave
             {
-                timeOffRequest.Status = TimeOffRequestStatus.Approved;
-                await NotifyApproversOnDecision(TimeOffRequestStatus.Approved, timeOffRequest);
-                await SendMailToRequesterApprovedRequest(timeOffRequest.Id, timeOffRequest.Requester);
+                request.Status = TimeOffRequestStatus.Approved;
+                await NotifyApproversOnDecision(TimeOffRequestStatus.Approved, request);
+                await SendMailToRequesterApprovedRequest(request.Id);
                 // To all approvers, removing the request from toApprove and adding it to Approved list
-                List<User> approvers = timeOffRequest.Approvers.ToList();
+                var approvers = request.Approvers.ToList();
 
-                approvers.ForEach(approver => approver.TimeOffRequestsToApprove.Remove(timeOffRequest));
-                approvers.ForEach(approver => approver.TimeOffRequestsApproved.Add(timeOffRequest));
+                approvers.ForEach(approver => approver.TimeOffRequestsToApprove.Remove(request));
+                approvers.ForEach(approver => approver.TimeOffRequestsApproved.Add(request));
 
-                timeOffRequest.Requester.DaysOff -= ValidateDaysOff(timeOffRequest.StartDate, timeOffRequest.EndDate);
+                request.Requester.DaysOff -= ValidateDaysOff(request.StartDate, request.EndDate);
                 //subtract the available days since the request is approved
                 await _timeOffRequestRepository.SaveChanges();
 
-                await NotifyTeamMembersLeaderIsOOO(timeOffRequest);
+                await NotifyTeamMembersLeaderIsOOO(request);
                 return "Approved";
             }
             else
             {// sending notifications to leaders which nave not yet confirmed, in case of call after creaton it's sent to all team leaders
-                List<User> approversToSendEmailTo = timeOffRequest.Approvers.Except(timeOffRequest.AlreadyApproved).ToList();
+                var approvers = request.Approvers.Except(request.AlreadyApproved).ToList();
 
-                foreach (User u in approversToSendEmailTo)
+                foreach (var u in approvers)
                 {
                     await _mailService.SendEmail(new MailRequest()
                     {
                         ToEmail = u.Email,
-                        Subject = $"{timeOffRequest.Requester.UserName} is requesting a TimeOff!",
-                        Body = $"{timeOffRequest.Requester.UserName} is requesting a TOR between the dates {timeOffRequest.StartDate.ToShortDateString()} and {timeOffRequest.EndDate.ToShortDateString()}!\n" +
-                        $"Total days off: {timeOffRequest.WorkingDaysOff}"
+                        Subject = $"{request.Requester.UserName} is requesting a TimeOff!",
+                        Body = $"{request.Requester.UserName} is requesting a TOR between the dates {request.StartDate.ToShortDateString()} and {request.EndDate.ToShortDateString()}!\n" +
+                        $"Total days off: {request.WorkingDaysOff}"
                     });
                 }
 
                 await _timeOffRequestRepository.SaveChanges();
-                return timeOffRequest.Status == TimeOffRequestStatus.Awaiting ? "Awaiting" : "Created";
+                return request.Status == TimeOffRequestStatus.Awaiting ? "Awaiting" : "Created";
             }
         }
 
-        public async Task SendMailToRequesterApprovedRequest(Guid requestId, User user)
+        private async Task SendMailToRequesterApprovedRequest(Guid id)
         {
-            TimeOffRequest request = await _timeOffRequestRepository.Get(requestId);
+            var request = await _timeOffRequestRepository.Get(id);
             //email to requester
-            MailRequest mailRequest = new MailRequest();
-            mailRequest.Body = $"Your request between {request.StartDate.ToShortDateString()}" +
-                $" and {request.EndDate.ToShortDateString()}  has been approved.";
-            mailRequest.Subject = "Approved request.";
-            mailRequest.ToEmail = request.Requester.Email;
-            await _mailService.SendEmail(mailRequest);
-        }
-
-        public async Task SendMailToRequesterRejectedRequest(Guid requestId, User user)
-        {
-            TimeOffRequest request = await _timeOffRequestRepository.Get(requestId);
-            //email to requester
-            MailRequest mailRequest = new MailRequest();
-            mailRequest.Body = $"Your request with start date: {request.StartDate.ToShortDateString()} " +
-                $" and end date: {request.EndDate.ToShortDateString()} has been rejected.";
-            mailRequest.Subject = "Rejected request.";
-            mailRequest.ToEmail = request.Requester.Email;
-            await _mailService.SendEmail(mailRequest);
-        }
-
-        private async Task NotifyTeamMembersLeaderIsOOO(TimeOffRequest timeOffRequest)
-        {
-            List<User> usersToSendEmailTo = await _userService.GetUsersUnderTeamLeader(timeOffRequest.Requester);
-
-            if (usersToSendEmailTo.Count != 0)
+            var mailRequest = new MailRequest()
             {
-                foreach (User u in usersToSendEmailTo)
+                Subject = "Approved request.",
+                Body = $"Your request between {request.StartDate.ToShortDateString()}" +
+                $" and {request.EndDate.ToShortDateString()}  has been approved.",
+                ToEmail = request.Requester.Email
+            };
+
+            await _mailService.SendEmail(mailRequest);
+        }
+
+        private async Task SendMailToRequesterRejectedRequest(Guid id)
+        {
+            var request = await _timeOffRequestRepository.Get(id);
+            //email to requester
+            var mailRequest = new MailRequest()
+            {
+                Subject = "Rejected request.",
+                Body = $"Your request with start date: {request.StartDate.ToShortDateString()} " +
+                $" and end date: {request.EndDate.ToShortDateString()} has been rejected.",
+                ToEmail = request.Requester.Email
+            };
+            await _mailService.SendEmail(mailRequest);
+        }
+
+        private async Task NotifyTeamMembersLeaderIsOOO(TimeOffRequest request)
+        {
+            var users = await _userService.GetUsersUnderTeamLeader(request.Requester);
+
+            if (users.Count != 0)
+            {
+                foreach (var user in users)
                 {
                     await _mailService.SendEmail(new MailRequest()
                     {
-                        ToEmail = u.Email,
+                        ToEmail = user.Email,
                         Subject = "TeamLeader OOO!",
-                        Body = $"{timeOffRequest.Requester.UserName} is OOO until {timeOffRequest.EndDate.ToShortDateString()}!"
+                        Body = $"{request.Requester.UserName} is OOO until {request.EndDate.ToShortDateString()}!"
                     });
                 }
             }
         }
 
-        private async Task NotifyApproversOnDecision(TimeOffRequestStatus status, TimeOffRequest timeOffRequest)
+        private async Task NotifyApproversOnDecision(TimeOffRequestStatus status, TimeOffRequest request)
         {
             string subject = "";
             string body = "";
             if (status == TimeOffRequestStatus.Approved)
             {
                 subject = "Time off Request Approved";
-                body = $"Time off request by: {timeOffRequest.Requester.UserName} with start date: {timeOffRequest.StartDate.ToShortDateString()} and end date: {timeOffRequest.EndDate.ToShortDateString()} is APPROVED";
+                body = $"Time off request by: {request.Requester.UserName} with start date: {request.StartDate.ToShortDateString()} and end date: {request.EndDate.ToShortDateString()} is APPROVED";
             }
             else if (status == TimeOffRequestStatus.Rejected)
             {
                 subject = "Time off request Rejected";
-                body = $"Time off request by: {timeOffRequest.Requester.UserName} with start date: {timeOffRequest.StartDate.ToShortDateString()} and end date: {timeOffRequest.EndDate.ToShortDateString()} is REJECTED";
+                body = $"Time off request by: {request.Requester.UserName} with start date: {request.StartDate.ToShortDateString()} and end date: {request.EndDate.ToShortDateString()} is REJECTED";
             }
             else if (status == TimeOffRequestStatus.Cancelled)
             {
                 subject = "Time off request Cancelled";
-                body = $"Time off request by: {timeOffRequest.Requester.UserName} with start date: {timeOffRequest.StartDate.ToShortDateString()} and end date: {timeOffRequest.EndDate.ToShortDateString()} has been CANCELLED";
+                body = $"Time off request by: {request.Requester.UserName} with start date: {request.StartDate.ToShortDateString()} and end date: {request.EndDate.ToShortDateString()} has been CANCELLED";
             }
 
-            List<User> approvers = timeOffRequest.Approvers.ToList();
+            var approvers = request.Approvers.ToList();
 
-            foreach (User approver in approvers)
+            foreach (var approver in approvers)
             {
                 await _mailService.SendEmail(new MailRequest()
                 {
@@ -356,45 +361,45 @@ namespace WorkForceManagement.BLL.Services
 
         public async Task<List<User>> GetMyColleguesTimeOffRequests(User currentUser)
         {
-            List<Team> userTeams = _userService.GetUserTeams(currentUser);
-            List<User> teamMembers = new List<User>();
-            List<User> teamMembersOnVacation = new List<User>();
+            var teams = _userService.GetUserTeams(currentUser);
+            var members = new List<User>();
+            var membersOnVacation = new List<User>();
 
-            foreach (var team in userTeams)
+            foreach (var team in teams)
             {
-                teamMembers = await _teamService.GetAllTeamMembers(team.Id);
+                members = await _teamService.GetAllTeamMembers(team.Id);
             }
 
-            foreach (var user in teamMembers)
+            foreach (var user in members)
             {
                 if ((user.CreatedTimeOffRequests.Where(t => t.Status == TimeOffRequestStatus.Approved).Any()) &&
                     (user.CreatedTimeOffRequests.Where(t => t.EndDate >= DateTime.Now).Any()))
                 {
-                    teamMembersOnVacation.Add(user);
+                    membersOnVacation.Add(user);
                 }
             }
 
-            return teamMembersOnVacation;
+            return membersOnVacation;
         }
 
-        public async Task CancelTimeOffRequest(Guid timeOffRequestId)
+        public async Task CancelTimeOffRequest(Guid id)
         {
-            TimeOffRequest timeOffRequest = await _timeOffRequestRepository.Get(timeOffRequestId);
+            var request = await _timeOffRequestRepository.Get(id);
 
-            if (timeOffRequest == null)
+            if (request == null)
             {
-                throw new ItemDoesNotExistException($"TimeOffRequest with id: {timeOffRequestId} doesn't exist!");
+                throw new ItemDoesNotExistException($"TimeOffRequest with id: {id} doesn't exist!");
             }
 
-            if (IsAbleToCancel(timeOffRequest))
+            if (IsAbleToCancel(request))
             {
-                await NotifyApproversOnDecision(TimeOffRequestStatus.Cancelled, timeOffRequest);
+                await NotifyApproversOnDecision(TimeOffRequestStatus.Cancelled, request);
 
-                timeOffRequest.Status = TimeOffRequestStatus.Cancelled;
+                request.Status = TimeOffRequestStatus.Cancelled;
             }
             else
             {
-                throw new CannotCancelTimeOffRequestException($"TimeOffRequest with id: {timeOffRequestId} cannot be cancelled!");
+                throw new CannotCancelTimeOffRequestException($"TimeOffRequest with id: {id} cannot be cancelled!");
             }
         }
 

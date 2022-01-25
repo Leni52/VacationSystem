@@ -33,7 +33,7 @@ namespace WorkForceManagement.WEB.Controller
                 return BadRequest();
             }
 
-            User currentUser = await _userService.GetCurrentUser(User);
+            var currentUser = await _userService.GetCurrentUser(User);
 
             var user = new User();
             _mapper.Map(model, user);
@@ -62,18 +62,18 @@ namespace WorkForceManagement.WEB.Controller
                 return BadRequest();
             }
 
-            User currentUser = await _userService.GetCurrentUser(User);
+            var currentUser = await _userService.GetCurrentUser(User);
 
-            User userToUpdate = await _userService.GetUserById(userId);
-            string oldEmail = userToUpdate.Email;
+            var user = await _userService.GetUserById(userId);
+            string oldEmail = user.Email;
 
-            if (userToUpdate == null)
+            if (user == null)
                 throw new KeyNotFoundException($"User with Id:{userId} was not found");
 
-            _mapper.Map(model, userToUpdate);
-            userToUpdate.UpdaterId = currentUser.Id;
+            _mapper.Map(model, user);
+            user.UpdaterId = currentUser.Id;
 
-            await _userService.Update(userToUpdate, oldEmail, model.Password, model.IsAdmin);
+            await _userService.Update(user, oldEmail, model.Password, model.IsAdmin);
 
             return Ok();
         }
@@ -82,9 +82,7 @@ namespace WorkForceManagement.WEB.Controller
         [HttpGet]
         public async Task<ActionResult<List<UserResponseDTO>>> GetAllUsers()
         {
-            var users = await _userService.GetAllUsers();
-
-            var results = _mapper.Map<List<UserResponseDTO>>(users);
+            var results = _mapper.Map<List<UserResponseDTO>>(await _userService.GetAllUsers());
 
             return Ok(results);
         }
@@ -93,9 +91,7 @@ namespace WorkForceManagement.WEB.Controller
         [HttpGet("{id}")]
         public async Task<ActionResult<UserResponseDTO>> GetUserById(Guid id)
         {
-            var user = await _userService.GetUserById(id);
-
-            var result = _mapper.Map<UserResponseDTO>(user);
+            var result = _mapper.Map<UserResponseDTO>(await _userService.GetUserById(id));
 
             return Ok(result);
         }

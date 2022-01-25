@@ -7,15 +7,14 @@ namespace WorkForceManagement.BLL.Services
 {
     public interface ITeamService
     {
-        Task AddUserToTeam(Guid teamId, User user, User currentUser);
-        Task Create(Team teamToAdd, User currentUser);
-        Task DeleteTeam(Guid teamId);
-        Task<List<User>> GetAllTeamMembers(Guid teamId);
+        Task AddUserToTeam(Guid id, User user, User currentUser);
+        Task Create(Team team, User currentUser);
+        Task DeleteTeam(Guid id);
+        Task<List<User>> GetAllTeamMembers(Guid id);
         Task<List<Team>> GetAllTeams();
-        Task<Team> GetTeamWithId(Guid teamId);
-        Task RemoveUserFromTeam(Guid teamId, User user, User currentUser);
-        Task UpdateTeam(Team teamToUpdate, Guid teamId, User currentUser);
-        Task UpdateTeamLeader(Guid teamId, User user, User currentUser);
-       
+        Task<Team> GetTeamWithId(Guid id);
+        Task RemoveUserFromTeam(Guid id, User user, User currentUser);
+        Task UpdateTeam(Team team, Guid teamId, User currentUser);
+        Task UpdateTeamLeader(Guid id, User user, User currentUser);
     }
 }

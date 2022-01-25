@@ -26,104 +26,103 @@ namespace WorkForceManagement.BLL.Services
             _mailService = mailService;
         }
 
-        public async Task Add(User userToAdd, string password, bool isAdmin)
+        public async Task Add(User user, string password, bool isAdmin)
         {
-            User foundUser = await _userManager.FindDifferentUserWithSameUsername(Guid.Parse(userToAdd.Id), userToAdd.UserName);
-            if (foundUser != null)
+            if (await _userManager.FindDifferentUserWithSameUsername(Guid.Parse(user.Id), user.UserName) != null)
             {
-                throw new UsernameTakenException($"Username: {userToAdd.UserName} already taken!");
+                throw new UsernameTakenException($"Username: {user.UserName} already taken!");
             }
 
-            await IsEmailValid(Guid.Parse(userToAdd.Id), userToAdd.Email);
+            await IsEmailValid(Guid.Parse(user.Id), user.Email);
 
-            userToAdd.TwoFactorEnabled = true;
-            await _userManager.CreateUser(userToAdd, password);
+            user.TwoFactorEnabled = true;
+            await _userManager.CreateUser(user, password);
 
-            await EmailUserWithConfirmationToken(userToAdd);
+            await EmailUserWithConfirmationToken(user);
 
             if (isAdmin)
             {
-                await _userManager.AddRoleToUser(userToAdd, "Admin");
+                await _userManager.AddRoleToUser(user, "Admin");
             }
         }
 
-        private async Task EmailUserWithConfirmationToken(User userToAdd)
+        private async Task EmailUserWithConfirmationToken(User user)
         {
-            var confirmEmailToken = await _userManager.GenerateEmailConfirmationTokenAsync(userToAdd);
+            var confirmEmailToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var encodedEmailToken = Encoding.UTF8.GetBytes(confirmEmailToken);
             var validEmailToken = WebEncoders.Base64UrlEncode(encodedEmailToken);
 
             string appUrl = "https://localhost:5000"; // TODO this probably should be changed to be included in app settings
-            string url = $"{appUrl}/api/User/confirmemail?userid={userToAdd.Id}&token={validEmailToken}";
+            string url = $"{appUrl}/api/User/confirmemail?userid={user.Id}&token={validEmailToken}";
 
             await _mailService.SendEmail(new MailRequest()
             {
-                ToEmail = userToAdd.Email,
+                ToEmail = user.Email,
                 Subject = "Confirm your email",
                 Body = $"<p>Confirm your email by <a href='{url}'> Clicking Here </a>  </p>"
             });
         }
 
-        private async Task IsEmailValid(Guid userId, string emailAddress)
+        private async Task IsEmailValid(Guid id, string email)
         {
             try
             {
-                MailAddress m = new MailAddress(emailAddress);
+                var mail = new MailAddress(email);
 
-                User userAlreadyInDb = await _userManager.FindById(userId);
-                User userWithSameEmail = await _userManager.FindByEmail(emailAddress);
+                var userAlreadyInDb = await _userManager.FindById(id);
+                var userWithSameEmail = await _userManager.FindByEmail(email);
 
                 if ((userWithSameEmail != null && userAlreadyInDb == null) || (userWithSameEmail != null && userWithSameEmail.Id != userAlreadyInDb.Id)) //Checks if email is valid when just updating the user or creating a new one
                 {
-                    throw new EmailAddressAlreadyInUseException($"Email: {emailAddress} already in use!");
+                    throw new EmailAddressAlreadyInUseException($"Email: {email} already in use!");
                 }
             }
             catch (FormatException)
             {
-                throw new InvalidEmailException($"Email: {emailAddress} is not valid!");
+                throw new InvalidEmailException($"Email: {email} is not valid!");
             }
         }
 
-        public async Task Delete(Guid userId)
+        public async Task Delete(Guid id)
         {
-            User userToDelete = await _userManager.FindById(userId);
+            var user = await _userManager.FindById(id);
 
-            if (userToDelete == null)
-                throw new KeyNotFoundException($"User with id: {userId} could not be found! ");
+            if (user == null)
+                throw new KeyNotFoundException($"User with id: {id} could not be found! ");
 
-            await _userManager.DeleteUser(userToDelete);
+            await _userManager.DeleteUser(user);
         }
 
-        public async Task Update(User updatedUser, string oldEmail, string newPassword, bool isAdmin)
+        public async Task Update(User user, string oldEmail, string newPassword, bool isAdmin)
         {
-            PasswordHasher<User> hasher = new PasswordHasher<User>();
-            Guid userId = Guid.Parse(updatedUser.Id);
+            var hasher = new PasswordHasher<User>();
+            var userId = Guid.Parse(user.Id);
 
-            await IsEmailValid(userId, updatedUser.Email);
+            await IsEmailValid(userId, user.Email);
 
-            if (await _userManager.FindDifferentUserWithSameUsername(userId, updatedUser.UserName) != null)
+            if (await _userManager.FindDifferentUserWithSameUsername(userId, user.UserName) != null)
             {
-                throw new UsernameTakenException($"Username: {updatedUser.UserName} already taken!");
+                throw new UsernameTakenException($"Username: {user.UserName} already taken!");
             }
 
             if (isAdmin && !(await _userManager.IsUserInRole(userId, "Admin")))
             {
-                await _userManager.AddRoleToUser(updatedUser, "Admin");
+                await _userManager.AddRoleToUser(user, "Admin");
             }
             else if (!isAdmin && await _userManager.IsUserInRole(userId, "Admin"))
             {
-                await _userManager.RemoveRoleFromUser(updatedUser, "Admin");
+                await _userManager.RemoveRoleFromUser(user, "Admin");
             }
 
-            if (!updatedUser.Email.Equals(oldEmail))
+            if (!user.Email.Equals(oldEmail))
             { // if the email gets updated, that email should be confirmed again
-                updatedUser.EmailConfirmed = false;
-                await EmailUserWithConfirmationToken(updatedUser);
+                user.EmailConfirmed = false;
+                await EmailUserWithConfirmationToken(user);
             }
 
-            updatedUser.ChangeDate = DateTime.Now;
-            updatedUser.PasswordHash = hasher.HashPassword(updatedUser, newPassword);
-            await _userManager.UpdateUser(updatedUser);
+            user.ChangeDate = DateTime.Now;
+            user.PasswordHash = hasher.HashPassword(user, newPassword);
+            await _userManager.UpdateUser(user);
         }
 
         public async Task<List<User>> GetAllUsers()
@@ -136,27 +135,27 @@ namespace WorkForceManagement.BLL.Services
             return await _userManager.GetCurrentUser(principal);
         }
 
-        public List<Team> GetUserTeams(User currentUser)
+        public List<Team> GetUserTeams(User user)
         {
-            return currentUser.Teams.ToList();
+            return user.Teams.ToList();
         }
 
         public async Task<User> GetUserById(Guid id)
         {
-            User user = await _userManager.FindById(id);
+            var user = await _userManager.FindById(id);
             if (user == null)
                 throw new KeyNotFoundException($"User with id: {id} does not exist!");
             return user;
         }
 
-        public async Task<bool> IsUserAdmin(User currentUser)
+        public async Task<bool> IsUserAdmin(User user)
         {
-            return await _userManager.IsUserInRole(Guid.Parse(currentUser.Id), "Admin");
+            return await _userManager.IsUserInRole(Guid.Parse(user.Id), "Admin");
         }
 
-        public async Task MakeUserAdmin(Guid userId)
+        public async Task MakeUserAdmin(Guid id)
         {
-            User user = await GetUserById(userId);
+            var user = await GetUserById(id);
 
             if (!(await _userManager.IsUserInRole(Guid.Parse(user.Id), "Admin")))
             {
@@ -164,9 +163,9 @@ namespace WorkForceManagement.BLL.Services
             }
         }
 
-        public async Task RemoveUserFromAdmin(Guid userId)
+        public async Task RemoveUserFromAdmin(Guid id)
         {
-            User user = await GetUserById(userId);
+            var user = await GetUserById(id);
 
             if (await _userManager.IsUserInRole(Guid.Parse(user.Id), "Admin"))
             {
@@ -176,8 +175,8 @@ namespace WorkForceManagement.BLL.Services
 
         public async Task<List<User>> GetUsersUnderTeamLeader(User user)
         {
-            List<User> users = new List<User>();
-            List<Team> teams = _teamService.GetAllTeams().Result.Where(t => t.TeamLeader == user).ToList();
+            var users = new List<User>();
+            var teams = _teamService.GetAllTeams().Result.Where(t => t.TeamLeader == user).ToList();
 
             foreach (Team t in teams)
             {
@@ -189,10 +188,10 @@ namespace WorkForceManagement.BLL.Services
 
         public async Task ConfirmEmailAdress(string userId, string token)
         {
-            User user = await GetUserById(Guid.Parse(userId));
+            var user = await GetUserById(Guid.Parse(userId));
 
             var decodedToken = WebEncoders.Base64UrlDecode(token);
-            string normalToken = Encoding.UTF8.GetString(decodedToken);
+            var normalToken = Encoding.UTF8.GetString(decodedToken);
 
             await _userManager.ConfirmEmailAsync(user, normalToken);
         }
