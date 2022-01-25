@@ -17,5 +17,7 @@ namespace WorkForceManagement.BLL.Services
         Task AnswerTimeOffRequest(Guid timeOffRequestId, bool isApproved, User currentUser, string reason);
         Task<List<User>> GetMyColleguesTimeOffRequests(User currentUser);
         Task CancelTimeOffRequest(Guid timeOffRequestId);
+        Task SaveFile(TblFile file, Guid TimeOffRequestId);
+        Task<TblFile> GetFile(Guid TimeOffRequestId);
     }
 }

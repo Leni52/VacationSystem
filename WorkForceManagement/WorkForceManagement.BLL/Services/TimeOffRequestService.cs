@@ -15,18 +15,22 @@ namespace WorkForceManagement.BLL.Services
         private readonly IUserService _userService;
         private readonly ITeamService _teamService;
         private readonly IMailService _mailService;
+        private readonly IFileService _fileService;
         private readonly List<DateTime> officialDaysOff = Calendar.GenerateCalendar();
 
         public TimeOffRequestService(
             IRepository<TimeOffRequest> timeOffRequestRepository,
             IUserService userService,
             ITeamService teamService,
-            IMailService mailService)
+            IMailService mailService,
+            IFileService fileService
+            )
         {
             _timeOffRequestRepository = timeOffRequestRepository;
             _userService = userService;
             _teamService = teamService;
             _mailService = mailService;
+            _fileService = fileService;
         }
 
         public async Task CreateTimeOffRequest(TimeOffRequest timeOffRequest, User currentUser)
@@ -410,6 +414,20 @@ namespace WorkForceManagement.BLL.Services
                 canCancel = true;
             }
             return canCancel;
+        }
+
+        public async Task SaveFile(TblFile file, Guid TimeOffRequestId)
+        {
+            TimeOffRequest request = await _timeOffRequestRepository.Get(TimeOffRequestId);
+            await _fileService.SaveFile(file);
+            request.Pdf = file;
+            await _timeOffRequestRepository.SaveChanges();
+        }
+
+        public async Task<TblFile> GetFile(Guid TimeOffRequestId)
+        {
+            TimeOffRequest request = await _timeOffRequestRepository.Get(TimeOffRequestId);
+            return request.Pdf;
         }
     }
 }

@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using WorkForceManagement.BLL.Exceptions;
 using WorkForceManagement.BLL.Services;
@@ -170,6 +172,31 @@ namespace WorkForceManagement.WEB.Controller
             await _timeOffRequestService.CancelTimeOffRequest(timeOffRequestId);
 
             return Ok();
+        }
+        
+        [HttpPost("Add a file")]
+        public async Task<IActionResult> IndexAsync(IFormFile postedFile, Guid TimeOffRequestId)
+        {
+            byte[] bytes;
+            using (BinaryReader br = new BinaryReader(postedFile.OpenReadStream()))
+            {
+                bytes = br.ReadBytes((int)postedFile.Length);
+            }
+            TblFile Pdf = new()
+            {
+                Name = postedFile.FileName,
+                ContentType = postedFile.ContentType,
+                Data = bytes
+            };
+            await _timeOffRequestService.SaveFile(Pdf, TimeOffRequestId);
+            return Ok(postedFile.FileName);
+        }
+
+        [HttpGet("Get TOR file")]
+        public async Task<FileResult> DownloadFile(Guid TimeOffRequestId)
+        {
+            TblFile file = await _timeOffRequestService.GetFile(TimeOffRequestId);
+            return File(file.Data, file.ContentType, file.Name);
         }
     }
 }

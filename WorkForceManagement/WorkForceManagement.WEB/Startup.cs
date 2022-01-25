@@ -88,11 +88,9 @@ namespace WorkForceManagement.WEB
                 options.Password.RequireLowercase = false;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
-                options.SignIn.RequireConfirmedEmail = true;
             })
                     .AddRoles<IdentityRole>()
-                    .AddEntityFrameworkStores<DatabaseContext>()
-                    .AddDefaultTokenProviders();
+                    .AddEntityFrameworkStores<DatabaseContext>();
 
             // DAL
             services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
@@ -105,6 +103,7 @@ namespace WorkForceManagement.WEB
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<ITeamService, TeamService>();
             services.AddTransient<ITimeOffRequestService, TimeOffRequestService>();
+            services.AddTransient<IFileService, FileService>();
 
             //policy
             services.AddTransient<IAuthorizationHandler, TimeOffRequestCreatorHandler>();
