@@ -78,6 +78,7 @@ namespace WorkForceManagement.WEB.Controller
             return Ok();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<ActionResult<List<UserResponseDTO>>> GetAllUsers()
         {
@@ -88,10 +89,12 @@ namespace WorkForceManagement.WEB.Controller
             return Ok(results);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public async Task<ActionResult<UserResponseDTO>> GetUserById(Guid id)
         {
             var user = await _userService.GetUserById(id);
+
             var result = _mapper.Map<UserResponseDTO>(user);
 
             return Ok(result);
@@ -101,22 +104,18 @@ namespace WorkForceManagement.WEB.Controller
         [HttpPatch("MakeUserAdmin/{userId}")]
         public async Task<IActionResult> MakeUserAdmin(Guid userId)
         {
-            var user = await _userService.GetUserById(userId);
+            await _userService.MakeUserAdmin(userId);
 
-            await _userService.MakeUserAdmin(user);
-
-            return Ok(user);
+            return Ok();
         }
 
         [Authorize(Roles = "Admin")]
         [HttpPatch("RemoveUserFromAdmin/{userId}")]
         public async Task<IActionResult> RemoveUserFromAdmin(Guid userId)
         {
-            var user = await _userService.GetUserById(userId);
+            await _userService.RemoveUserFromAdmin(userId);
 
-            await _userService.RemoveUserFromAdmin(user);
-
-            return Ok(user);
+            return Ok();
         }
 
         [ApiExplorerSettings(IgnoreApi = true)]

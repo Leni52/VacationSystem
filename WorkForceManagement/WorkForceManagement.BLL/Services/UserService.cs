@@ -72,7 +72,8 @@ namespace WorkForceManagement.BLL.Services
 
                 User userAlreadyInDb = await _userManager.FindById(userId);
                 User userWithSameEmail = await _userManager.FindByEmail(emailAddress);
-                if ((userWithSameEmail != null && userAlreadyInDb == null) || (userWithSameEmail != null && userWithSameEmail.Id != userAlreadyInDb.Id))
+
+                if ((userWithSameEmail != null && userAlreadyInDb == null) || (userWithSameEmail != null && userWithSameEmail.Id != userAlreadyInDb.Id)) //Checks if email is valid when just updating the user or creating a new one
                 {
                     throw new EmailAddressAlreadyInUseException($"Email: {emailAddress} already in use!");
                 }
@@ -98,7 +99,7 @@ namespace WorkForceManagement.BLL.Services
             PasswordHasher<User> hasher = new PasswordHasher<User>();
             Guid userId = Guid.Parse(updatedUser.Id);
 
-            await IsEmailValid(Guid.Parse(updatedUser.Id), updatedUser.Email);
+            await IsEmailValid(userId, updatedUser.Email);
 
             if (await _userManager.FindDifferentUserWithSameUsername(userId, updatedUser.UserName) != null)
             {
@@ -153,16 +154,20 @@ namespace WorkForceManagement.BLL.Services
             return await _userManager.IsUserInRole(Guid.Parse(currentUser.Id), "Admin");
         }
 
-        public async Task MakeUserAdmin(User user)
+        public async Task MakeUserAdmin(Guid userId)
         {
+            User user = await GetUserById(userId);
+
             if (!(await _userManager.IsUserInRole(Guid.Parse(user.Id), "Admin")))
             {
                 await _userManager.AddRoleToUser(user, "Admin");
             }
         }
 
-        public async Task RemoveUserFromAdmin(User user)
+        public async Task RemoveUserFromAdmin(Guid userId)
         {
+            User user = await GetUserById(userId);
+
             if (await _userManager.IsUserInRole(Guid.Parse(user.Id), "Admin"))
             {
                 await _userManager.RemoveRoleFromUser(user, "Admin");

@@ -16,8 +16,8 @@ namespace WorkForceManagement.BLL.Services
         Task<User> GetUserById(Guid id);
         Task<User> GetCurrentUser(ClaimsPrincipal principal);
         Task<bool> IsUserAdmin(User currentUser);
-        Task MakeUserAdmin(User user);
-        Task RemoveUserFromAdmin(User user);
+        Task MakeUserAdmin(Guid userId);
+        Task RemoveUserFromAdmin(Guid userId);
         Task<List<User>> GetUsersUnderTeamLeader(User user);
         Task ConfirmEmailAdress(string userId, string token);
     }
