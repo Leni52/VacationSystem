@@ -68,8 +68,8 @@ namespace WorkForceManagement.BLL.Services
         {
             if (startDate > endDate) // you cant create time off 1 day before start
                 throw new InvalidDatesException("Invalid time off request dates, the start date should be earlier or equal to end date");
-            if(startDate.Date < DateTime.Now.Date.AddDays(1))
-                throw new InvalidDatesException("Invalid time off request dates, the start date should be at least 1 day away from today");
+            if(startDate.Date < DateTime.Now.Date)
+                throw new InvalidDatesException("Invalid time off request dates, the start date should be at least be no earlier than today");
 
             int requestedDays = ValidateDaysOff(startDate, endDate);
             int totalDays = user.DaysOff;
