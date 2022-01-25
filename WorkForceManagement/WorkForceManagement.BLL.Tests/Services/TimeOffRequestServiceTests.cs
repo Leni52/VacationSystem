@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using WorkForceManagement.BLL.Exceptions;
 using WorkForceManagement.BLL.Services;
+using WorkForceManagement.BLL.Services.Interfaces;
 using WorkForceManagement.DAL.Entities;
 using WorkForceManagement.DAL.Repositories;
 using Xunit;
@@ -16,12 +17,13 @@ namespace WorkForceManagement.BLL.Tests.Services
         private readonly Mock<IUserService> userServiceMock = new Mock<IUserService>();
         private readonly Mock<ITeamService> teamServiceMock = new Mock<ITeamService>();
         private readonly Mock<IMailService> mailService = new Mock<IMailService>();
+        private readonly Mock<IFileService> fileService = new Mock<IFileService>();
         private readonly TimeOffRequestService sut;
 
 
         public TimeOffRequestServiceTests()
         {
-            sut = new TimeOffRequestService(requestRepositoryStub.Object, userServiceMock.Object, teamServiceMock.Object, mailService.Object);
+            sut = new TimeOffRequestService(requestRepositoryStub.Object, userServiceMock.Object, teamServiceMock.Object, mailService.Object, fileService.Object);
         }
 
         //create
@@ -124,7 +126,7 @@ namespace WorkForceManagement.BLL.Tests.Services
             { UserName = "Admin" };
 
             //act
-            var result = await sut.GetMyRequests(currentUser.Id);
+            var result = await sut.GetMyRequests(Guid.Parse(currentUser.Id));
             //asert
             Assert.IsType<List<TimeOffRequest>>(result);
         }
