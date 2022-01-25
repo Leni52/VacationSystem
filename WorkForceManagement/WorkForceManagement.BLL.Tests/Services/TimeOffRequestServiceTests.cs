@@ -12,21 +12,26 @@ namespace WorkForceManagement.BLL.Tests.Services
 {
     public class TimeOffRequestServiceTests
     {
+        private readonly Mock<IRepository<TimeOffRequest>> requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
+        private readonly Mock<IUserService> userServiceMock = new Mock<IUserService>();
+        private readonly Mock<ITeamService> teamServiceMock = new Mock<ITeamService>();
+        private readonly Mock<IMailService> mailService = new Mock<IMailService>();
+        private readonly TimeOffRequestService sut;
+
+        public TimeOffRequestServiceTests()
+        {
+            sut = new TimeOffRequestService(requestRepositoryStub.Object, userServiceMock.Object, teamServiceMock.Object, mailService.Object);
+        }
+
         //create
         [Fact]
         public void Create_ValidRequest_Pass()
         {
             //arrange
-            var requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
-            var userServiceMock = new Mock<IUserService>();
-            var teamServiceMock = new Mock<ITeamService>();
-            var mailService = new Mock<IMailService>();
             User currentUser = new User()
             {
                 UserName = "admin",
             };
-
-            var sut = new TimeOffRequestService(requestRepositoryStub.Object,userServiceMock.Object, teamServiceMock.Object, mailService.Object);
 
             TimeOffRequest timeOffRequest = new TimeOffRequest()
             {
@@ -41,37 +46,30 @@ namespace WorkForceManagement.BLL.Tests.Services
             Assert.NotNull(result);
             //asert
         }
+        
         [Fact]
         public void Create_InvalidRequest_Fail()
         {
             //arrange
-            var requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
-            var userServiceMock = new Mock<IUserService>();
-            var teamServiceMock = new Mock<ITeamService>();
-            var mailService = new Mock<IMailService>();
             User currentUser = null;
 
-            var sut = new TimeOffRequestService(requestRepositoryStub.Object, userServiceMock.Object, teamServiceMock.Object, mailService.Object);
             //act
             var result = sut.CreateTimeOffRequest(new TimeOffRequest(), currentUser);
             Assert.False(result.IsCompletedSuccessfully);
             //asert
         }
+
+        
         [Fact]
         public void CreateRequest_InvalidRequest_Fail()
         {
             //arrange
-            var requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
-            var userServiceMock = new Mock<IUserService>();
-            var teamServiceMock = new Mock<ITeamService>();
-            var mailService = new Mock<IMailService>();
             User currentUser = new User() { UserName = "Admin" };
             TimeOffRequest t1 = new TimeOffRequest()
             {
                 Description = "Testing and testing"
             };
 
-            var sut = new TimeOffRequestService(requestRepositoryStub.Object, userServiceMock.Object, teamServiceMock.Object, mailService.Object);
             //act
             var result = sut.CreateTimeOffRequest(t1, currentUser);
             //asert
@@ -82,13 +80,6 @@ namespace WorkForceManagement.BLL.Tests.Services
         public void Delete_ValidId_Pass()
         {
             //arrange
-            var requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
-            var userServiceMock = new Mock<IUserService>();
-            var teamServiceMock = new Mock<ITeamService>();
-            var mailService = new Mock<IMailService>();
-
-            var sut = new TimeOffRequestService(requestRepositoryStub.Object, userServiceMock.Object, teamServiceMock.Object, mailService.Object);
-
             TimeOffRequest timeOffRequest = new TimeOffRequest();
             //act
             var result = sut.DeleteTimeOffRequest(timeOffRequest.Id);
@@ -101,13 +92,6 @@ namespace WorkForceManagement.BLL.Tests.Services
         public void Delete_InvalidId_Fail()
         {
             //arrange
-            var requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
-            var userServiceMock = new Mock<IUserService>();
-            var teamServiceMock = new Mock<ITeamService>();
-            var mailService = new Mock<IMailService>();
-
-            var sut = new TimeOffRequestService(requestRepositoryStub.Object, userServiceMock.Object, teamServiceMock.Object, mailService.Object);
-
             TimeOffRequest timeOffRequest = new TimeOffRequest();
             //act
             //assert           
@@ -119,16 +103,10 @@ namespace WorkForceManagement.BLL.Tests.Services
         public async void GetAllRequests_ValidRequest_Pass()
         {
             //arrange
-            var requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
-            var userServiceMock = new Mock<IUserService>();
-            var teamServiceMock = new Mock<ITeamService>();
-            var mailService = new Mock<IMailService>();
             requestRepositoryStub.Setup(reqRep => reqRep.All())
               .ReturnsAsync(new List<TimeOffRequest>());
             User currentUser = new User()
             { UserName = "Admin" };
-
-            var sut = new TimeOffRequestService(requestRepositoryStub.Object, userServiceMock.Object, teamServiceMock.Object, mailService.Object);
 
             //act
             var result = await sut.GetAllRequests();
@@ -140,18 +118,12 @@ namespace WorkForceManagement.BLL.Tests.Services
         public async void GetRequest_ValidRequest_Pass()
         {
             //arrange
-            var requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
-            var userServiceMock = new Mock<IUserService>();
-            var teamServiceMock = new Mock<ITeamService>();
-            var mailService = new Mock<IMailService>();
             User currentUser = new User()
             {
                 UserName = "Admin"
             };
             requestRepositoryStub.Setup(reqRep => reqRep.Get(It.IsAny<Guid>()))
                 .ReturnsAsync(new TimeOffRequest());
-
-            var sut = new TimeOffRequestService(requestRepositoryStub.Object, userServiceMock.Object, teamServiceMock.Object, mailService.Object);
 
             //act
             var result = await sut.GetTimeOffRequest(Guid.NewGuid());
@@ -163,12 +135,6 @@ namespace WorkForceManagement.BLL.Tests.Services
         public async void GetRequest_InvalidRequest_Fail()
         {
             //arrange
-            var requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
-            var userServiceMock = new Mock<IUserService>();
-            var teamServiceMock = new Mock<ITeamService>();
-            var mailService = new Mock<IMailService>();
-
-            var sut = new TimeOffRequestService(requestRepositoryStub.Object, userServiceMock.Object, teamServiceMock.Object, mailService.Object);
             //act           
             //asert         
             await Assert.ThrowsAsync<ItemDoesNotExistException>(() => sut.GetTimeOffRequest(Guid.NewGuid()));
@@ -179,14 +145,9 @@ namespace WorkForceManagement.BLL.Tests.Services
         public async void UpdateRequest_ValidRequest_Pass()
         {
             //arrange
-            var requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
-            var userServiceMock = new Mock<IUserService>();
-            var teamServiceMock = new Mock<ITeamService>();
-            var mailService = new Mock<IMailService>();
-
-            var sut = new TimeOffRequestService(requestRepositoryStub.Object, userServiceMock.Object, teamServiceMock.Object, mailService.Object);
-
-            var currentUser = new User() { UserName = "Admin" };
+            var currentUser = new User() { UserName = "Admin", DaysOff=20, CreatedTimeOffRequests = new List<TimeOffRequest>() };
+            userServiceMock.Setup(user => user.GetUserById(It.IsAny<Guid>()))
+                .ReturnsAsync(currentUser);
             requestRepositoryStub.Setup(reqRep => reqRep.Get(It.IsAny<Guid>()))
                 .ReturnsAsync(new TimeOffRequest());
             //act
@@ -197,264 +158,97 @@ namespace WorkForceManagement.BLL.Tests.Services
         }
 
         [Fact]
-        public async Task CheckForDaysOff_AwaitingStatusExecutesSuccessfully()
+        public async void GetMyColleguesTimeOffRequests_ValidRequest_ReturnsListOfUsers()
         {
             //arrange
-            var requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
-            var userServiceMock = new Mock<IUserService>();
-            var teamServiceMock = new Mock<ITeamService>();
-            var mailService = new Mock<IMailService>();
+            List<Team> teams = new List<Team>();
+            User currentUser = new User() { Teams = teams };
 
-            User requester = new User()
-            {
-                Id = Guid.NewGuid().ToString(),
-                UserName = "requester"
-            };
-            var sut = new TimeOffRequestService(requestRepositoryStub.Object, userServiceMock.Object, teamServiceMock.Object, mailService.Object);
-
-            TimeOffRequest timeOffRequest = new TimeOffRequest()
-            {
-                Requester = requester,
-                StartDate = DateTime.Today.AddDays(5),
-                EndDate = DateTime.Today.AddDays(10),
-                Description = "Testing valid cancellation",
-                Type = TimeOffRequestType.Paid,
-                Status = TimeOffRequestStatus.Awaiting
-            };
-
-            requestRepositoryStub.Setup(torRep => torRep.Get(It.IsAny<Guid>()))
-                .ReturnsAsync(timeOffRequest);
-
-            //act
-            await sut.CancelTimeOffRequest(Guid.NewGuid());
-
-            Assert.Equal(TimeOffRequestStatus.Cancelled, timeOffRequest.Status);
-            //asert
-        }
-
-        [Fact]
-        public async Task CheckForDaysOff_CreatedStatusExecutesSuccessfully()
-        {
-            //arrange
-            var requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
-            var userServiceMock = new Mock<IUserService>();
-            var teamServiceMock = new Mock<ITeamService>();
-            var mailService = new Mock<IMailService>();
-
-            User requester = new User()
-            {
-                Id = Guid.NewGuid().ToString(),
-                UserName = "requester"
-            };
-            var sut = new TimeOffRequestService(requestRepositoryStub.Object, userServiceMock.Object, teamServiceMock.Object, mailService.Object);
-
-            TimeOffRequest timeOffRequest = new TimeOffRequest()
-            {
-                Requester = requester,
-                StartDate = DateTime.Today.AddDays(4),
-                EndDate = DateTime.Today.AddDays(10),
-                Description = "Testing valid cancellation",
-                Type = TimeOffRequestType.Paid,
-                Status = TimeOffRequestStatus.Created
-            };
-
-            requestRepositoryStub.Setup(torRep => torRep.Get(It.IsAny<Guid>()))
-                .ReturnsAsync(timeOffRequest);
-
-            //act
-            await sut.CancelTimeOffRequest(Guid.NewGuid());
-
-            Assert.Equal(TimeOffRequestStatus.Cancelled, timeOffRequest.Status);
-            //asert
-        }
-
-        [Fact]
-        public async Task CheckForDaysOff_NullTORSuppliedFails()
-        {
-            //arrange
-            var requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
-            var userServiceMock = new Mock<IUserService>();
-            var mailServiceMock = new Mock<IMailService>();
-            var teamServiceMock = new Mock<ITeamService>();
-            var sut = new TimeOffRequestService(requestRepositoryStub.Object, userServiceMock.Object,
-                           teamServiceMock.Object, mailServiceMock.Object);
-
-            //act    
-            requestRepositoryStub.Setup(torRep => torRep.Get(It.IsAny<Guid>()))
-                .ReturnsAsync((TimeOffRequest)null);
-
-            //assert
-            await Assert.ThrowsAsync<ItemDoesNotExistException>(() => sut.CancelTimeOffRequest(Guid.NewGuid()));
-        }
-
-        [Fact]
-        public async Task CheckForDaysOff_OneDayBeforeStartDateFails()
-        {
-            //arrange
-            var requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
-            var userServiceMock = new Mock<IUserService>();
-            var teamServiceMock = new Mock<ITeamService>();
-            var mailService = new Mock<IMailService>();
-
-            User requester = new User()
-            {
-                Id = Guid.NewGuid().ToString(),
-                UserName = "requester"
-            };
-            var sut = new TimeOffRequestService(requestRepositoryStub.Object, userServiceMock.Object, teamServiceMock.Object, mailService.Object);
-
-            TimeOffRequest timeOffRequest = new TimeOffRequest()
-            {
-                Requester = requester,
-                StartDate = DateTime.Today.AddDays(1),
-                EndDate = DateTime.Today.AddDays(10),
-                Description = "Testing valid cancellation",
-                Type = TimeOffRequestType.Unpaid,
-                Status = TimeOffRequestStatus.Awaiting
-            };
-
-            requestRepositoryStub.Setup(torRep => torRep.Get(It.IsAny<Guid>()))
-                .ReturnsAsync(timeOffRequest);
-
+            userServiceMock.Setup(userService => userService.GetUserTeams(It.IsAny<User>()))
+                .Returns(teams);
             //act
             //assert
-            await Assert.ThrowsAsync<CannotCancelTimeOffRequestException>(() => sut.CancelTimeOffRequest(Guid.NewGuid()));
+            Assert.IsType<List<User>>(await sut.GetMyColleguesTimeOffRequests(currentUser));
         }
 
         [Fact]
-        public async Task CheckForDaysOff_TwoDaysBeforeStartDateFails()
+        public async Task AnswerTimeOffRequest_ValidRequest_Passes()
         {
             //arrange
-            var requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
-            var userServiceMock = new Mock<IUserService>();
-            var teamServiceMock = new Mock<ITeamService>();
-            var mailService = new Mock<IMailService>();
+            User requester = new User() { Id = Guid.NewGuid().ToString(), Email = "test@gmail.com" };
+            User currentUser = new User() { Id = Guid.NewGuid().ToString(), TimeOffRequestsApproved = new List<TimeOffRequest>(), TimeOffRequestsToApprove = new List<TimeOffRequest>()};
+            List<User> approvers = new List<User>();
+            approvers.Add(currentUser);
 
-            User requester = new User()
-            {
-                Id = Guid.NewGuid().ToString(),
-                UserName = "requester"
-            };
-            var sut = new TimeOffRequestService(requestRepositoryStub.Object, userServiceMock.Object, teamServiceMock.Object, mailService.Object);
-
-            TimeOffRequest timeOffRequest = new TimeOffRequest()
+            Guid timeOffRequestId = Guid.NewGuid();
+            TimeOffRequest torRequest = new TimeOffRequest()
             {
                 Requester = requester,
-                StartDate = DateTime.Today.AddDays(2),
-                EndDate = DateTime.Today.AddDays(10),
-                Description = "Testing valid cancellation",
-                Type = TimeOffRequestType.Unpaid,
-                Status = TimeOffRequestStatus.Awaiting
+                Id = timeOffRequestId,
+                Approvers = approvers
             };
 
-            requestRepositoryStub.Setup(torRep => torRep.Get(It.IsAny<Guid>()))
-                .ReturnsAsync(timeOffRequest);
+            requestRepositoryStub.Setup(reqRep => reqRep.Get(It.IsAny<Guid>()))
+                .ReturnsAsync(torRequest);
+            userServiceMock.Setup(service => service.GetUsersUnderTeamLeader(It.IsAny<User>()))
+                .ReturnsAsync(new List<User>());
 
             //act
+            var exception = await Record.ExceptionAsync(() => sut.AnswerTimeOffRequest(timeOffRequestId, true, currentUser, "reason"));
             //assert
-            await Assert.ThrowsAsync<CannotCancelTimeOffRequestException>(() => sut.CancelTimeOffRequest(Guid.NewGuid()));
-        }
-        [Fact]
-        public async Task CheckForDaysOff_ThreeDaysBeforeStartDateFails()
-        {
-            //arrange
-            var requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
-            var userServiceMock = new Mock<IUserService>();
-            var teamServiceMock = new Mock<ITeamService>();
-            var mailService = new Mock<IMailService>();
-
-            User requester = new User()
-            {
-                Id = Guid.NewGuid().ToString(),
-                UserName = "requester"
-            };
-            var sut = new TimeOffRequestService(requestRepositoryStub.Object, userServiceMock.Object, teamServiceMock.Object, mailService.Object);
-
-            TimeOffRequest timeOffRequest = new TimeOffRequest()
-            {
-                Requester = requester,
-                StartDate = DateTime.Today.AddDays(3),
-                EndDate = DateTime.Today.AddDays(10),
-                Description = "Testing valid cancellation",
-                Type = TimeOffRequestType.Unpaid,
-                Status = TimeOffRequestStatus.Awaiting
-            };
-
-            requestRepositoryStub.Setup(torRep => torRep.Get(It.IsAny<Guid>()))
-                .ReturnsAsync(timeOffRequest);
-
-            //act
-            //assert
-            await Assert.ThrowsAsync<CannotCancelTimeOffRequestException>(() => sut.CancelTimeOffRequest(Guid.NewGuid()));
+            Assert.Null(exception);
         }
 
         [Fact]
-        public async Task CheckForDaysOff_TORAlreadyApprovedFails()
+        public async Task AnswerTimeOffRequest_RequestClosed_ThrowsException()
         {
             //arrange
-            var requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
-            var userServiceMock = new Mock<IUserService>();
-            var teamServiceMock = new Mock<ITeamService>();
-            var mailService = new Mock<IMailService>();
+            User requester = new User() { Id = Guid.NewGuid().ToString(), Email = "test@gmail.com" };
+            User currentUser = new User() { Id = Guid.NewGuid().ToString(), TimeOffRequestsApproved = new List<TimeOffRequest>(), TimeOffRequestsToApprove = new List<TimeOffRequest>() };
+            List<User> approvers = new List<User>();
+            approvers.Add(currentUser);
 
-            User requester = new User()
-            {
-                Id = Guid.NewGuid().ToString(),
-                UserName = "requester"
-            };
-            var sut = new TimeOffRequestService(requestRepositoryStub.Object, userServiceMock.Object, teamServiceMock.Object, mailService.Object);
-
-            TimeOffRequest timeOffRequest = new TimeOffRequest()
+            Guid timeOffRequestId = Guid.NewGuid();
+            TimeOffRequest torRequest = new TimeOffRequest()
             {
                 Requester = requester,
-                StartDate = DateTime.Today.AddDays(4),
-                EndDate = DateTime.Today.AddDays(10),
-                Description = "Testing valid cancellation",
-                Type = TimeOffRequestType.Unpaid,
-                Status = TimeOffRequestStatus.Approved
-            };
-
-            requestRepositoryStub.Setup(torRep => torRep.Get(It.IsAny<Guid>()))
-                .ReturnsAsync(timeOffRequest);
-
-            //act
-            //assert
-            await Assert.ThrowsAsync<CannotCancelTimeOffRequestException>(() => sut.CancelTimeOffRequest(Guid.NewGuid()));
-        }
-
-        [Fact]
-        public async Task CheckForDaysOff_TORRejectedFails()
-        {
-            //arrange
-            var requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
-            var userServiceMock = new Mock<IUserService>();
-            var teamServiceMock = new Mock<ITeamService>();
-            var mailService = new Mock<IMailService>();
-
-            User requester = new User()
-            {
-                Id = Guid.NewGuid().ToString(),
-                UserName = "requester"
-            };
-            var sut = new TimeOffRequestService(requestRepositoryStub.Object, userServiceMock.Object, teamServiceMock.Object, mailService.Object);
-
-            TimeOffRequest timeOffRequest = new TimeOffRequest()
-            {
-                Requester = requester,
-                StartDate = DateTime.Today.AddDays(6),
-                EndDate = DateTime.Today.AddDays(10),
-                Description = "Testing valid cancellation",
-                Type = TimeOffRequestType.Unpaid,
+                Id = timeOffRequestId,
+                Approvers = approvers,
                 Status = TimeOffRequestStatus.Rejected
             };
 
-            requestRepositoryStub.Setup(torRep => torRep.Get(It.IsAny<Guid>()))
-                .ReturnsAsync(timeOffRequest);
+            requestRepositoryStub.Setup(reqRep => reqRep.Get(It.IsAny<Guid>()))
+                .ReturnsAsync(torRequest);
+            userServiceMock.Setup(service => service.GetUsersUnderTeamLeader(It.IsAny<User>()))
+                .ReturnsAsync(new List<User>());
 
             //act
-            //assert
-            await Assert.ThrowsAsync<CannotCancelTimeOffRequestException>(() => sut.CancelTimeOffRequest(Guid.NewGuid()));
+            await Assert.ThrowsAsync<TimeOffRequestIsClosedException>(() => sut.AnswerTimeOffRequest(timeOffRequestId, true, currentUser, "reason"));
         }
 
+        [Fact]
+        public async Task AnswerTimeOffRequest_UserIsntApproverException_ThrowsException()
+        {
+            //arrange
+            User requester = new User() { Id = Guid.NewGuid().ToString(), Email = "test@gmail.com" };
+            User currentUser = new User() { Id = Guid.NewGuid().ToString(), TimeOffRequestsApproved = new List<TimeOffRequest>(), TimeOffRequestsToApprove = new List<TimeOffRequest>() };
+            List<User> approvers = new List<User>();
+
+            Guid timeOffRequestId = Guid.NewGuid();
+            TimeOffRequest torRequest = new TimeOffRequest()
+            {
+                Requester = requester,
+                Id = timeOffRequestId,
+                Approvers = approvers
+            };
+
+            requestRepositoryStub.Setup(reqRep => reqRep.Get(It.IsAny<Guid>()))
+                .ReturnsAsync(torRequest);
+            userServiceMock.Setup(service => service.GetUsersUnderTeamLeader(It.IsAny<User>()))
+                .ReturnsAsync(new List<User>());
+
+            //act
+            await Assert.ThrowsAsync<UserIsntApproverException>(() => sut.AnswerTimeOffRequest(timeOffRequestId, true, currentUser, "reason"));
+        }
     }
 }

@@ -78,7 +78,7 @@ namespace WorkForceManagement.WEB.Controller
             }
             // _mapper.Map(request, timeOffRequest);
             TimeOffRequest timeOffRequest = _mapper.Map<TimeOffRequest>(request);
-            var updatedRequest = await _timeOffRequestService.UpdateTimeOffRequest(timeOffRequestId, timeOffRequest, currentUser.Id);
+            await _timeOffRequestService.UpdateTimeOffRequest(timeOffRequestId, timeOffRequest, currentUser.Id);
             return Ok();
         }
 
