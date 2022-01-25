@@ -123,7 +123,6 @@ namespace WorkForceManagement.WEB.Controller
         [HttpGet("ConfirmEmail")]
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
-
             await _userService.ConfirmEmailAdress(userId, token);
 
             return Ok();
