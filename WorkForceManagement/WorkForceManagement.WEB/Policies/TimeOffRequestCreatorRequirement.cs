@@ -6,7 +6,6 @@ namespace WorkForceManagement.WEB.Policies
     {
         public TimeOffRequestCreatorRequirement()
         {
-
         }
     }
 }

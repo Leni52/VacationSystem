@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using WorkForceManagement.DAL;
 
-namespace WorkForceManagement.BLL.Services
+namespace WorkForceManagement.BLL.Services.Interfaces
 {
     public interface IMailService
     {
