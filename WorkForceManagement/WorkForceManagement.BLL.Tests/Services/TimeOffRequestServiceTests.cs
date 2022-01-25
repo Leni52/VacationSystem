@@ -18,6 +18,7 @@ namespace WorkForceManagement.BLL.Tests.Services
         private readonly Mock<IMailService> mailService = new Mock<IMailService>();
         private readonly TimeOffRequestService sut;
 
+
         public TimeOffRequestServiceTests()
         {
             sut = new TimeOffRequestService(requestRepositoryStub.Object, userServiceMock.Object, teamServiceMock.Object, mailService.Object);
@@ -263,6 +264,7 @@ namespace WorkForceManagement.BLL.Tests.Services
             //act
             await Assert.ThrowsAsync<UserIsntApproverException>(() => sut.AnswerTimeOffRequest(timeOffRequestId, true, currentUser, "reason"));
         }
+
         [Fact]
         public async Task Create_InvalidRequest_EndDateBeforeStartDate_Fail()
         {
@@ -333,7 +335,7 @@ namespace WorkForceManagement.BLL.Tests.Services
             //assert
             Assert.Equal(TimeOffRequestStatus.Approved, timeOffRequest.Status);
         }
-       
+
         [Fact]
         public async void CheckForDaysOff_IncludesWeekend()
         {
@@ -414,8 +416,203 @@ namespace WorkForceManagement.BLL.Tests.Services
 .ReturnsAsync(new List<User>());
             var result = await Record.ExceptionAsync(() => sut.CreateTimeOffRequest(timeOffRequest, currentUser));
             Assert.Null(result);
-        }     
-      
+        }
+        [Fact]
+        public async Task CheckForDaysOff_AwaitingStatusExecutesSuccessfully()
+        {
+            //arrange
+            User requester = new User()
+            {
+                Id = Guid.NewGuid().ToString(),
+                UserName = "requester"
+            };
+            TimeOffRequest timeOffRequest = new TimeOffRequest()
+            {
+                Requester = requester,
+                StartDate = DateTime.Today.AddDays(5),
+                EndDate = DateTime.Today.AddDays(10),
+                Description = "Testing valid cancellation",
+                Type = TimeOffRequestType.Paid,
+                Status = TimeOffRequestStatus.Awaiting
+            };
+            requestRepositoryStub.Setup(torRep => torRep.Get(It.IsAny<Guid>()))
+                .ReturnsAsync(timeOffRequest);
+
+            //act
+            await sut.CancelTimeOffRequest(Guid.NewGuid());
+
+            Assert.Equal(TimeOffRequestStatus.Cancelled, timeOffRequest.Status);
+            //asert
+        }
+
+        [Fact]
+        public async Task CheckForDaysOff_CreatedStatusExecutesSuccessfully()
+        {
+            //arrange
+            User requester = new User()
+            {
+                Id = Guid.NewGuid().ToString(),
+                UserName = "requester"
+            };
+            TimeOffRequest timeOffRequest = new TimeOffRequest()
+            {
+                Requester = requester,
+                StartDate = DateTime.Today.AddDays(5),
+                EndDate = DateTime.Today.AddDays(10),
+                Description = "Testing valid cancellation",
+                Type = TimeOffRequestType.Paid,
+                Status = TimeOffRequestStatus.Created
+            };
+            requestRepositoryStub.Setup(torRep => torRep.Get(It.IsAny<Guid>()))
+                .ReturnsAsync(timeOffRequest);
+
+            //act
+            await sut.CancelTimeOffRequest(Guid.NewGuid());
+
+            Assert.Equal(TimeOffRequestStatus.Cancelled, timeOffRequest.Status);
+            //asert
+        }
+
+        [Fact]
+        public async Task CheckForDaysOff_NullTORSuppliedFails()
+        {
+            //arrange
+            //act    
+            requestRepositoryStub.Setup(torRep => torRep.Get(It.IsAny<Guid>()))
+                .ReturnsAsync((TimeOffRequest)null);
+
+            //assert
+            await Assert.ThrowsAsync<ItemDoesNotExistException>(() => sut.CancelTimeOffRequest(Guid.NewGuid()));
+        }
+
+        [Fact]
+        public async Task CheckForDaysOff_OneDayBeforeStartDateFails()
+        {
+            //arrange
+            User requester = new User()
+            {
+                Id = Guid.NewGuid().ToString(),
+                UserName = "requester"
+            };
+            TimeOffRequest timeOffRequest = new TimeOffRequest()
+            {
+                Requester = requester,
+                StartDate = DateTime.Today.AddDays(1),
+                EndDate = DateTime.Today.AddDays(10),
+                Description = "Testing valid cancellation",
+                Type = TimeOffRequestType.Unpaid,
+                Status = TimeOffRequestStatus.Awaiting
+            };
+            requestRepositoryStub.Setup(torRep => torRep.Get(It.IsAny<Guid>()))
+                .ReturnsAsync(timeOffRequest);
+
+            //act
+            //assert
+            await Assert.ThrowsAsync<CannotCancelTimeOffRequestException>(() => sut.CancelTimeOffRequest(Guid.NewGuid()));
+        }
+
+        [Fact]
+        public async Task CheckForDaysOff_TwoDaysBeforeStartDateFails()
+        {
+            //arrange
+            User requester = new User()
+            {
+                Id = Guid.NewGuid().ToString(),
+                UserName = "requester"
+            };
+            TimeOffRequest timeOffRequest = new TimeOffRequest()
+            {
+                Requester = requester,
+                StartDate = DateTime.Today.AddDays(2),
+                EndDate = DateTime.Today.AddDays(10),
+                Description = "Testing valid cancellation",
+                Type = TimeOffRequestType.Unpaid,
+                Status = TimeOffRequestStatus.Awaiting
+            };
+            requestRepositoryStub.Setup(torRep => torRep.Get(It.IsAny<Guid>()))
+                .ReturnsAsync(timeOffRequest);
+
+            //act
+            //assert
+            await Assert.ThrowsAsync<CannotCancelTimeOffRequestException>(() => sut.CancelTimeOffRequest(Guid.NewGuid()));
+        }
+        [Fact]
+        public async Task CheckForDaysOff_ThreeDaysBeforeStartDateSucceeds()
+        {
+            //arrange
+            User requester = new User()
+            {
+                Id = Guid.NewGuid().ToString(),
+                UserName = "requester"
+            };
+            TimeOffRequest timeOffRequest = new TimeOffRequest()
+            {
+                Requester = requester,
+                StartDate = DateTime.Today.AddDays(3),
+                EndDate = DateTime.Today.AddDays(10),
+                Description = "Testing valid cancellation",
+                Type = TimeOffRequestType.Unpaid,
+                Status = TimeOffRequestStatus.Awaiting
+            };
+            requestRepositoryStub.Setup(torRep => torRep.Get(It.IsAny<Guid>()))
+                .ReturnsAsync(timeOffRequest);
+
+            //act
+            //assert
+            await Assert.ThrowsAsync<CannotCancelTimeOffRequestException>(() => sut.CancelTimeOffRequest(Guid.NewGuid()));
+        }
+
+        [Fact]
+        public async Task CheckForDaysOff_TORAlreadyApprovedFails()
+        {
+            //arrange
+            User requester = new User()
+            {
+                Id = Guid.NewGuid().ToString(),
+                UserName = "requester"
+            };
+            TimeOffRequest timeOffRequest = new TimeOffRequest()
+            {
+                Requester = requester,
+                StartDate = DateTime.Today.AddDays(4),
+                EndDate = DateTime.Today.AddDays(10),
+                Description = "Testing valid cancellation",
+                Type = TimeOffRequestType.Unpaid,
+                Status = TimeOffRequestStatus.Approved
+            };
+            requestRepositoryStub.Setup(torRep => torRep.Get(It.IsAny<Guid>()))
+                .ReturnsAsync(timeOffRequest);
+
+            //act
+            //assert
+            await Assert.ThrowsAsync<CannotCancelTimeOffRequestException>(() => sut.CancelTimeOffRequest(Guid.NewGuid()));
+        }
+
+        [Fact]
+        public async Task CheckForDaysOff_TORRejectedFails()
+        {
+            //arrange
+            User requester = new User()
+            {
+                Id = Guid.NewGuid().ToString(),
+                UserName = "requester"
+            };
+            TimeOffRequest timeOffRequest = new TimeOffRequest()
+            {
+                Requester = requester,
+                StartDate = DateTime.Today.AddDays(6),
+                EndDate = DateTime.Today.AddDays(10),
+                Description = "Testing valid cancellation",
+                Type = TimeOffRequestType.Unpaid,
+                Status = TimeOffRequestStatus.Rejected
+            };
+            requestRepositoryStub.Setup(torRep => torRep.Get(It.IsAny<Guid>()))
+                .ReturnsAsync(timeOffRequest);
+
+            //act
+            //assert
+            await Assert.ThrowsAsync<CannotCancelTimeOffRequestException>(() => sut.CancelTimeOffRequest(Guid.NewGuid()));
+        }
 
     }
 }
