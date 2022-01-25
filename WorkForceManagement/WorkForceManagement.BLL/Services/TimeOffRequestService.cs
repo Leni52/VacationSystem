@@ -93,7 +93,6 @@ namespace WorkForceManagement.BLL.Services
                 .Select(offset => startDate.AddDays(offset))
                 .Where(day => !IsDayOfficialDayOff(day) && !IsDayWeekend(day))
                 .Count();
-            //TODO Validate if the count is smaller than days of of the user
         }
 
         private bool IsDayOfficialDayOff(DateTime day)
@@ -216,7 +215,7 @@ namespace WorkForceManagement.BLL.Services
             timeOffRequest.AlreadyApproved.Add(currentUser);
             await _timeOffRequestRepository.SaveChanges();
             //email to requester
-            await SendMailToRequesterApprovedRequest(timeOffRequest.Id, currentUser); // TODO this might be incorrent or modified at least
+            await SendMailToRequesterApprovedRequest(timeOffRequest.Id, currentUser);
             await CheckTimeOffRequest(timeOffRequest.Id);
         }
 

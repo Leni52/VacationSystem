@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,12 +19,15 @@ namespace WorkForceManagement.BLL.Services
         private readonly ITeamService _teamService;
         private readonly IAuthUserManager _userManager;
         private readonly IMailService _mailService;
+        private readonly IConfiguration _configuration;
 
-        public UserService(ITeamService teamService, IAuthUserManager userManager, IMailService mailService)
+
+        public UserService(ITeamService teamService, IAuthUserManager userManager, IMailService mailService, IConfiguration configuration)
         {
             _teamService = teamService;
             _userManager = userManager;
             _mailService = mailService;
+            _configuration = configuration;
         }
 
         public async Task Add(User userToAdd, string password, bool isAdmin)
@@ -52,7 +56,7 @@ namespace WorkForceManagement.BLL.Services
             var encodedEmailToken = Encoding.UTF8.GetBytes(confirmEmailToken);
             var validEmailToken = WebEncoders.Base64UrlEncode(encodedEmailToken);
 
-            string appUrl = "https://localhost:5000"; // TODO this probably should be changed to be included in app settings
+            string appUrl = $"{_configuration["AppUrl"]}";
             string url = $"{appUrl}/api/User/confirmemail?userid={userToAdd.Id}&token={validEmailToken}";
 
             await _mailService.SendEmail(new MailRequest()
