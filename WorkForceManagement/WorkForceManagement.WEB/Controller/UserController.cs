@@ -105,7 +105,7 @@ namespace WorkForceManagement.WEB.Controller
 
             await _userService.MakeUserAdmin(user);
 
-            return Ok(user);
+            return Ok();
         }
 
         [Authorize(Roles = "Admin")]
@@ -116,7 +116,7 @@ namespace WorkForceManagement.WEB.Controller
 
             await _userService.RemoveUserFromAdmin(user);
 
-            return Ok(user);
+            return Ok();
         }
 
         [ApiExplorerSettings(IgnoreApi = true)]

@@ -65,8 +65,10 @@ namespace WorkForceManagement.BLL.Services
 
         private void ValidateTimeOffRequestDates(DateTime startDate, DateTime endDate, User currentUser)
         {
-            if (startDate > endDate)
+            if (startDate > endDate) // you cant create time off 1 day before start
                 throw new InvalidDatesException("Invalid time off request dates, the start date should be earlier or equal to end date");
+            if(startDate.Date < DateTime.Now.Date.AddDays(1))
+                throw new InvalidDatesException("Invalid time off request dates, the start date should be at least 1 day away from today");
 
             int requestedDays = ValidateDaysOff(startDate, endDate);
             int totalDays = currentUser.DaysOff;
@@ -177,7 +179,7 @@ namespace WorkForceManagement.BLL.Services
 
             timeOffRequest.ChangeDate = DateTime.Now.Date;
             timeOffRequest.UpdaterId = currentUser.Id;
-            if(reason.Length != 0)
+            if(reason != null)
             {
                 timeOffRequest.Reason = reason;
             }
@@ -288,7 +290,7 @@ namespace WorkForceManagement.BLL.Services
             mailRequest.Body = $"Your request between {request.StartDate.ToShortDateString()}" +
                 $" and {request.EndDate.ToShortDateString()}  has been approved.";
             mailRequest.Subject = "Approved request.";
-            mailRequest.ToEmail = request.Requester.Email;
+            mailRequest.ToEmail = user.Email;
             await _mailService.SendEmail(mailRequest);
         }
 
