@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using WorkForceManagement.BLL.Exceptions;
-using WorkForceManagement.BLL.Services;
+using WorkForceManagement.BLL.Services.Interfaces;
 using WorkForceManagement.DAL.Entities;
 using WorkForceManagement.DTO.Requests;
 using WorkForceManagement.DTO.ResponseDTO;
@@ -34,12 +34,9 @@ namespace WorkForceManagement.WEB.Controller
         [HttpGet]
         public async Task<ActionResult<List<TimeOffRequestResponseDTO>>> GetAllTimeOffRequests()
         {
-            List<TimeOffRequestResponseDTO> timeOffRequestResponseModel =
-                new List<TimeOffRequestResponseDTO>();
-            var requests = await _timeOffRequestService.GetAllRequests();
+            var results = _mapper.Map<List<TimeOffRequestResponseDTO>>(await _timeOffRequestService.GetAllRequests());
 
-            timeOffRequestResponseModel = _mapper.Map<List<TimeOffRequestResponseDTO>>(requests);
-            return Ok(timeOffRequestResponseModel);
+            return Ok(results);
         }
 
         [HttpGet("{timeOffRequestId}")]
@@ -97,12 +94,12 @@ namespace WorkForceManagement.WEB.Controller
         [HttpGet("MyRequests")]
         public async Task<ActionResult<List<TimeOffRequest>>> GetMyRequests()
         {
-            User currentUser = await _userService.GetCurrentUser(User);
-            if (currentUser != null)
+            var user = await _userService.GetCurrentUser(User);
+            if (user != null)
             {
-                List<TimeOffRequest> myRequests = await _timeOffRequestService.GetMyRequests(currentUser.Id);
-                var myRequestsDTO = _mapper.Map<List<TimeOffRequestResponseDTO>>(myRequests);
-                return Ok(myRequestsDTO);
+                var results = _mapper.Map<List<TimeOffRequestResponseDTO>>(await _timeOffRequestService.GetMyRequests(Guid.Parse(user.Id)));
+
+                return Ok(results);
             }
             return BadRequest();
         }
@@ -111,9 +108,9 @@ namespace WorkForceManagement.WEB.Controller
         [Authorize(Policy = "TeamLeader")]
         public async Task<ActionResult> AnswerTimeOffRequest(Guid timeOffRequestId, bool isApproved, string reason)
         {
-            User currentUser = await _userService.GetCurrentUser(User);
+            var user = await _userService.GetCurrentUser(User);
 
-            await _timeOffRequestService.AnswerTimeOffRequest(timeOffRequestId, isApproved, currentUser, reason);
+            await _timeOffRequestService.AnswerTimeOffRequest(timeOffRequestId, isApproved, user, reason);
 
             return Ok();
         }
@@ -135,13 +132,13 @@ namespace WorkForceManagement.WEB.Controller
         [Authorize]
         public async Task<ActionResult<List<TimeOffRequest>>> RequestsWaitingForApproval()
         {
-            User currentUser = await _userService.GetCurrentUser(User);
+            var user = await _userService.GetCurrentUser(User);
 
-            if (currentUser != null)
+            if (user != null)
             {
-                var requestsDTO = _mapper.Map<List<TimeOffRequestResponseDTO>>(currentUser.TimeOffRequestsToApprove);
+                var results = _mapper.Map<List<TimeOffRequestResponseDTO>>(user.TimeOffRequestsToApprove);
 
-                return Ok(requestsDTO);
+                return Ok(results);
             }
 
             return BadRequest();
@@ -149,15 +146,15 @@ namespace WorkForceManagement.WEB.Controller
         [HttpGet("MyColleguesVacation")]
         public async Task<ActionResult> GetMyColleguesVacationList()
         {
-            User currentUser = await _userService.GetCurrentUser(User);
+            var user = await _userService.GetCurrentUser(User);
             
-            if (currentUser != null)
+            if (user != null)
             {
-                List<User> membersOnVacation = await _timeOffRequestService.GetMyColleguesTimeOffRequests(currentUser);
+                var members = await _timeOffRequestService.GetMyColleguesTimeOffRequests(user);
                 
-                var membersOnVacationDTO = _mapper.Map<List<UserResponseDTO>>(membersOnVacation);
+                var results = _mapper.Map<List<UserResponseDTO>>(members);
                 
-                return Ok(membersOnVacationDTO);
+                return Ok(results);
             }
 
             return BadRequest();
