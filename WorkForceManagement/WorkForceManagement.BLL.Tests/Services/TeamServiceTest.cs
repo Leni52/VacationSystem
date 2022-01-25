@@ -123,6 +123,22 @@ namespace WorkForceManagement.BLL.Tests.Services
             //asert
             await Assert.ThrowsAsync<TeamWithSameNameExistsException>(() => sut.UpdateTeam(new Team(), Guid.NewGuid(), new User()));
         }
+        [Fact]
+        public async Task UpdateTeam_TeamLeaderDidntConfirmEmail_ThrowsException()
+        {
+            //arrange
+            teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Expression<Func<Team, bool>>>()))
+                .ReturnsAsync((Team)null);
+            teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Guid>()))
+                .ReturnsAsync(new Team());
+
+            var teamLeader = new User() { EmailConfirmed = false };
+            var teamToUpdate = new Team() { TeamLeader = teamLeader };
+
+            //act
+            //asert
+            await Assert.ThrowsAsync<UserEmailNotConfirmedException>(() => sut.UpdateTeam(teamToUpdate, Guid.NewGuid(), new User()));
+        }
 
         [Fact]
         public async Task DeleteTeam_ValidInput_Passes()
@@ -171,6 +187,18 @@ namespace WorkForceManagement.BLL.Tests.Services
             //asert
             await Assert.ThrowsAsync<KeyNotFoundException>(() => sut.UpdateTeamLeader(Guid.NewGuid(), new User(), new User()));
         }
+        [Fact]
+        public async Task UpdateTeamLeader_TeamLeaderDidntConfirmEmail_ThrowsException()
+        {
+            //arrange
+            teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Guid>()))
+                .ReturnsAsync(new Team());
+
+            var newTeamLeader = new User() { EmailConfirmed = false };
+            //act
+            //asert
+            await Assert.ThrowsAsync<UserEmailNotConfirmedException>(() => sut.UpdateTeamLeader(Guid.NewGuid(), newTeamLeader, new User()));
+        }
 
         [Fact]
         public async Task AddUserToTeam_ValidInput_Passes()
@@ -197,6 +225,36 @@ namespace WorkForceManagement.BLL.Tests.Services
             //act
             //asert
             await Assert.ThrowsAsync<KeyNotFoundException>(() => sut.AddUserToTeam(Guid.NewGuid(), new User(), new User()));
+        }
+
+        [Fact]
+        public async Task AddUserToTeam_UserAlreadyInTeam_ThrowException()
+        {
+            //arrange
+            var userToAdd = new User() { EmailConfirmed = true };
+            var team = new Team() { TeamLeader = new User(), Members = new List<User>{ userToAdd } };
+            
+
+            teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Guid>()))
+                .ReturnsAsync(team);
+            //act
+            //asert
+            await Assert.ThrowsAsync<ItemAlreadyExistsException>(() => sut.AddUserToTeam(Guid.NewGuid(), userToAdd, new User()));
+        }
+
+        [Fact]
+        public async Task AddUserToTeam_UserDidntConfirmEmail_ThrowException()
+        {
+            //arrange
+            var team = new Team() { TeamLeader = new User(), Members = new List<User>() };
+            var userToAdd = new User() { EmailConfirmed = false };
+
+
+            teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Guid>()))
+                .ReturnsAsync(team);
+            //act
+            //asert
+            await Assert.ThrowsAsync<UserEmailNotConfirmedException>(() => sut.AddUserToTeam(Guid.NewGuid(), userToAdd, new User()));
         }
 
         [Fact]
@@ -267,6 +325,27 @@ namespace WorkForceManagement.BLL.Tests.Services
             //act
             await Assert.ThrowsAsync<KeyNotFoundException>(() => sut.RemoveUserFromTeam(team.Id, teamMember, new User()));
         }
-        
+
+        [Fact]
+        public async Task Create_TeamLeaderDidntConfirmEmail_ThrowsException()
+        {
+            //arrange
+            teamRepositoryMock.Setup(teamRep => teamRep.Get(It.IsAny<Expression<Func<Team, bool>>>()))
+                .ReturnsAsync((Team)null);
+
+            User teamLeader = new User()
+            {
+                EmailConfirmed = false
+            };
+            Team teamToAdd = new Team()
+            {
+                TeamLeader = teamLeader
+            };
+
+            //act
+            //asert
+            await Assert.ThrowsAsync<UserEmailNotConfirmedException>(() => sut.Create(teamToAdd, new User()));
+        }
+
     }
 }
