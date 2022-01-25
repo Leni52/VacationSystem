@@ -3,7 +3,7 @@ using IdentityServer4.Validation;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using WorkForceManagement.BLL.Services;
+using WorkForceManagement.BLL.Services.Interfaces;
 using WorkForceManagement.DAL.Entities;
 
 namespace WorkForceManagement.WEB

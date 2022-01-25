@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using WorkForceManagement.BLL.Exceptions;
-using WorkForceManagement.BLL.Services;
+using WorkForceManagement.BLL.Services.Interfaces;
 using WorkForceManagement.DAL.Entities;
 using WorkForceManagement.DTO.Requests;
 using WorkForceManagement.DTO.ResponseDTO;

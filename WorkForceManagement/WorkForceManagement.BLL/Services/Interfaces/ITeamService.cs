@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using WorkForceManagement.DAL.Entities;
 
-namespace WorkForceManagement.BLL.Services
+namespace WorkForceManagement.BLL.Services.Interfaces
 {
     public interface ITeamService
     {

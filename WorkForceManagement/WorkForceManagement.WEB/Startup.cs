@@ -1,22 +1,17 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using System.Collections.Generic;
 using WorkForceManagement.BLL;
 using WorkForceManagement.BLL.Services;
+using WorkForceManagement.BLL.Services.Interfaces;
 using WorkForceManagement.DAL.Data;
 using WorkForceManagement.DAL.Entities;
 using WorkForceManagement.DAL.Repositories;
@@ -49,7 +44,7 @@ namespace WorkForceManagement.WEB
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WorkForceManagement.WEB", Version = "v1" });
-                // Adds the authorize button in swagger UI 
+                // Adds the authorize button in swagger UI
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
@@ -124,7 +119,7 @@ namespace WorkForceManagement.WEB
             // Authentication
             // Adds the asp.net auth services
             services
-                .AddAuthorization(options=>
+                .AddAuthorization(options =>
                 {
                     options.AddPolicy("TimeOffRequestCreator", policy =>
                     policy.Requirements.Add(new TimeOffRequestCreatorRequirement()));
@@ -132,7 +127,6 @@ namespace WorkForceManagement.WEB
                     policy.Requirements.Add(new TeamLeaderRequirement()));
                     options.AddPolicy("Admin", policy =>
                            policy.RequireRole("Admin"));
-
                 })
                 .AddAuthentication(options =>
                 {
@@ -150,13 +144,12 @@ namespace WorkForceManagement.WEB
                 });
         }
 
-
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             DatabaseSeeder.Seed(app.ApplicationServices);
 
-            //Adds the Identityserver Middleware that will handle 
+            //Adds the Identityserver Middleware that will handle
             app.UseIdentityServer();
 
             if (env.IsDevelopment())
