@@ -423,6 +423,8 @@ namespace WorkForceManagement.BLL.Services
         public async Task SaveFile(TblFile file, Guid TimeOffRequestId)
         {
             TimeOffRequest request = await _timeOffRequestRepository.Get(TimeOffRequestId);
+            if ((request == null) || (file == null))
+                throw new ItemDoesNotExistException();
             await _fileService.SaveFile(file);
             request.Pdf = file;
             await _timeOffRequestRepository.SaveChanges();
@@ -430,8 +432,12 @@ namespace WorkForceManagement.BLL.Services
 
         public async Task<TblFile> GetFile(Guid TimeOffRequestId)
         {
-            TimeOffRequest request = await _timeOffRequestRepository.Get(TimeOffRequestId);
+            var request = await _timeOffRequestRepository.Get(TimeOffRequestId);
+            if (request == null)
+                throw new ItemDoesNotExistException();
             return request.Pdf;
+
+
         }
     }
 }

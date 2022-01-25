@@ -61,8 +61,8 @@ namespace WorkForceManagement.WEB.Controller
             User currentUser = await _userService.GetCurrentUser(User);
             TimeOffRequest timeOffRequest = _mapper.Map<TimeOffRequest>(timeOffRequestRequestDTO);
 
-            timeOffRequest.Type = (TimeOffRequestType)timeOffRequestRequestDTO.Type;
-            await _timeOffRequestService.CreateTimeOffRequest(timeOffRequest, currentUser);
+            timeOffRequest.Type = timeOffRequestRequestDTO.Type;
+            await _timeOffRequestService.CreateTimeOffRequest(timeOffRequest, currentUser);            
             return Ok(timeOffRequestRequestDTO);
         }
 
@@ -174,26 +174,51 @@ namespace WorkForceManagement.WEB.Controller
         [HttpPost("Add a file")]
         public async Task<IActionResult> IndexAsync(IFormFile postedFile, Guid TimeOffRequestId)
         {
-            byte[] bytes;
-            using (BinaryReader br = new BinaryReader(postedFile.OpenReadStream()))
+            try
             {
-                bytes = br.ReadBytes((int)postedFile.Length);
+                if (postedFile == null)
+                    throw new ItemDoesNotExistException();
+                byte[] bytes;
+                using (BinaryReader br = new BinaryReader(postedFile.OpenReadStream()))
+                {
+                    bytes = br.ReadBytes((int)postedFile.Length);
+                }
+                TblFile file = new()
+                {
+                    Name = postedFile.FileName,
+                    ContentType = postedFile.ContentType,
+                    Data = bytes
+                };
+                await _timeOffRequestService.SaveFile(file, TimeOffRequestId);
+                return Ok(postedFile.FileName);
             }
-            TblFile Pdf = new()
+            catch (ItemDoesNotExistException ex)
             {
-                Name = postedFile.FileName,
-                ContentType = postedFile.ContentType,
-                Data = bytes
-            };
-            await _timeOffRequestService.SaveFile(Pdf, TimeOffRequestId);
-            return Ok(postedFile.FileName);
+                return NotFound(ex.Message);
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("Get TOR file")]
-        public async Task<FileResult> DownloadFile(Guid TimeOffRequestId)
+        public async Task<IActionResult> DownloadFile(Guid TimeOffRequestId)
         {
-            TblFile file = await _timeOffRequestService.GetFile(TimeOffRequestId);
-            return File(file.Data, file.ContentType, file.Name);
+            try
+            {
+                TblFile file = await _timeOffRequestService.GetFile(TimeOffRequestId);
+                return File(file.Data, file.ContentType, file.Name);
+            }
+            catch (ItemDoesNotExistException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
+
     }
 }
