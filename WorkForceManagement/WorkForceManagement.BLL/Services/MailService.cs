@@ -1,15 +1,9 @@
-﻿using MailKit.Net.Smtp;
-using MailKit.Security;
+﻿using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Mail;
-using System.Text;
 using System.Threading.Tasks;
+using WorkForceManagement.BLL.Services.Interfaces;
 using WorkForceManagement.DAL;
-using WorkForceManagement.DAL.Entities;
 using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 
 namespace WorkForceManagement.BLL.Services
@@ -17,11 +11,12 @@ namespace WorkForceManagement.BLL.Services
     public class MailService : IMailService
     {
         private readonly MailSettings _mailSettings;
-       
+
         public MailService(IOptions<MailSettings> options)
         {
             _mailSettings = options.Value;
         }
+
         public async Task SendEmail(MailRequest mailRequest)
         {
             var email = new MimeMessage();
@@ -37,8 +32,6 @@ namespace WorkForceManagement.BLL.Services
             smtp.Authenticate(_mailSettings.Mail, _mailSettings.Password);
             await smtp.SendAsync(email);
             smtp.Disconnect(true);
-
         }
-
     }
 }

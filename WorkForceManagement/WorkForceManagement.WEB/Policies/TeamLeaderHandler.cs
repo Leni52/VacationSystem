@@ -2,21 +2,21 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using WorkForceManagement.BLL.Services;
+using WorkForceManagement.BLL.Services.Interfaces;
 using WorkForceManagement.DAL.Entities;
 
 namespace WorkForceManagement.WEB.Policies
 {
-    public class TeamLeaderHandler:AuthorizationHandler<TeamLeaderRequirement>
+    public class TeamLeaderHandler : AuthorizationHandler<TeamLeaderRequirement>
     {
         private IHttpContextAccessor _httpContextAccessor;
         private IAuthUserManager _authUserManager;
         private ITimeOffRequestService _timeOffRequestService;
         private IUserService _userService;
+
         public TeamLeaderHandler(IHttpContextAccessor httpContextAccessor, IAuthUserManager authUserManager,
             ITimeOffRequestService timeOffRequest, IUserService userService)
         {
@@ -25,7 +25,7 @@ namespace WorkForceManagement.WEB.Policies
             _timeOffRequestService = timeOffRequest;
             _userService = userService;
         }
-       
+
         protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, TeamLeaderRequirement requirement)
         {
             Guid requestId = Guid.Parse(_httpContextAccessor.HttpContext.GetRouteValue("timeOffRequestId").ToString());
@@ -45,9 +45,9 @@ namespace WorkForceManagement.WEB.Policies
             {
                 context.Succeed(requirement);
                 return;
-            }            
+            }
             await Task.CompletedTask;
             return;
         }
     }
-    }
+}

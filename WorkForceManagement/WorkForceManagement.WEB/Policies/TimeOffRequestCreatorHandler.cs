@@ -2,11 +2,10 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using WorkForceManagement.BLL.Services;
+using WorkForceManagement.BLL.Services.Interfaces;
 using WorkForceManagement.DAL.Entities;
 
 namespace WorkForceManagement.WEB.Policies
@@ -17,6 +16,7 @@ namespace WorkForceManagement.WEB.Policies
         private IAuthUserManager _authUserManager;
         private ITimeOffRequestService _timeOffRequestService;
         private IUserService _userService;
+
         public TimeOffRequestCreatorHandler(IHttpContextAccessor httpContextAccessor, IAuthUserManager authUserManager,
             ITimeOffRequestService timeOffRequest, IUserService userService)
         {
@@ -25,12 +25,13 @@ namespace WorkForceManagement.WEB.Policies
             _timeOffRequestService = timeOffRequest;
             _userService = userService;
         }
-        protected async override Task HandleRequirementAsync(AuthorizationHandlerContext context, TimeOffRequestCreatorRequirement requirement)
+
+        protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, TimeOffRequestCreatorRequirement requirement)
         {
             Guid requestId = Guid.Parse(_httpContextAccessor.HttpContext.GetRouteValue("timeOffRequestId").ToString());
             string userId = context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
             Guid userIdGuid = Guid.Parse(userId);
-         
+
             User user = await _userService.GetUserById(userIdGuid);
             TimeOffRequest request = await _timeOffRequestService.GetTimeOffRequest(requestId);
 
@@ -54,9 +55,6 @@ namespace WorkForceManagement.WEB.Policies
             }
             await System.Threading.Tasks.Task.CompletedTask;
             return;
-
         }
-
     }
 }
-

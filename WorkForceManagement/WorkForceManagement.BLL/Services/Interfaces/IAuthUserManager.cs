@@ -5,7 +5,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using WorkForceManagement.DAL.Entities;
 
-namespace WorkForceManagement.BLL.Services
+namespace WorkForceManagement.BLL.Services.Interfaces
 {
     public interface IAuthUserManager
     {

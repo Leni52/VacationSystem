@@ -1,20 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using WorkForceManagement.BLL.Services;
 
 namespace WorkForceManagement.WEB.Controller
 {
     [Route("api/[controller]")]
     public class BearerTokenController : ControllerBase
     {
-        static HttpClient client = new HttpClient();
+        private static HttpClient client = new HttpClient();
+
         public BearerTokenController() : base()
         {
-
         }
 
         [HttpPost("{username}&{password}")]

@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using WorkForceManagement.BLL.Services;
+using WorkForceManagement.BLL.Services.Interfaces;
 using WorkForceManagement.DAL.Entities;
 using WorkForceManagement.DTO.RequestDTO;
 using WorkForceManagement.DTO.ResponseDTO;
@@ -33,7 +33,7 @@ namespace WorkForceManagement.WEB.Controller
                 return BadRequest();
             }
 
-            User currentUser = await _userService.GetCurrentUser(User);
+            var currentUser = await _userService.GetCurrentUser(User);
 
             var user = new User();
             _mapper.Map(model, user);
@@ -62,37 +62,36 @@ namespace WorkForceManagement.WEB.Controller
                 return BadRequest();
             }
 
-            User currentUser = await _userService.GetCurrentUser(User);
+            var currentUser = await _userService.GetCurrentUser(User);
 
-            User userToUpdate = await _userService.GetUserById(userId);
-            string oldEmail = userToUpdate.Email;
+            var user = await _userService.GetUserById(userId);
+            string oldEmail = user.Email;
 
-            if (userToUpdate == null)
+            if (user == null)
                 throw new KeyNotFoundException($"User with Id:{userId} was not found");
 
-            _mapper.Map(model, userToUpdate);
-            userToUpdate.UpdaterId = currentUser.Id;
+            _mapper.Map(model, user);
+            user.UpdaterId = currentUser.Id;
 
-            await _userService.Update(userToUpdate, oldEmail, model.Password, model.IsAdmin);
+            await _userService.Update(user, oldEmail, model.Password, model.IsAdmin);
 
             return Ok();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<ActionResult<List<UserResponseDTO>>> GetAllUsers()
         {
-            var users = await _userService.GetAllUsers();
-
-            var results = _mapper.Map<List<UserResponseDTO>>(users);
+            var results = _mapper.Map<List<UserResponseDTO>>(await _userService.GetAllUsers());
 
             return Ok(results);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public async Task<ActionResult<UserResponseDTO>> GetUserById(Guid id)
         {
-            var user = await _userService.GetUserById(id);
-            var result = _mapper.Map<UserResponseDTO>(user);
+            var result = _mapper.Map<UserResponseDTO>(await _userService.GetUserById(id));
 
             return Ok(result);
         }
@@ -101,9 +100,7 @@ namespace WorkForceManagement.WEB.Controller
         [HttpPatch("MakeUserAdmin/{userId}")]
         public async Task<IActionResult> MakeUserAdmin(Guid userId)
         {
-            var user = await _userService.GetUserById(userId);
-
-            await _userService.MakeUserAdmin(user);
+            await _userService.MakeUserAdmin(userId);
 
             return Ok();
         }
@@ -112,9 +109,7 @@ namespace WorkForceManagement.WEB.Controller
         [HttpPatch("RemoveUserFromAdmin/{userId}")]
         public async Task<IActionResult> RemoveUserFromAdmin(Guid userId)
         {
-            var user = await _userService.GetUserById(userId);
-
-            await _userService.RemoveUserFromAdmin(user);
+            await _userService.RemoveUserFromAdmin(userId);
 
             return Ok();
         }
