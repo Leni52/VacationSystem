@@ -34,7 +34,7 @@ namespace WorkForceManagement.BLL.Services
                 throw new UsernameTakenException($"Username: {userToAdd.UserName} already taken!");
             }
 
-            await IsEmailValid(userToAdd.Email);
+            await IsEmailValid(Guid.Parse(userToAdd.Id), userToAdd.Email);
 
             userToAdd.TwoFactorEnabled = true;
             await _userManager.CreateUser(userToAdd, password);
@@ -64,13 +64,15 @@ namespace WorkForceManagement.BLL.Services
             });
         }
 
-        private async Task IsEmailValid(string emailAddress)
+        private async Task IsEmailValid(Guid userId, string emailAddress)
         {
             try
             {
                 MailAddress m = new MailAddress(emailAddress);
 
-                if (await _userManager.FindByEmail(emailAddress) != null)
+                User userAlreadyInDb = await _userManager.FindById(userId);
+                User userWithSameEmail = await _userManager.FindByEmail(emailAddress);
+                if ((userWithSameEmail != null && userAlreadyInDb == null) || (userWithSameEmail != null && userWithSameEmail.Id != userAlreadyInDb.Id))
                 {
                     throw new EmailAddressAlreadyInUseException($"Email: {emailAddress} already in use!");
                 }
@@ -96,11 +98,7 @@ namespace WorkForceManagement.BLL.Services
             PasswordHasher<User> hasher = new PasswordHasher<User>();
             Guid userId = Guid.Parse(updatedUser.Id);
 
-            User userWithSameEmail = await _userManager.FindByEmail(updatedUser.Email);
-            if (userWithSameEmail != null && userWithSameEmail.Id != updatedUser.Id)
-            { // found different user with same email
-                throw new EmailAddressAlreadyInUseException($"Email: {updatedUser.Email} already in use!");
-            }
+            await IsEmailValid(Guid.Parse(updatedUser.Id), updatedUser.Email);
 
             if (await _userManager.FindDifferentUserWithSameUsername(userId, updatedUser.UserName) != null)
             {
