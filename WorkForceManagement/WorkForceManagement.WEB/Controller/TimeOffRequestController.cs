@@ -118,7 +118,7 @@ namespace WorkForceManagement.WEB.Controller
             return Ok();
         }
 
-        [HttpPatch("CheckTimeOffRequest/{timeOffRequestId}")]
+        [HttpGet("CheckTimeOffRequest/{timeOffRequestId}")]
         public async Task<ActionResult> CheckTimeOffRequest(Guid timeOffRequestId)
         {
             try
