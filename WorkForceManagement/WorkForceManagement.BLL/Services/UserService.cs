@@ -124,6 +124,7 @@ namespace WorkForceManagement.BLL.Services
             }
 
             updatedUser.ChangeDate = DateTime.Now;
+            updatedUser.PasswordHash = hasher.HashPassword(updatedUser, newPassword);
             await _userManager.UpdateUser(updatedUser);
         }
 
