@@ -46,7 +46,7 @@ namespace WorkForceManagement.BLL.Tests.Services
             Assert.NotNull(result);
             //asert
         }
-        
+
         [Fact]
         public void Create_InvalidRequest_Fail()
         {
@@ -59,7 +59,7 @@ namespace WorkForceManagement.BLL.Tests.Services
             //asert
         }
 
-        
+
         [Fact]
         public void CreateRequest_InvalidRequest_Fail()
         {
@@ -113,7 +113,20 @@ namespace WorkForceManagement.BLL.Tests.Services
             //asert
             Assert.IsType<List<TimeOffRequest>>(result);
         }
+        [Fact]
+        public async void GetMyRequests_ValidRequest_Pass()
+        {
+            //arrange
+            requestRepositoryStub.Setup(reqRep => reqRep.All())
+              .ReturnsAsync(new List<TimeOffRequest>());
+            User currentUser = new User()
+            { UserName = "Admin" };
 
+            //act
+            var result = await sut.GetMyRequests(currentUser.Id);
+            //asert
+            Assert.IsType<List<TimeOffRequest>>(result);
+        }
         [Fact]
         public async void GetRequest_ValidRequest_Pass()
         {
@@ -145,7 +158,7 @@ namespace WorkForceManagement.BLL.Tests.Services
         public async void UpdateRequest_ValidRequest_Pass()
         {
             //arrange
-            var currentUser = new User() { UserName = "Admin", DaysOff=20, CreatedTimeOffRequests = new List<TimeOffRequest>() };
+            var currentUser = new User() { UserName = "Admin", DaysOff = 20, CreatedTimeOffRequests = new List<TimeOffRequest>() };
             userServiceMock.Setup(user => user.GetUserById(It.IsAny<Guid>()))
                 .ReturnsAsync(currentUser);
             requestRepositoryStub.Setup(reqRep => reqRep.Get(It.IsAny<Guid>()))
@@ -176,7 +189,7 @@ namespace WorkForceManagement.BLL.Tests.Services
         {
             //arrange
             User requester = new User() { Id = Guid.NewGuid().ToString(), Email = "test@gmail.com" };
-            User currentUser = new User() { Id = Guid.NewGuid().ToString(), TimeOffRequestsApproved = new List<TimeOffRequest>(), TimeOffRequestsToApprove = new List<TimeOffRequest>()};
+            User currentUser = new User() { Id = Guid.NewGuid().ToString(), TimeOffRequestsApproved = new List<TimeOffRequest>(), TimeOffRequestsToApprove = new List<TimeOffRequest>() };
             List<User> approvers = new List<User>();
             approvers.Add(currentUser);
 
@@ -250,5 +263,159 @@ namespace WorkForceManagement.BLL.Tests.Services
             //act
             await Assert.ThrowsAsync<UserIsntApproverException>(() => sut.AnswerTimeOffRequest(timeOffRequestId, true, currentUser, "reason"));
         }
+        [Fact]
+        public async Task Create_InvalidRequest_EndDateBeforeStartDate_Fail()
+        {
+            //arrange           
+            User currentUser = new User()
+            {
+                UserName = "admin",
+            };
+            TimeOffRequest timeOffRequest = new TimeOffRequest()
+            {
+                StartDate = new DateTime(2022, 1, 28),
+                EndDate = new DateTime(2022, 1, 22),
+                Description = "Testing and testing",
+                Type = TimeOffRequestType.Paid
+            };
+            //act
+            //asert
+            await Assert.ThrowsAsync<InvalidDatesException>(() => sut.CreateTimeOffRequest(timeOffRequest, currentUser));
+
+        }
+        [Fact]
+        public async Task CheckForDaysOff_NotEnoughDaysOff_Fail()
+        {
+            //arrange
+            User currentUser = new User()
+            {
+                UserName = "admin",
+                DaysOff = 3
+            };
+            TimeOffRequest timeOffRequest = new TimeOffRequest()
+            {
+                StartDate = new DateTime(2022, 1, 17),
+                EndDate = new DateTime(2022, 1, 21),
+                Description = "Testing and testing",
+                Type = TimeOffRequestType.Paid
+            };
+            //act    
+            //assert
+            await Assert.ThrowsAsync<InvalidDatesException>(() => sut.CreateTimeOffRequest(timeOffRequest, currentUser));
+        }
+        [Fact]
+        public async Task CheckForDaysOff_IncludesSickLeave_Pass()
+        {
+            //arrange
+            User currentUser = new User()
+            {
+                UserName = "admin",
+                DaysOff = 10,
+                CreatedTimeOffRequests = new List<TimeOffRequest>(),
+                Teams = new List<Team>()
+            };
+
+            TimeOffRequest timeOffRequest = new TimeOffRequest()
+            {
+                Requester = currentUser,
+                StartDate = new DateTime(2022, 3, 1),
+                EndDate = new DateTime(2022, 3, 14),
+                Description = "Testing and testing",
+                Type = TimeOffRequestType.SickLeave,
+                Status = TimeOffRequestStatus.Created
+            };
+            //act    
+            requestRepositoryStub.Setup(torRep => torRep.Get(It.IsAny<Guid>()))
+                 .ReturnsAsync(timeOffRequest);
+            userServiceMock.Setup(service => service.GetUsersUnderTeamLeader(It.IsAny<User>()))
+.ReturnsAsync(new List<User>());
+            await sut.CreateTimeOffRequest(new TimeOffRequest(), currentUser);
+            //assert
+            Assert.Equal(TimeOffRequestStatus.Approved, timeOffRequest.Status);
+        }
+       
+        [Fact]
+        public async void CheckForDaysOff_IncludesWeekend()
+        {
+            //arrange
+            User currentUser = new User()
+            {
+                UserName = "admin",
+                DaysOff = 4,
+                CreatedTimeOffRequests = new List<TimeOffRequest>(),
+                Teams = new List<Team>()
+            };
+            TimeOffRequest timeOffRequest = new TimeOffRequest()
+            {
+                StartDate = new DateTime(2022, 1, 25),
+                EndDate = new DateTime(2022, 1, 30),
+                Description = "Testing and testing",
+                Type = TimeOffRequestType.Paid,
+                Status = TimeOffRequestStatus.Created,
+                Requester = currentUser
+            };
+            requestRepositoryStub.Setup(torRep => torRep.Get(It.IsAny<Guid>()))
+               .ReturnsAsync(timeOffRequest);
+            userServiceMock.Setup(service => service.GetUsersUnderTeamLeader(It.IsAny<User>()))
+.ReturnsAsync(new List<User>());
+            var result = await Record.ExceptionAsync(() => sut.CreateTimeOffRequest(timeOffRequest, currentUser));
+            Assert.Null(result);
+        }
+        [Fact]
+        public async void CheckForDaysOff_IncludesHoliday()
+        {
+            //arrange
+            User currentUser = new User()
+            {
+                UserName = "admin",
+                DaysOff = 1,
+                CreatedTimeOffRequests = new List<TimeOffRequest>(),
+                Teams = new List<Team>()
+            };
+            TimeOffRequest timeOffRequest = new TimeOffRequest()
+            {
+                StartDate = new DateTime(2022, 3, 3),
+                EndDate = new DateTime(2022, 3, 4),
+                Description = "Testing and testing",
+                Type = TimeOffRequestType.Paid,
+                Status = TimeOffRequestStatus.Created,
+                Requester = currentUser
+            };
+            requestRepositoryStub.Setup(torRep => torRep.Get(It.IsAny<Guid>()))
+               .ReturnsAsync(timeOffRequest);
+            userServiceMock.Setup(service => service.GetUsersUnderTeamLeader(It.IsAny<User>()))
+.ReturnsAsync(new List<User>());
+            var result = await Record.ExceptionAsync(() => sut.CreateTimeOffRequest(timeOffRequest, currentUser));
+            Assert.Null(result);
+        }
+        [Fact]
+        public async void CheckForDaysOff_IncludesWeekendAndHoliday()
+        {
+            //arrange
+            User currentUser = new User()
+            {
+                UserName = "admin",
+                DaysOff = 1,
+                CreatedTimeOffRequests = new List<TimeOffRequest>(),
+                Teams = new List<Team>()
+            };
+            TimeOffRequest timeOffRequest = new TimeOffRequest()
+            {
+                StartDate = new DateTime(2022, 3, 3),
+                EndDate = new DateTime(2022, 3, 6),
+                Description = "Testing and testing",
+                Type = TimeOffRequestType.Paid,
+                Status = TimeOffRequestStatus.Created,
+                Requester = currentUser
+            };
+            requestRepositoryStub.Setup(torRep => torRep.Get(It.IsAny<Guid>()))
+               .ReturnsAsync(timeOffRequest);
+            userServiceMock.Setup(service => service.GetUsersUnderTeamLeader(It.IsAny<User>()))
+.ReturnsAsync(new List<User>());
+            var result = await Record.ExceptionAsync(() => sut.CreateTimeOffRequest(timeOffRequest, currentUser));
+            Assert.Null(result);
+        }     
+      
+
     }
 }
