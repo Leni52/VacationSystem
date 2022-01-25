@@ -97,6 +97,12 @@ namespace WorkForceManagement.BLL.Services
             PasswordHasher<User> hasher = new PasswordHasher<User>();
             Guid userId = Guid.Parse(updatedUser.Id);
 
+            User userWithSameEmail = await _userManager.FindByEmail(updatedUser.Email);
+            if(userWithSameEmail != null && userWithSameEmail.Id != updatedUser.Id )
+            { // found different user with same email
+                throw new EmailAddressAlreadyInUseException($"Email: {updatedUser.Email} already in use!");
+            }
+
             if (await _userManager.FindDifferentUserWithSameUsername(userId, updatedUser.UserName) != null)
             {
                 throw new UsernameTakenException($"Username: {updatedUser.UserName} already taken!");

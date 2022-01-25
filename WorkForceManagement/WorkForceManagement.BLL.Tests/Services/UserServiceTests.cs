@@ -186,5 +186,83 @@ namespace WorkForceManagement.BLL.Tests.Services
             await Assert.ThrowsAsync<EmailAddressAlreadyInUseException>(() => sut.Add(userToAdd, "adminpass", true));
         }
 
+        [Fact]
+        public async Task Update_ValidInput_Passes()
+        {
+            User userToUpdate = new User()
+            {
+                Id = Guid.NewGuid().ToString(),
+                Email = "test@gmail.com",
+                UserName = "testUser",
+                PasswordHash = "testPass"
+            };
+            var exception = await Record.ExceptionAsync(() => sut.Update(userToUpdate, "test@gmail.com", "testPass", true));
+            Assert.Null(exception);
+        }
+
+        [Fact]
+        public async Task Update_UsernameTaken_ThrowsException()
+        {
+            //arrange
+            User userToUpdate = new User()
+            {
+                Id = Guid.NewGuid().ToString(),
+                Email = "test@gmail.com",
+                UserName = "testUser",
+                PasswordHash = "testPass"
+            };
+            authUserManagerMock.Setup(manager => manager.FindDifferentUserWithSameUsername(It.IsAny<Guid>(), It.IsAny<string>()))
+                .ReturnsAsync(new User());
+            //act
+            //assert
+            await Assert.ThrowsAsync<UsernameTakenException>(() => sut.Update(userToUpdate, "test@gmail.com", "testPass", true));
+        }
+        [Fact]
+        public async Task Update_EmailAddresAlreadyInUse_ThrowsException()
+        {
+            //arrange
+            User userToUpdate = new User()
+            {
+                Id = Guid.NewGuid().ToString(),
+                Email = "test@gmail.com",
+                UserName = "testUser",
+            };
+            User userWithSameEmail = new User()
+            {
+                Id = Guid.NewGuid().ToString(),
+                Email = "test@gmail.com",
+                UserName = "otherUser",
+            };
+            authUserManagerMock.Setup(manager => manager.FindByEmail(It.IsAny<string>()))
+                .ReturnsAsync(userWithSameEmail);
+
+            //act
+            //assert
+            await Assert.ThrowsAsync<EmailAddressAlreadyInUseException>(() => sut.Update(userToUpdate, "test@gmail.com", "testPass", true));
+        }
+
+        [Fact]
+        public async Task IsUserAdmin_UserIsAdmin_ReturnsTrue()
+        {
+            User currentUser = new User();
+
+            authUserManagerMock.Setup(manager => manager.IsUserInRole(It.IsAny<Guid>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
+
+            Assert.True(await sut.IsUserAdmin(currentUser));
+        }
+
+        [Fact]
+        public async Task IsUserAdmin_UserIsNotAdmin_ReturnsFalse()
+        {
+            User currentUser = new User();
+
+            authUserManagerMock.Setup(manager => manager.IsUserInRole(It.IsAny<Guid>(), It.IsAny<string>()))
+                .ReturnsAsync(false);
+
+            Assert.False(await sut.IsUserAdmin(currentUser));
+        }
+
+
     }
 }
