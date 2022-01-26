@@ -34,7 +34,7 @@ namespace WorkForceManagement.BLL.Services
         {
             ValidateTimeOffRequestDates(request.StartDate, request.EndDate, currentUser);
             request.WorkingDaysOff = ValidateDaysOff(request.StartDate, request.EndDate);
-
+            IsTypeValid(request);
             request.Status = TimeOffRequestStatus.Created;
             request.CreatorId = currentUser.Id;
             request.UpdaterId = currentUser.Id;
@@ -68,7 +68,7 @@ namespace WorkForceManagement.BLL.Services
         {
             if (startDate > endDate) // you cant create time off 1 day before start
                 throw new InvalidDatesException("Invalid time off request dates, the start date should be earlier or equal to end date");
-            if(startDate.Date < DateTime.Now.Date)
+            if (startDate.Date < DateTime.Now.Date)
                 throw new InvalidDatesException("Invalid time off request dates, the start date should be at least be no earlier than today");
 
             int requestedDays = ValidateDaysOff(startDate, endDate);
@@ -143,6 +143,7 @@ namespace WorkForceManagement.BLL.Services
             {
                 throw new ItemDoesNotExistException();
             }
+            IsTypeValid(requestToUpdate);
             requestToUpdate.WorkingDaysOff = daysOff;
             requestToUpdate.ChangeDate = DateTime.Now;
             requestToUpdate.UpdaterId = currentUserId;
@@ -178,7 +179,7 @@ namespace WorkForceManagement.BLL.Services
 
             request.ChangeDate = DateTime.Now.Date;
             request.UpdaterId = currentUser.Id;
-            if(reason != null)
+            if (reason != null)
             {
                 request.Reason = reason;
             }
@@ -417,6 +418,20 @@ namespace WorkForceManagement.BLL.Services
                 canCancel = true;
             }
             return canCancel;
+        }
+        private void IsTypeValid(TimeOffRequest request)
+        {
+            bool validType = false;
+            if (request.Type == TimeOffRequestType.Paid ||
+                request.Type == TimeOffRequestType.Unpaid ||
+                request.Type == TimeOffRequestType.SickLeave)
+            {
+                validType = true;
+            }
+            if (!validType)
+            {
+                throw new InvalidTimeOffRequestTypeException();
+            }
         }
     }
 }
