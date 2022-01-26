@@ -20,7 +20,7 @@ namespace WorkForceManagement.BLL.Services
 
         public async Task Create(Team team, User currentUser)
         {
-            if (await _teamRepository.Get(team => team.Name == team.Name) != null)
+            if (await _teamRepository.Get(_team => _team.Name == team.Name) != null)
                 throw new TeamWithSameNameExistsException($"Team with the name:{team.Name} already exists!");
 
             ValidateUserConfirmedEmail(team.TeamLeader);
@@ -56,9 +56,9 @@ namespace WorkForceManagement.BLL.Services
         public async Task UpdateTeam(Team team, Guid teamId, User currentUser)
         {
             var teamWithSameName = await _teamRepository.Get(
-                team =>
-                team.Name == team.Name &&
-                team.Id != teamId); // find different team with same name
+                _team =>
+                _team.Name == team.Name &&
+                _team.Id != teamId); // find different team with same name
 
             if (teamWithSameName != null)
                 throw new TeamWithSameNameExistsException($"Team with the name:{team.Name} already exists!");

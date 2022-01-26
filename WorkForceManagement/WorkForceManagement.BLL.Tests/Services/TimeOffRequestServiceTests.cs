@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using WorkForceManagement.BLL.Exceptions;
 using WorkForceManagement.BLL.Services;
+using WorkForceManagement.BLL.Services.Interfaces;
 using WorkForceManagement.DAL.Entities;
 using WorkForceManagement.DAL.Repositories;
 using Xunit;
@@ -36,8 +37,8 @@ namespace WorkForceManagement.BLL.Tests.Services
 
             TimeOffRequest timeOffRequest = new TimeOffRequest()
             {
-                StartDate = new DateTime(2022, 1, 22),
-                EndDate = new DateTime(2022, 1, 28),
+                StartDate = DateTime.Now.Date.AddDays(1),
+                EndDate = DateTime.Now.Date.AddDays(5),
                 Description = "Testing and testing",
                 Type = TimeOffRequestType.Paid
             };
@@ -124,7 +125,7 @@ namespace WorkForceManagement.BLL.Tests.Services
             { UserName = "Admin" };
 
             //act
-            var result = await sut.GetMyRequests(currentUser.Id);
+            var result = await sut.GetMyRequests(Guid.Parse(currentUser.Id));
             //asert
             Assert.IsType<List<TimeOffRequest>>(result);
         }
@@ -165,8 +166,14 @@ namespace WorkForceManagement.BLL.Tests.Services
             requestRepositoryStub.Setup(reqRep => reqRep.Get(It.IsAny<Guid>()))
                 .ReturnsAsync(new TimeOffRequest());
             //act
+            var timeOffRequest = new TimeOffRequest()
+            {
+                StartDate = DateTime.Now.Date.AddDays(1),
+                EndDate = DateTime.Now.Date.AddDays(5)
+            };
+
             var result = await Record.ExceptionAsync(() => sut.UpdateTimeOffRequest(new Guid(),
-                new TimeOffRequest(), currentUser.Id));
+                timeOffRequest, currentUser.Id));
             //assert
             Assert.Null(result);
         }
@@ -275,8 +282,8 @@ namespace WorkForceManagement.BLL.Tests.Services
             };
             TimeOffRequest timeOffRequest = new TimeOffRequest()
             {
-                StartDate = new DateTime(2022, 1, 28),
-                EndDate = new DateTime(2022, 1, 22),
+                StartDate = DateTime.Now.Date.AddDays(5),
+                EndDate = DateTime.Now.Date.AddDays(1),
                 Description = "Testing and testing",
                 Type = TimeOffRequestType.Paid
             };
@@ -320,8 +327,8 @@ namespace WorkForceManagement.BLL.Tests.Services
             TimeOffRequest timeOffRequest = new TimeOffRequest()
             {
                 Requester = currentUser,
-                StartDate = new DateTime(2022, 3, 1),
-                EndDate = new DateTime(2022, 3, 14),
+                StartDate = DateTime.Now.Date.AddDays(1),
+                EndDate = DateTime.Now.Date.AddDays(5),
                 Description = "Testing and testing",
                 Type = TimeOffRequestType.SickLeave,
                 Status = TimeOffRequestStatus.Created
@@ -330,8 +337,8 @@ namespace WorkForceManagement.BLL.Tests.Services
             requestRepositoryStub.Setup(torRep => torRep.Get(It.IsAny<Guid>()))
                  .ReturnsAsync(timeOffRequest);
             userServiceMock.Setup(service => service.GetUsersUnderTeamLeader(It.IsAny<User>()))
-.ReturnsAsync(new List<User>());
-            await sut.CreateTimeOffRequest(new TimeOffRequest(), currentUser);
+                .ReturnsAsync(new List<User>());
+            await sut.CreateTimeOffRequest(timeOffRequest, currentUser);
             //assert
             Assert.Equal(TimeOffRequestStatus.Approved, timeOffRequest.Status);
         }
@@ -343,14 +350,14 @@ namespace WorkForceManagement.BLL.Tests.Services
             User currentUser = new User()
             {
                 UserName = "admin",
-                DaysOff = 4,
+                DaysOff = 9,
                 CreatedTimeOffRequests = new List<TimeOffRequest>(),
                 Teams = new List<Team>()
             };
             TimeOffRequest timeOffRequest = new TimeOffRequest()
             {
-                StartDate = new DateTime(2022, 1, 25),
-                EndDate = new DateTime(2022, 1, 30),
+                StartDate = DateTime.Now.Date.AddDays(1),
+                EndDate = DateTime.Now.Date.AddDays(10),
                 Description = "Testing and testing",
                 Type = TimeOffRequestType.Paid,
                 Status = TimeOffRequestStatus.Created,
