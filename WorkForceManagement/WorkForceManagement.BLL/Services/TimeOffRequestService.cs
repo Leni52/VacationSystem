@@ -400,6 +400,7 @@ namespace WorkForceManagement.BLL.Services
                 await NotifyApproversOnDecision(TimeOffRequestStatus.Cancelled, request);
 
                 request.Status = TimeOffRequestStatus.Cancelled;
+                await _timeOffRequestRepository.SaveChanges();
             }
             else
             {
