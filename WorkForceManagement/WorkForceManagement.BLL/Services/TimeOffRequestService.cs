@@ -425,6 +425,8 @@ namespace WorkForceManagement.BLL.Services
             TimeOffRequest request = await _timeOffRequestRepository.Get(TimeOffRequestId);
             if ((request == null) || (file == null))
                 throw new ItemDoesNotExistException();
+            if (request.Type != TimeOffRequestType.SickLeave)
+                throw new CannotAddFileIfTORIsNotSickLeaveException("Cannot add a file if the TimeOffRequest is not SickLeave");
             request.Pdf = file;
             await _timeOffRequestRepository.SaveChanges();
         }

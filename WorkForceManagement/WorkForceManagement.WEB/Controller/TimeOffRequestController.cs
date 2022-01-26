@@ -196,7 +196,11 @@ namespace WorkForceManagement.WEB.Controller
             {
                 return NotFound(ex.Message);
             }
-            catch(Exception ex)
+            catch(CannotAddFileIfTORIsNotSickLeaveException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
