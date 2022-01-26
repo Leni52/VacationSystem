@@ -403,7 +403,7 @@ namespace WorkForceManagement.BLL.Tests.Services
                 CreatedTimeOffRequests = new List<TimeOffRequest>(),
                 Teams = new List<Team>()
             };
-            TimeOffRequest timeOffRequest = new TimeOffRequest()
+            TimeOffRequest timeOffRequest = new()
             {
                 StartDate = new DateTime(2022, 3, 3),
                 EndDate = new DateTime(2022, 3, 6),
@@ -420,10 +420,10 @@ namespace WorkForceManagement.BLL.Tests.Services
             Assert.Null(result);
         }
         [Fact]
-        public async Task CheckForDaysOff_AwaitingStatusExecutesSuccessfully()
+        public async Task CheckForDaysOff_AwaitingStatus_ExecutesSuccessfully()
         {
             //arrange
-            User requester = new User()
+            User requester = new()
             {
                 Id = Guid.NewGuid().ToString(),
                 UserName = "requester"
@@ -448,15 +448,15 @@ namespace WorkForceManagement.BLL.Tests.Services
         }
 
         [Fact]
-        public async Task CheckForDaysOff_CreatedStatusExecutesSuccessfully()
+        public async Task CheckForDaysOff_CreatedStatus_ExecutesSuccessfully()
         {
             //arrange
-            User requester = new User()
+            User requester = new()
             {
                 Id = Guid.NewGuid().ToString(),
                 UserName = "requester"
             };
-            TimeOffRequest timeOffRequest = new TimeOffRequest()
+            TimeOffRequest timeOffRequest = new()
             {
                 Requester = requester,
                 StartDate = DateTime.Today.AddDays(5),
@@ -476,7 +476,7 @@ namespace WorkForceManagement.BLL.Tests.Services
         }
 
         [Fact]
-        public async Task CheckForDaysOff_NullTORSuppliedFails()
+        public async Task CheckForDaysOff_NullTORSupplied_Fails()
         {
             //arrange
             //act    
@@ -488,15 +488,15 @@ namespace WorkForceManagement.BLL.Tests.Services
         }
 
         [Fact]
-        public async Task CheckForDaysOff_OneDayBeforeStartDateFails()
+        public async Task CheckForDaysOff_OneDayBeforeStartDate_Fails()
         {
             //arrange
-            User requester = new User()
+            User requester = new()
             {
                 Id = Guid.NewGuid().ToString(),
                 UserName = "requester"
             };
-            TimeOffRequest timeOffRequest = new TimeOffRequest()
+            TimeOffRequest timeOffRequest = new()
             {
                 Requester = requester,
                 StartDate = DateTime.Today.AddDays(1),
@@ -510,19 +510,20 @@ namespace WorkForceManagement.BLL.Tests.Services
 
             //act
             //assert
-            await Assert.ThrowsAsync<CannotCancelTimeOffRequestException>(() => sut.CancelTimeOffRequest(Guid.NewGuid()));
+            await Assert.ThrowsAsync<CannotCancelTimeOffRequestException>(
+                () => sut.CancelTimeOffRequest(Guid.NewGuid()));
         }
 
         [Fact]
-        public async Task CheckForDaysOff_TwoDaysBeforeStartDateFails()
+        public async Task CheckForDaysOff_TwoDaysBeforeStartDate_Fails()
         {
             //arrange
-            User requester = new User()
+            User requester = new()
             {
                 Id = Guid.NewGuid().ToString(),
                 UserName = "requester"
             };
-            TimeOffRequest timeOffRequest = new TimeOffRequest()
+            TimeOffRequest timeOffRequest = new()
             {
                 Requester = requester,
                 StartDate = DateTime.Today.AddDays(2),
@@ -539,10 +540,10 @@ namespace WorkForceManagement.BLL.Tests.Services
             await Assert.ThrowsAsync<CannotCancelTimeOffRequestException>(() => sut.CancelTimeOffRequest(Guid.NewGuid()));
         }
         [Fact]
-        public async Task CheckForDaysOff_ThreeDaysBeforeStartDateSucceeds()
+        public async Task CheckForDaysOff_ThreeDaysBeforeStartDate_Fails()
         {
             //arrange
-            User requester = new User()
+            User requester = new()
             {
                 Id = Guid.NewGuid().ToString(),
                 UserName = "requester"
@@ -565,7 +566,7 @@ namespace WorkForceManagement.BLL.Tests.Services
         }
 
         [Fact]
-        public async Task CheckForDaysOff_TORAlreadyApprovedFails()
+        public async Task CheckForDaysOff_TORAlreadyApproved_Fails()
         {
             //arrange
             User requester = new User()
@@ -591,7 +592,7 @@ namespace WorkForceManagement.BLL.Tests.Services
         }
 
         [Fact]
-        public async Task CheckForDaysOff_TORRejectedFails()
+        public async Task CheckForDaysOff_TORRejected_Fails()
         {
             //arrange
             User requester = new User()
@@ -616,5 +617,61 @@ namespace WorkForceManagement.BLL.Tests.Services
             await Assert.ThrowsAsync<CannotCancelTimeOffRequestException>(() => sut.CancelTimeOffRequest(Guid.NewGuid()));
         }
 
+        [Fact]
+        public async Task SaveFile_ValidFileSupplied_Passes()
+        {
+            TimeOffRequest timeOffRequest = new();
+            requestRepositoryStub.Setup(torRep => torRep.Get(It.IsAny<Guid>()))
+                .ReturnsAsync(timeOffRequest);
+            TblFile file = new();
+
+            await sut.SaveFile(file, Guid.NewGuid());
+        }
+
+        [Fact]
+        public async Task SaveFile_InvalidTORIdSupplied_Fails()
+        {
+            requestRepositoryStub.Setup(torRep => torRep.Get(It.IsAny<Guid>()))
+                .ReturnsAsync((TimeOffRequest)null);
+            TblFile file = new();
+            await Assert.ThrowsAsync<ItemDoesNotExistException>(() => sut.SaveFile(file, Guid.NewGuid()));
+        }
+
+        [Fact]
+        public async Task SaveFile_NullFileSupplied_Fails()
+        {
+            TimeOffRequest timeOffRequest = new();
+            requestRepositoryStub.Setup(torRep => torRep.Get(It.IsAny<Guid>()))
+                .ReturnsAsync(timeOffRequest);
+            TblFile file = null;
+            await Assert.ThrowsAsync<ItemDoesNotExistException>(() => sut.SaveFile(file, Guid.NewGuid()));
+        }
+        [Fact]
+        public async Task SaveFile_BothParamsNull_Fails()
+        {
+            requestRepositoryStub.Setup(torRep => torRep.Get(It.IsAny<Guid>()))
+                .ReturnsAsync((TimeOffRequest)null);
+            TblFile file = null;
+            await Assert.ThrowsAsync<ItemDoesNotExistException>(() => sut.SaveFile(file, Guid.NewGuid()));
+        }
+        [Fact]
+        public async Task GetFile_ValidTORId_Passes()
+        {
+            TblFile file = new();
+            TimeOffRequest timeOffRequest = new()
+            {
+                Pdf = file
+            };
+            requestRepositoryStub.Setup(torRep => torRep.Get(It.IsAny<Guid>()))
+                .ReturnsAsync(timeOffRequest);
+            await sut.GetFile(Guid.NewGuid());
+        }
+        [Fact]
+        public async Task GetFile_InvalidTORId_Fails()
+        {
+            requestRepositoryStub.Setup(torRep => torRep.Get(It.IsAny<Guid>()))
+                .ReturnsAsync((TimeOffRequest)null);
+            await Assert.ThrowsAsync<ItemDoesNotExistException>(() => sut.GetFile(Guid.NewGuid()));
+        }
     }
 }

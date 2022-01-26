@@ -172,7 +172,7 @@ namespace WorkForceManagement.WEB.Controller
         }
         
         [HttpPost("Add a file")]
-        public async Task<IActionResult> IndexAsync(IFormFile postedFile, Guid TimeOffRequestId)
+        public async Task<IActionResult> UploadFile(IFormFile postedFile, Guid TimeOffRequestId)
         {
             try
             {
@@ -208,6 +208,8 @@ namespace WorkForceManagement.WEB.Controller
             try
             {
                 TblFile file = await _timeOffRequestService.GetFile(TimeOffRequestId);
+                if (file == null)
+                    throw new ItemDoesNotExistException("The TOR doesn't contain a file");
                 return File(file.Data, file.ContentType, file.Name);
             }
             catch (ItemDoesNotExistException ex)
