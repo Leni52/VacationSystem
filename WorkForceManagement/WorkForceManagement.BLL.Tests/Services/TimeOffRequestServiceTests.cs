@@ -13,10 +13,10 @@ namespace WorkForceManagement.BLL.Tests.Services
 {
     public class TimeOffRequestServiceTests
     {
-        private readonly Mock<IRepository<TimeOffRequest>> requestRepositoryStub = new Mock<IRepository<TimeOffRequest>>();
-        private readonly Mock<IUserService> userServiceMock = new Mock<IUserService>();
-        private readonly Mock<ITeamService> teamServiceMock = new Mock<ITeamService>();
-        private readonly Mock<IMailService> mailService = new Mock<IMailService>();
+        private readonly Mock<IRepository<TimeOffRequest>> requestRepositoryStub = new();
+        private readonly Mock<IUserService> userServiceMock = new();
+        private readonly Mock<ITeamService> teamServiceMock = new();
+        private readonly Mock<IMailService> mailService = new();
         private readonly TimeOffRequestService sut;
 
 
@@ -30,12 +30,12 @@ namespace WorkForceManagement.BLL.Tests.Services
         public void Create_ValidRequest_Pass()
         {
             //arrange
-            User currentUser = new User()
+            User currentUser = new()
             {
                 UserName = "admin",
             };
 
-            TimeOffRequest timeOffRequest = new TimeOffRequest()
+            TimeOffRequest timeOffRequest = new()
             {
                 StartDate = DateTime.Now.Date.AddDays(1),
                 EndDate = DateTime.Now.Date.AddDays(5),
@@ -66,8 +66,8 @@ namespace WorkForceManagement.BLL.Tests.Services
         public void CreateRequest_InvalidRequest_Fail()
         {
             //arrange
-            User currentUser = new User() { UserName = "Admin" };
-            TimeOffRequest t1 = new TimeOffRequest()
+            User currentUser = new() { UserName = "Admin" };
+            TimeOffRequest t1 = new()
             {
                 Description = "Testing and testing"
             };
@@ -82,7 +82,7 @@ namespace WorkForceManagement.BLL.Tests.Services
         public void Delete_ValidId_Pass()
         {
             //arrange
-            TimeOffRequest timeOffRequest = new TimeOffRequest();
+            TimeOffRequest timeOffRequest = new();
             //act
             var result = sut.DeleteTimeOffRequest(timeOffRequest.Id);
 
@@ -94,7 +94,7 @@ namespace WorkForceManagement.BLL.Tests.Services
         public void Delete_InvalidId_Fail()
         {
             //arrange
-            TimeOffRequest timeOffRequest = new TimeOffRequest();
+            TimeOffRequest timeOffRequest = new();
             //act
             //assert           
             Assert.ThrowsAsync<ItemDoesNotExistException>(() => sut.DeleteTimeOffRequest(Guid.NewGuid()));
@@ -107,7 +107,7 @@ namespace WorkForceManagement.BLL.Tests.Services
             //arrange
             requestRepositoryStub.Setup(reqRep => reqRep.All())
               .ReturnsAsync(new List<TimeOffRequest>());
-            User currentUser = new User()
+            User currentUser = new()
             { UserName = "Admin" };
 
             //act
@@ -121,7 +121,7 @@ namespace WorkForceManagement.BLL.Tests.Services
             //arrange
             requestRepositoryStub.Setup(reqRep => reqRep.All())
               .ReturnsAsync(new List<TimeOffRequest>());
-            User currentUser = new User()
+            User currentUser = new()
             { UserName = "Admin" };
 
             //act
@@ -133,7 +133,7 @@ namespace WorkForceManagement.BLL.Tests.Services
         public async void GetRequest_ValidRequest_Pass()
         {
             //arrange
-            User currentUser = new User()
+            User currentUser = new()
             {
                 UserName = "Admin"
             };
@@ -182,8 +182,8 @@ namespace WorkForceManagement.BLL.Tests.Services
         public async void GetMyColleguesTimeOffRequests_ValidRequest_ReturnsListOfUsers()
         {
             //arrange
-            List<Team> teams = new List<Team>();
-            User currentUser = new User() { Teams = teams };
+            List<Team> teams = new();
+            User currentUser = new() { Teams = teams };
 
             userServiceMock.Setup(userService => userService.GetUserTeams(It.IsAny<User>()))
                 .Returns(teams);

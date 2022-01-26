@@ -171,7 +171,7 @@ namespace WorkForceManagement.WEB.Controller
             return Ok();
         }
         
-        [HttpPost("Add a file")]
+        [HttpPost("AddFileToTOR")]
         public async Task<IActionResult> UploadFile(IFormFile postedFile, Guid TimeOffRequestId)
         {
             try
@@ -202,7 +202,7 @@ namespace WorkForceManagement.WEB.Controller
             }
         }
 
-        [HttpGet("Get TOR file")]
+        [HttpGet("GetTORFile")]
         public async Task<IActionResult> DownloadFile(Guid TimeOffRequestId)
         {
             try
