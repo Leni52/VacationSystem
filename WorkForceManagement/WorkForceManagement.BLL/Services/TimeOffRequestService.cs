@@ -422,7 +422,7 @@ namespace WorkForceManagement.BLL.Services
 
         public async Task SaveFile(TblFile file, Guid TimeOffRequestId)
         {
-            TimeOffRequest request = await _timeOffRequestRepository.Get(TimeOffRequestId);
+            var request = await _timeOffRequestRepository.Get(TimeOffRequestId);
             if ((request == null) || (file == null))
                 throw new ItemDoesNotExistException();
             if (request.Type != TimeOffRequestType.SickLeave)
