@@ -16,22 +16,19 @@ namespace WorkForceManagement.BLL.Services
         private readonly IUserService _userService;
         private readonly ITeamService _teamService;
         private readonly IMailService _mailService;
-        private readonly IFileService _fileService;
         private readonly List<DateTime> officialDaysOff = Calendar.GenerateCalendar();
 
         public TimeOffRequestService(
             IRepository<TimeOffRequest> timeOffRequestRepository,
             IUserService userService,
             ITeamService teamService,
-            IMailService mailService,
-            IFileService fileService
+            IMailService mailService
             )
         {
             _timeOffRequestRepository = timeOffRequestRepository;
             _userService = userService;
             _teamService = teamService;
             _mailService = mailService;
-            _fileService = fileService;
         }
 
         public async Task CreateTimeOffRequest(TimeOffRequest request, User currentUser)
@@ -427,7 +424,6 @@ namespace WorkForceManagement.BLL.Services
             TimeOffRequest request = await _timeOffRequestRepository.Get(TimeOffRequestId);
             if ((request == null) || (file == null))
                 throw new ItemDoesNotExistException();
-            await _fileService.SaveFile(file);
             request.Pdf = file;
             await _timeOffRequestRepository.SaveChanges();
         }
@@ -436,7 +432,7 @@ namespace WorkForceManagement.BLL.Services
         {
             var request = await _timeOffRequestRepository.Get(TimeOffRequestId);
             if (request == null)
-                throw new ItemDoesNotExistException();
+                throw new ItemDoesNotExistException("The required TOR does not exist!");
             return request.Pdf;
 
 

@@ -17,13 +17,12 @@ namespace WorkForceManagement.BLL.Tests.Services
         private readonly Mock<IUserService> userServiceMock = new Mock<IUserService>();
         private readonly Mock<ITeamService> teamServiceMock = new Mock<ITeamService>();
         private readonly Mock<IMailService> mailService = new Mock<IMailService>();
-        private readonly Mock<IFileService> fileService = new Mock<IFileService>();
         private readonly TimeOffRequestService sut;
 
 
         public TimeOffRequestServiceTests()
         {
-            sut = new TimeOffRequestService(requestRepositoryStub.Object, userServiceMock.Object, teamServiceMock.Object, mailService.Object, fileService.Object);
+            sut = new TimeOffRequestService(requestRepositoryStub.Object, userServiceMock.Object, teamServiceMock.Object, mailService.Object);
         }
 
         //create
