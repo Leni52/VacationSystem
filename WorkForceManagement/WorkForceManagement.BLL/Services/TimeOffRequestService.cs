@@ -22,7 +22,8 @@ namespace WorkForceManagement.BLL.Services
             IRepository<TimeOffRequest> timeOffRequestRepository,
             IUserService userService,
             ITeamService teamService,
-            IMailService mailService)
+            IMailService mailService
+            )
         {
             _timeOffRequestRepository = timeOffRequestRepository;
             _userService = userService;
@@ -417,6 +418,27 @@ namespace WorkForceManagement.BLL.Services
                 canCancel = true;
             }
             return canCancel;
+        }
+
+        public async Task SaveFile(TblFile file, Guid TimeOffRequestId)
+        {
+            var request = await _timeOffRequestRepository.Get(TimeOffRequestId);
+            if ((request == null) || (file == null))
+                throw new ItemDoesNotExistException();
+            if (request.Type != TimeOffRequestType.SickLeave)
+                throw new CannotAddFileIfTORIsNotSickLeaveException("Cannot add a file if the TimeOffRequest is not SickLeave");
+            request.Pdf = file;
+            await _timeOffRequestRepository.SaveChanges();
+        }
+
+        public async Task<TblFile> GetFile(Guid TimeOffRequestId)
+        {
+            var request = await _timeOffRequestRepository.Get(TimeOffRequestId);
+            if (request == null)
+                throw new ItemDoesNotExistException("The required TOR does not exist!");
+            return request.Pdf;
+
+
         }
     }
 }

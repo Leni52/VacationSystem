@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using WorkForceManagement.BLL.Exceptions;
 using WorkForceManagement.BLL.Services.Interfaces;
@@ -59,8 +61,8 @@ namespace WorkForceManagement.WEB.Controller
             User currentUser = await _userService.GetCurrentUser(User);
             TimeOffRequest timeOffRequest = _mapper.Map<TimeOffRequest>(timeOffRequestRequestDTO);
 
-            timeOffRequest.Type = (TimeOffRequestType)timeOffRequestRequestDTO.Type;
-            await _timeOffRequestService.CreateTimeOffRequest(timeOffRequest, currentUser);
+            timeOffRequest.Type = timeOffRequestRequestDTO.Type;
+            await _timeOffRequestService.CreateTimeOffRequest(timeOffRequest, currentUser);            
             return Ok(timeOffRequestRequestDTO);
         }
 
@@ -168,5 +170,61 @@ namespace WorkForceManagement.WEB.Controller
 
             return Ok();
         }
+        
+        [HttpPost("AddFileToTOR")]
+        public async Task<IActionResult> UploadFile(IFormFile postedFile, Guid TimeOffRequestId)
+        {
+            try
+            {
+                if (postedFile == null)
+                    throw new ItemDoesNotExistException();
+                byte[] bytes;
+                using (BinaryReader br = new BinaryReader(postedFile.OpenReadStream()))
+                {
+                    bytes = br.ReadBytes((int)postedFile.Length);
+                }
+                TblFile file = new()
+                {
+                    Name = postedFile.FileName,
+                    ContentType = postedFile.ContentType,
+                    Data = bytes
+                };
+                await _timeOffRequestService.SaveFile(file, TimeOffRequestId);
+                return Ok(postedFile.FileName);
+            }
+            catch (ItemDoesNotExistException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch(CannotAddFileIfTORIsNotSickLeaveException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("GetTORFile")]
+        public async Task<IActionResult> DownloadFile(Guid TimeOffRequestId)
+        {
+            try
+            {
+                TblFile file = await _timeOffRequestService.GetFile(TimeOffRequestId);
+                if (file == null)
+                    throw new ItemDoesNotExistException("The TOR doesn't contain a file");
+                return File(file.Data, file.ContentType, file.Name);
+            }
+            catch (ItemDoesNotExistException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
     }
 }

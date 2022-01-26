@@ -17,5 +17,7 @@ namespace WorkForceManagement.DAL.Entities
         public virtual List<User> AlreadyApproved { get; set; } = new List<User>();
         public string Reason { get; set; }
         public int WorkingDaysOff { get; set; }
+        public virtual TblFile Pdf { get; set; }
+
     }
 }
