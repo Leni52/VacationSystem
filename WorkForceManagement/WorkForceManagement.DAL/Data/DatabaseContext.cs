@@ -13,6 +13,7 @@ namespace WorkForceManagement.DAL.Data
 
         public DbSet<Team> Teams { get; set; }
         public DbSet<TimeOffRequest> TimeOffRequests { get; set; }
+        public DbSet<TblFile> TblFiles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
