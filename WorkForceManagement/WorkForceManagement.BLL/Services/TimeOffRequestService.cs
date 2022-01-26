@@ -35,6 +35,8 @@ namespace WorkForceManagement.BLL.Services
             ValidateTimeOffRequestDates(request.StartDate, request.EndDate, currentUser);
             request.WorkingDaysOff = ValidateDaysOff(request.StartDate, request.EndDate);
 
+            currentUser.DaysOff -= request.WorkingDaysOff;
+
             request.Status = TimeOffRequestStatus.Created;
             request.CreatorId = currentUser.Id;
             request.UpdaterId = currentUser.Id;
@@ -194,13 +196,15 @@ namespace WorkForceManagement.BLL.Services
             }
             else
             {
-                await RejectTimeOffRequest(request, currentUser);
+                await RejectTimeOffRequest(request);
             }
         }
 
-        public async Task RejectTimeOffRequest(TimeOffRequest request, User currentUser)
+        private async Task RejectTimeOffRequest(TimeOffRequest request)
         {
             request.Status = TimeOffRequestStatus.Rejected;
+
+            request.Requester.DaysOff += request.WorkingDaysOff;
 
             await SendMailToRequesterRejectedRequest(request.Id);
             await NotifyApproversOnDecision(TimeOffRequestStatus.Rejected, request);
@@ -211,7 +215,7 @@ namespace WorkForceManagement.BLL.Services
             await _timeOffRequestRepository.SaveChanges();
         }
 
-        public async Task ApproveTimeOffRequest(TimeOffRequest request, User currentUser)
+        private async Task ApproveTimeOffRequest(TimeOffRequest request, User currentUser)
         {
             request.AlreadyApproved.Add(currentUser);
             await _timeOffRequestRepository.SaveChanges();
@@ -397,6 +401,8 @@ namespace WorkForceManagement.BLL.Services
             if (IsAbleToCancel(request))
             {
                 await NotifyApproversOnDecision(TimeOffRequestStatus.Cancelled, request);
+
+                request.Requester.DaysOff += request.WorkingDaysOff;
 
                 request.Status = TimeOffRequestStatus.Cancelled;
                 await _timeOffRequestRepository.SaveChanges();
