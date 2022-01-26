@@ -39,6 +39,7 @@ namespace WorkForceManagement.WEB.Middleware
                     case TimeOffRequestIsClosedException:
                     case ItemAlreadyExistsException:
                     case EmailAddressAlreadyInUseException:
+                    case InvalidTimeOffRequestTypeException:
                         response.StatusCode = (int)HttpStatusCode.Conflict;
                         break;
                     case InvalidDatesException:

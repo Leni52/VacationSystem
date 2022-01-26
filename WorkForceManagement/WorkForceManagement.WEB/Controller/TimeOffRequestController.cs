@@ -16,6 +16,7 @@ using WorkForceManagement.DTO.Responses;
 namespace WorkForceManagement.WEB.Controller
 {
     [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
     public class TimeOffRequestController : ControllerBase
     {
@@ -75,8 +76,7 @@ namespace WorkForceManagement.WEB.Controller
             {
                 return BadRequest();
             }
-            // _mapper.Map(request, timeOffRequest);
-            TimeOffRequest timeOffRequest = _mapper.Map<TimeOffRequest>(request);
+            var timeOffRequest = _mapper.Map<TimeOffRequest>(request);
             await _timeOffRequestService.UpdateTimeOffRequest(timeOffRequestId, timeOffRequest, currentUser.Id);
             return Ok();
         }
