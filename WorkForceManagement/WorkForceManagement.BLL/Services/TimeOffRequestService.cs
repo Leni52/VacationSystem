@@ -70,8 +70,10 @@ namespace WorkForceManagement.BLL.Services
 
         private void ValidateTimeOffRequestDates(DateTime startDate, DateTime endDate, User user)
         {
-            if (startDate > endDate)
+            if (startDate > endDate) // you cant create time off 1 day before start
                 throw new InvalidDatesException("Invalid time off request dates, the start date should be earlier or equal to end date");
+            if(startDate.Date < DateTime.Now.Date)
+                throw new InvalidDatesException("Invalid time off request dates, the start date should be at least be no earlier than today");
 
             int requestedDays = ValidateDaysOff(startDate, endDate);
             int totalDays = user.DaysOff;
@@ -180,7 +182,7 @@ namespace WorkForceManagement.BLL.Services
 
             request.ChangeDate = DateTime.Now.Date;
             request.UpdaterId = currentUser.Id;
-            if (reason.Length != 0)
+            if(reason != null)
             {
                 request.Reason = reason;
             }

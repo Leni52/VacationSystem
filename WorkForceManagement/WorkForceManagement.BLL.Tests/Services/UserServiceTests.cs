@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -16,13 +17,14 @@ namespace WorkForceManagement.BLL.Tests.Services
         private readonly Mock<IAuthUserManager> authUserManagerMock = new Mock<IAuthUserManager>();
         private readonly Mock<IMailService> mailServiceMock = new Mock<IMailService>();
         private readonly Mock<ITeamService> teamServiceMock = new Mock<ITeamService>();
+        private readonly Mock<IConfiguration> configuration = new Mock<IConfiguration>();
         private readonly UserService sut;
 
         PasswordHasher<User> hasher = new PasswordHasher<User>();
 
         public UserServiceTests()
         {
-            sut = new UserService(teamServiceMock.Object, authUserManagerMock.Object, mailServiceMock.Object);
+            sut = new UserService(teamServiceMock.Object, authUserManagerMock.Object, mailServiceMock.Object, configuration.Object);
         }
 
         [Fact]
