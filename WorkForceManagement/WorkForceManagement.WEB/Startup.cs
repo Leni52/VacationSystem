@@ -83,6 +83,7 @@ namespace WorkForceManagement.WEB
                 options.Password.RequireLowercase = false;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
+                options.SignIn.RequireConfirmedEmail = true;
             })
                     .AddRoles<IdentityRole>()
                     .AddEntityFrameworkStores<DatabaseContext>()
